@@ -1,5 +1,18 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
+  import Button from '$lib/components/ui/button/button.svelte';
+  import Card from '$lib/components/ui/card/card.svelte';
+  import CardContent from '$lib/components/ui/card/card-content.svelte';
+  import CardHeader from '$lib/components/ui/card/card-header.svelte';
+  import CardTitle from '$lib/components/ui/card/card-title.svelte';
+  import CardDescription from '$lib/components/ui/card/card-description.svelte';
+  import Input from '$lib/components/ui/input/input.svelte';
+  import Label from '$lib/components/ui/label/label.svelte';
+  import Badge from '$lib/components/ui/badge/badge.svelte';
+  import Separator from '$lib/components/ui/separator/separator.svelte';
+  import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
+  import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
+  import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -177,15 +190,15 @@
 </script>
 
 <main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
-  <div class="bg-white/90 backdrop-blur rounded-2xl shadow-xl p-8 w-full max-w-xl border border-white/60">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Focalite</h1>
-      <p class="text-gray-600 text-sm">Focus timer with enforced breaks</p>
-    </div>
+  <Card class="w-full max-w-xl">
+    <CardHeader class="text-center">
+      <CardTitle class="text-3xl font-bold tracking-tight">Focalite</CardTitle>
+      <CardDescription>Focus timer with enforced breaks</CardDescription>
+    </CardHeader>
+    <CardContent>
 
-    <!-- Timer Display with Progress Ring -->
-    <div class="flex items-center justify-center mb-8">
+      <!-- Timer Display with Progress Ring -->
+      <div class="flex items-center justify-center mb-8">
       <div class="relative" aria-label={phaseLabel} role="region">
         {#key currentPhase}
           <svg
@@ -229,82 +242,79 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
-    <!-- Controls -->
-    <div class="grid grid-cols-2 gap-3">
+      <!-- Controls -->
+      <div class="grid grid-cols-2 gap-3">
       {#if currentPhase === 'idle'}
-        <button
+        <Button
           onclick={startFocus}
-          class="col-span-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+          class="col-span-2"
           title="Start focus (Space)"
-        >Start Focus</button>
+        >Start Focus</Button>
       {:else}
         {#if running()}
-          <button
+          <Button
             onclick={pause}
-            class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+            variant="secondary"
             title="Pause (Space)"
-          >Pause</button>
+          >Pause</Button>
         {:else}
-          <button
+          <Button
             onclick={resume}
-            class="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
             title="Resume (Space)"
-          >Resume</button>
+          >Resume</Button>
         {/if}
-        <button
+        <Button
           onclick={reset}
-          class="bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-900 font-medium py-3 rounded-lg transition-colors border border-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+          variant="outline"
           title={currentPhase === 'break' ? 'End break early (Esc)' : 'Reset (Esc)'}
-        >{currentPhase === 'break' ? 'End Break Early' : 'Reset'}</button>
+        >{currentPhase === 'break' ? 'End Break Early' : 'Reset'}</Button>
       {/if}
-    </div>
+      </div>
 
-    <div class="mt-3 text-center text-xs text-gray-500">
-      <span>Space: start/pause/resume</span>
-      <span class="mx-2">•</span>
-      <span>Esc: {currentPhase === 'break' ? 'end break' : 'reset'}</span>
-      <span class="mx-2">•</span>
-      <span>B: start break</span>
-    </div>
+      <div class="mt-3 flex justify-center gap-2 flex-wrap">
+        <Badge variant="secondary" class="text-xs">Space: start/pause/resume</Badge>
+        <Badge variant="secondary" class="text-xs">Esc: {currentPhase === 'break' ? 'end break' : 'reset'}</Badge>
+        <Badge variant="secondary" class="text-xs">B: start break</Badge>
+      </div>
 
-    <!-- Settings -->
-    {#if currentPhase === 'idle'}
-      <div class="mt-8 pt-6 border-t border-gray-100">
-        <details class="group">
-          <summary class="list-none cursor-pointer select-none flex items-center justify-between py-2">
-            <span class="text-lg font-semibold text-gray-800">Session Settings</span>
-            <span class="text-gray-500 group-open:rotate-180 transition-transform">▾</span>
-          </summary>
+      <!-- Settings -->
+      {#if currentPhase === 'idle'}
+        <Separator class="mt-6" />
+        <Collapsible class="group">
+          <CollapsibleTrigger class="list-none cursor-pointer select-none flex items-center justify-between py-2 w-full">
+            <span class="text-lg font-semibold">Session Settings</span>
+            <span class="text-gray-500 group-data-[state=open]:rotate-180 transition-transform">▾</span>
+          </CollapsibleTrigger>
 
-          <div class="mt-4 space-y-6">
+          <CollapsibleContent class="mt-4 space-y-6">
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-600">Presets</label>
+              <Label class="text-sm font-medium">Presets</Label>
               <div class="flex flex-wrap gap-2">
-                <button onclick={() => applyPreset(25, 5)} class="px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors" title="25 min focus / 5 min break">Pomodoro (25/5)</button>
-                <button onclick={() => applyPreset(50, 10)} class="px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors" title="50 min focus / 10 min break">Long (50/10)</button>
-                <button onclick={() => applyPreset(15, 3)} class="px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors" title="15 min focus / 3 min break">Quick (15/3)</button>
+                <Button onclick={() => applyPreset(25, 5)} variant="outline" size="sm" title="25 min focus / 5 min break">Pomodoro (25/5)</Button>
+                <Button onclick={() => applyPreset(50, 10)} variant="outline" size="sm" title="50 min focus / 10 min break">Long (50/10)</Button>
+                <Button onclick={() => applyPreset(15, 3)} variant="outline" size="sm" title="15 min focus / 3 min break">Quick (15/3)</Button>
               </div>
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-600">Focus Duration</label>
+              <Label class="text-sm font-medium">Focus Duration</Label>
               <div class="flex items-center gap-2 flex-wrap">
                 <div class="flex gap-2">
                   {#each [10, 15, 25, 45, 60] as minutes}
-                    <button onclick={() => setFocusDuration(minutes)} class="px-3 py-1.5 text-sm rounded-md transition-colors {focusDurationSec === minutes * 60 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}">{minutes}m</button>
+                    <Button onclick={() => setFocusDuration(minutes)} variant={focusDurationSec === minutes * 60 ? 'default' : 'outline'} size="sm">{minutes}m</Button>
                   {/each}
                 </div>
                 <span class="text-gray-400">or</span>
                 <div class="flex items-center gap-1">
-                  <input
+                  <Input
                     type="number"
                     min="0.1"
                     max="180"
                     step="0.1"
                     placeholder="Custom"
-                    class="w-24 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-24"
                     onkeydown={(e) => {
                       if (e.key === 'Enter') {
                         const target = e.target as HTMLInputElement;
@@ -332,22 +342,22 @@
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-600">Break Duration</label>
+              <Label class="text-sm font-medium">Break Duration</Label>
               <div class="flex items-center gap-2 flex-wrap">
                 <div class="flex gap-2">
                   {#each [3, 5, 10, 15] as minutes}
-                    <button onclick={() => setBreakDuration(minutes)} class="px-3 py-1.5 text-sm rounded-md transition-colors {breakDurationSec === minutes * 60 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}">{minutes}m</button>
+                    <Button onclick={() => setBreakDuration(minutes)} variant={breakDurationSec === minutes * 60 ? 'default' : 'outline'} size="sm">{minutes}m</Button>
                   {/each}
                 </div>
                 <span class="text-gray-400">or</span>
                 <div class="flex items-center gap-1">
-                  <input
+                  <Input
                     type="number"
                     min="0.1"
                     max="60"
                     step="0.1"
                     placeholder="Custom"
-                    class="w-24 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-24"
                     onkeydown={(e) => {
                       if (e.key === 'Enter') {
                         const target = e.target as HTMLInputElement;
@@ -373,9 +383,9 @@
               </div>
               <div class="text-xs text-gray-500">Current: {(breakDurationSec / 60).toFixed(1)} minutes</div>
             </div>
-          </div>
-        </details>
-      </div>
-    {/if}
-  </div>
+          </CollapsibleContent>
+        </Collapsible>
+      {/if}
+    </CardContent>
+  </Card>
 </main>
