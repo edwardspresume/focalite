@@ -1,156 +1,213 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { invoke } from '@tauri-apps/api/core';
+  import { listen } from '@tauri-apps/api/event';
+  import { onMount } from 'svelte';
 
-  let name = $state("");
-  let greetMsg = $state("");
+  type TimerPhase = 'focus' | 'break' | 'idle';
 
-  async function greet(event: Event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
+  // Base state
+  let focusDurationSec = $state(25 * 60); // 25 minutes
+  let breakDurationSec = $state(5 * 60); // 5 minutes
+  let currentPhase: TimerPhase = $state('idle');
+  let startedAt: number | null = $state(null);
+  let now = $state(Date.now());
+
+  // Derived state
+  const currentDuration = $derived(() => 
+    currentPhase === 'focus' ? focusDurationSec :
+    currentPhase === 'break' ? breakDurationSec : 0
+  );
+  const elapsed = $derived(() => startedAt ? Math.floor((now - startedAt) / 1000) : 0);
+  const remaining = $derived(() => Math.max(currentDuration() - elapsed(), 0));
+  const running = $derived(() => startedAt !== null && remaining() > 0);
+  const isTimerComplete = $derived(() => startedAt !== null && remaining() === 0);
+
+  // Format time display
+  const formatTime = $derived.by(() => {
+    const mins = Math.floor(remaining() / 60);
+    const secs = remaining() % 60;
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  });
+
+  // Tick only while running
+  $effect(() => {
+    if (!running()) return;
+    const id = setInterval(() => {
+      now = Date.now();
+    }, 250);
+    return () => clearInterval(id);
+  });
+
+  // Handle automatic phase transitions
+  $effect(() => {
+    if (!isTimerComplete()) return;
+
+    if (currentPhase === 'focus') {
+      // Automatically transition to break and start enforced break
+      startBreak();
+    } else if (currentPhase === 'break') {
+      // Break completed, return to idle
+      currentPhase = 'idle';
+      startedAt = null;
+      closeBreakOverlays();
+    }
+  });
+
+  async function startFocus() {
+    if (running()) return;
+    currentPhase = 'focus';
+    startedAt = Date.now();
+    now = startedAt;
   }
+
+  async function startBreak() {
+    currentPhase = 'break';
+    startedAt = Date.now();
+    now = startedAt;
+
+    // Store break end time for overlay windows
+    const breakEndTime = startedAt + (breakDurationSec * 1000);
+    localStorage.setItem('breakEndTime', breakEndTime.toString());
+
+    // Create fullscreen overlay windows on all monitors
+    try {
+      console.log('Creating break overlays...');
+      await invoke('create_break_overlays');
+      console.log('Break overlays created successfully');
+    } catch (error) {
+      console.error('Failed to create break overlays:', error);
+      // Don't let the error stop the break phase
+      alert(`Error creating break overlay: ${error}`);
+    }
+  }
+
+  async function stop() {
+    if (currentPhase === 'break') {
+      await closeBreakOverlays();
+    }
+    currentPhase = 'idle';
+    startedAt = null;
+  }
+
+  async function closeBreakOverlays() {
+    try {
+      await invoke('close_break_overlays');
+    } catch (error) {
+      console.error('Failed to close break overlays:', error);
+    }
+  }
+
+  function setFocusDuration(minutes: number) {
+    if (!running()) {
+      focusDurationSec = minutes * 60;
+    }
+  }
+
+  function setBreakDuration(minutes: number) {
+    if (!running()) {
+      breakDurationSec = minutes * 60;
+    }
+  }
+
+  // Listen for break end events from overlay windows
+  onMount(() => {
+    const unlisten = listen('break_ended', () => {
+      currentPhase = 'idle';
+      startedAt = null;
+      localStorage.removeItem('breakEndTime');
+    });
+
+    return () => {
+      unlisten.then(fn => fn());
+    };
+  });
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+<main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Focalite</h1>
+      <p class="text-gray-600">Focus Timer with Enforced Breaks</p>
+    </div>
 
-  <div class="row">
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
+    <!-- Timer Display -->
+    <div class="text-center mb-8">
+      <div class="text-6xl font-mono font-bold text-gray-800 mb-2" aria-live="polite">
+        {formatTime}
+      </div>
+      <div class="text-lg capitalize text-gray-600">
+        {currentPhase === 'idle' ? 'Ready to Focus' :
+         currentPhase === 'focus' ? 'Focus Time' : 'Break Time'}
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="space-y-4">
+      {#if currentPhase === 'idle'}
+        <button
+          onclick={startFocus}
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        >
+          Start Focus Session
+        </button>
+      {:else if currentPhase === 'focus'}
+        <button
+          onclick={stop}
+          class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        >
+          Stop Focus
+        </button>
+      {:else}
+        <div class="text-center text-orange-600 font-semibold">
+          Break in progress - overlay windows active
+        </div>
+      {/if}
+    </div>
+
+    <!-- Settings -->
+    {#if currentPhase === 'idle'}
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Settings</h3>
+
+        <div class="space-y-4">
+          <!-- Focus Duration -->
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-gray-600">Focus Duration</label>
+            <div class="flex gap-2">
+              {#each [.1, 25, 45, 60] as minutes}
+                <button
+                  onclick={() => setFocusDuration(minutes)}
+                  class="px-3 py-1 text-sm rounded-md transition-colors
+                    {focusDurationSec === minutes * 60
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                >
+                  {minutes}m
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <!-- Break Duration -->
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-medium text-gray-600">Break Duration</label>
+            <div class="flex gap-2">
+              {#each [5, 10, 15] as minutes}
+                <button
+                  onclick={() => setBreakDuration(minutes)}
+                  class="px-3 py-1 text-sm rounded-md transition-colors
+                    {breakDurationSec === minutes * 60
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
+                >
+                  {minutes}m
+                </button>
+              {/each}
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
-
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
 </main>
-
-<style>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.svelte-kit:hover {
-  filter: drop-shadow(0 0 2em #ff3e00);
-}
-
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
-</style>
