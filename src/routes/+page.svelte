@@ -13,14 +13,21 @@
   let now = $state(Date.now());
 
   // Derived state
-  const currentDuration = $derived(() => 
-    currentPhase === 'focus' ? focusDurationSec :
-    currentPhase === 'break' ? breakDurationSec : 0
+  const currentDuration = $derived(() =>
+    currentPhase === 'focus'
+      ? focusDurationSec
+      : currentPhase === 'break'
+        ? breakDurationSec
+        : 0
   );
-  const elapsed = $derived(() => startedAt ? Math.floor((now - startedAt) / 1000) : 0);
+  const elapsed = $derived(() =>
+    startedAt ? Math.floor((now - startedAt) / 1000) : 0
+  );
   const remaining = $derived(() => Math.max(currentDuration() - elapsed(), 0));
   const running = $derived(() => startedAt !== null && remaining() > 0);
-  const isTimerComplete = $derived(() => startedAt !== null && remaining() === 0);
+  const isTimerComplete = $derived(
+    () => startedAt !== null && remaining() === 0
+  );
 
   // Format time display
   const formatTime = $derived.by(() => {
@@ -55,6 +62,7 @@
 
   async function startFocus() {
     if (running()) return;
+
     currentPhase = 'focus';
     startedAt = Date.now();
     now = startedAt;
@@ -66,7 +74,7 @@
     now = startedAt;
 
     // Store break end time for overlay windows
-    const breakEndTime = startedAt + (breakDurationSec * 1000);
+    const breakEndTime = startedAt + breakDurationSec * 1000;
     localStorage.setItem('breakEndTime', breakEndTime.toString());
 
     // Create fullscreen overlay windows on all monitors
@@ -100,6 +108,9 @@
   function setFocusDuration(minutes: number) {
     if (!running()) {
       focusDurationSec = minutes * 60;
+      console.log(
+        `Focus duration set to ${minutes} minutes (${focusDurationSec} seconds)`
+      );
     }
   }
 
@@ -118,12 +129,14 @@
     });
 
     return () => {
-      unlisten.then(fn => fn());
+      unlisten.then((fn) => fn());
     };
   });
 </script>
 
-<main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
+<main
+  class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8"
+>
   <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
     <!-- Header -->
     <div class="text-center mb-8">
@@ -133,12 +146,18 @@
 
     <!-- Timer Display -->
     <div class="text-center mb-8">
-      <div class="text-6xl font-mono font-bold text-gray-800 mb-2" aria-live="polite">
+      <div
+        class="text-6xl font-mono font-bold text-gray-800 mb-2"
+        aria-live="polite"
+      >
         {formatTime}
       </div>
       <div class="text-lg capitalize text-gray-600">
-        {currentPhase === 'idle' ? 'Ready to Focus' :
-         currentPhase === 'focus' ? 'Focus Time' : 'Break Time'}
+        {currentPhase === 'idle'
+          ? 'Ready to Focus'
+          : currentPhase === 'focus'
+            ? 'Focus Time'
+            : 'Break Time'}
       </div>
     </div>
 
@@ -172,38 +191,120 @@
 
         <div class="space-y-4">
           <!-- Focus Duration -->
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-600">Focus Duration</label>
-            <div class="flex gap-2">
-              {#each [.1, 25, 45, 60] as minutes}
-                <button
-                  onclick={() => setFocusDuration(minutes)}
-                  class="px-3 py-1 text-sm rounded-md transition-colors
-                    {focusDurationSec === minutes * 60
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-gray-600"
+              >Focus Duration</label
+            >
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex gap-2">
+                {#each [0.1, 25, 45, 60] as minutes}
+                  <button
+                    onclick={() => setFocusDuration(minutes)}
+                    class="px-3 py-1 text-sm rounded-md transition-colors
+                      {focusDurationSec === minutes * 60
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
-                >
-                  {minutes}m
-                </button>
-              {/each}
+                  >
+                    {minutes}m
+                  </button>
+                {/each}
+              </div>
+              <span class="text-gray-400">or</span>
+              <div class="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0.1"
+                  max="180"
+                  step="0.1"
+                  placeholder="Custom"
+                  class="w-20 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onkeydown={(e) => {
+                    if (e.key === 'Enter') {
+                      const target = e.target as HTMLInputElement;
+                      const value = parseFloat(target.value);
+                      console.log(
+                        `Custom focus input: ${target.value} -> ${value}`
+                      );
+                      if (value && value > 0 && value <= 180) {
+                        setFocusDuration(value);
+                        target.value = '';
+                        target.blur();
+                      }
+                    }
+                  }}
+                  onchange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    const value = parseFloat(target.value);
+                    console.log(
+                      `Custom focus change: ${target.value} -> ${value}`
+                    );
+                    if (value && value > 0 && value <= 180) {
+                      setFocusDuration(value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <span class="text-xs text-gray-500">min</span>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500">
+              Current: {(focusDurationSec / 60).toFixed(1)} minutes
             </div>
           </div>
 
           <!-- Break Duration -->
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium text-gray-600">Break Duration</label>
-            <div class="flex gap-2">
-              {#each [5, 10, 15] as minutes}
-                <button
-                  onclick={() => setBreakDuration(minutes)}
-                  class="px-3 py-1 text-sm rounded-md transition-colors
-                    {breakDurationSec === minutes * 60
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-gray-600"
+              >Break Duration</label
+            >
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex gap-2">
+                {#each [5, 10, 15] as minutes}
+                  <button
+                    onclick={() => setBreakDuration(minutes)}
+                    class="px-3 py-1 text-sm rounded-md transition-colors
+                      {breakDurationSec === minutes * 60
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
-                >
-                  {minutes}m
-                </button>
-              {/each}
+                  >
+                    {minutes}m
+                  </button>
+                {/each}
+              </div>
+              <span class="text-gray-400">or</span>
+              <div class="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0.1"
+                  max="60"
+                  step="0.1"
+                  placeholder="Custom"
+                  class="w-20 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onkeydown={(e) => {
+                    if (e.key === 'Enter') {
+                      const target = e.target as HTMLInputElement;
+                      const value = parseFloat(target.value);
+                      if (value && value > 0 && value <= 60) {
+                        setBreakDuration(value);
+                        target.value = '';
+                        target.blur();
+                      }
+                    }
+                  }}
+                  onchange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    const value = parseFloat(target.value);
+                    if (value && value > 0 && value <= 60) {
+                      setBreakDuration(value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <span class="text-xs text-gray-500">min</span>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500">
+              Current: {(breakDurationSec / 60).toFixed(1)} minutes
             </div>
           </div>
         </div>

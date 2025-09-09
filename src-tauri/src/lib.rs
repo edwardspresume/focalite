@@ -26,12 +26,16 @@ async fn create_break_overlays(app_handle: tauri::AppHandle) -> Result<(), Strin
         tauri::WebviewUrl::App("break-overlay/".into())
     )
     .title("Break Time")
-    .inner_size(800.0, 600.0)
+    // Make the overlay take the whole screen and stay above everything
+    .fullscreen(true)
     .always_on_top(true)
     .decorations(false)
+    .skip_taskbar(true)
     .resizable(false);
 
-    let _window = window_builder.build().map_err(|e| e.to_string())?;
+    let window = window_builder.build().map_err(|e| e.to_string())?;
+    // Ensure the overlay gains focus immediately
+    let _ = window.set_focus();
     overlays.push(window_label);
 
     Ok(())
