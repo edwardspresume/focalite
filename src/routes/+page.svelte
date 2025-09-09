@@ -1,7 +1,5 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
-  import { listen } from '@tauri-apps/api/event';
-  import { onMount } from 'svelte';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -54,9 +52,9 @@
       startBreak();
     } else if (currentPhase === 'break') {
       // Break completed, return to idle
+      exitBreakMode();
       currentPhase = 'idle';
       startedAt = null;
-      closeBreakOverlays();
     }
   });
 
@@ -73,35 +71,27 @@
     startedAt = Date.now();
     now = startedAt;
 
-    // Store break end time for overlay windows
-    const breakEndTime = startedAt + breakDurationSec * 1000;
-    localStorage.setItem('breakEndTime', breakEndTime.toString());
-
-    // Create fullscreen overlay windows on all monitors
+    // Make window fullscreen and always on top for break mode
     try {
-      console.log('Creating break overlays...');
-      await invoke('create_break_overlays');
-      console.log('Break overlays created successfully');
+      await invoke('enter_break_mode');
     } catch (error) {
-      console.error('Failed to create break overlays:', error);
-      // Don't let the error stop the break phase
-      alert(`Error creating break overlay: ${error}`);
+      console.error('Failed to enter break mode:', error);
     }
   }
 
   async function stop() {
     if (currentPhase === 'break') {
-      await closeBreakOverlays();
+      await exitBreakMode();
     }
     currentPhase = 'idle';
     startedAt = null;
   }
 
-  async function closeBreakOverlays() {
+  async function exitBreakMode() {
     try {
-      await invoke('close_break_overlays');
+      await invoke('exit_break_mode');
     } catch (error) {
-      console.error('Failed to close break overlays:', error);
+      console.error('Failed to exit break mode:', error);
     }
   }
 
@@ -120,18 +110,6 @@
     }
   }
 
-  // Listen for break end events from overlay windows
-  onMount(() => {
-    const unlisten = listen('break_ended', () => {
-      currentPhase = 'idle';
-      startedAt = null;
-      localStorage.removeItem('breakEndTime');
-    });
-
-    return () => {
-      unlisten.then((fn) => fn());
-    };
-  });
 </script>
 
 <main
@@ -178,8 +156,20 @@
           Stop Focus
         </button>
       {:else}
-        <div class="text-center text-orange-600 font-semibold">
-          Break in progress - overlay windows active
+        <!-- Break Mode UI -->
+        <div class="text-center space-y-4">
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🛌</div>
+            <h2 class="text-2xl font-bold text-orange-600 mb-2">Break Time!</h2>
+            <p class="text-gray-600">Time to rest your eyes and mind</p>
+          </div>
+          
+          <button
+            onclick={stop}
+            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            End Break Early
+          </button>
         </div>
       {/if}
     </div>
