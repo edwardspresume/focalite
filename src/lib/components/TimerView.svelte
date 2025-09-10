@@ -73,7 +73,9 @@
 
 <div class="max-w-4xl mx-auto space-y-8">
   <!-- Main Timer section -->
-  <section class="bg-accent border rounded-xl p-8 shadow-lg gap-6 flex flex-col items-center">
+  <section
+    class="bg-accent border rounded-xl p-8 shadow-lg gap-6 flex flex-col items-center"
+  >
     <!-- Timer Display -->
     <div class="size-64 relative">
       <svg class="size-full transform -rotate-90" viewBox="0 0 100 100">
@@ -165,71 +167,95 @@
   <Collapsible bind:open={settingsOpen}>
     <section class="bg-accent border rounded-xl shadow-lg">
       <CollapsibleTrigger class="w-full">
-        <header class="p-6 hover:bg-muted/50 transition-colors cursor-pointer rounded-t-xl">
-          <h2 class="flex items-center justify-between text-foreground text-xl font-semibold">
+        <header
+          class="p-6 hover:bg-muted/50 transition-colors cursor-pointer rounded-t-xl"
+        >
+          <h2
+            class="flex items-center justify-between text-foreground text-xl font-semibold"
+          >
             <div class="flex items-center gap-2">
               <Settings class="size-5" />
               Session Settings
             </div>
-            <ChevronDown class="size-4 transition-transform duration-200 {settingsOpen ? 'rotate-180' : ''}" />
+            <ChevronDown
+              class="size-4 transition-transform duration-200 {settingsOpen
+                ? 'rotate-180'
+                : ''}"
+            />
           </h2>
         </header>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div class="p-6 pt-0 space-y-6">
-      <div class="grid md:grid-cols-2 gap-6">
-        <!-- Focus Duration -->
-        <div>
-          <h3
-            class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
-          >
-            <Target class="w-4 h-4" />
-            Focus Duration
-          </h3>
-          <div class="flex flex-wrap gap-2 mb-3">
-            {#each focusOptions as duration}
-              <Button
-                variant={Math.floor(focusDurationSec / 60) === duration
-                  ? 'default'
-                  : 'outline'}
-                size="sm"
-                onclick={() => setFocusDuration(duration)}
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Focus Duration -->
+            <div>
+              <h3
+                class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
               >
-                {duration}m
-              </Button>
-            {/each}
-          </div>
-          <p class="text-xs text-muted-foreground">
-            Current: {(focusDurationSec / 60).toFixed(1)} minutes
-          </p>
-        </div>
+                <Target class="w-4 h-4" />
+                Focus Duration
+              </h3>
+              <div class="flex flex-wrap gap-2 mb-3">
+                {#each focusOptions as duration}
+                  <Button
+                    variant={Math.floor(focusDurationSec / 60) === duration
+                      ? 'default'
+                      : 'outline'}
+                    size="sm"
+                    disabled={currentPhase !== 'idle'}
+                    onclick={() => setFocusDuration(duration)}
+                    class={Math.floor(focusDurationSec / 60) === duration
+                      ? 'ring-2 ring-primary/50 shadow-md'
+                      : ''}
+                  >
+                    {duration}m
+                  </Button>
+                {/each}
+              </div>
+              <p class="text-xs text-muted-foreground">
+                {#if currentPhase === 'idle'}
+                  Current: {(focusDurationSec / 60).toFixed(1)} minutes
+                {:else}
+                  Next session: {(focusDurationSec / 60).toFixed(1)} minutes
+                {/if}
+              </p>
+            </div>
 
-        <!-- Break Duration -->
-        <div>
-          <h3
-            class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
-          >
-            <Clock class="w-4 h-4" />
-            Break Duration
-          </h3>
-          <div class="flex flex-wrap gap-2 mb-3">
-            {#each breakOptions as duration}
-              <Button
-                variant={Math.floor(breakDurationSec / 60) === duration
-                  ? 'default'
-                  : 'outline'}
-                size="sm"
-                onclick={() => setBreakDuration(duration)}
+            <!-- Break Duration -->
+            <div>
+              <h3
+                class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
               >
-                {duration}m
-              </Button>
-            {/each}
+                <Clock class="w-4 h-4" />
+                Break Duration
+              </h3>
+              <div class="flex flex-wrap gap-2 mb-3">
+                {#each breakOptions as duration}
+                  <Button
+                    variant={Math.floor(breakDurationSec / 60) === duration
+                      ? 'default'
+                      : 'outline'}
+                    size="sm"
+                    disabled={currentPhase !== 'idle'}
+                    onclick={() => setBreakDuration(duration)}
+                    class={Math.floor(breakDurationSec / 60) === duration
+                      ? 'ring-2 ring-primary/50 shadow-md'
+                      : ''}
+                  >
+                    {duration}m
+                  </Button>
+                {/each}
+              </div>
+              <p class="text-xs text-muted-foreground">
+                {#if currentPhase === 'idle'}
+                  Current: {(breakDurationSec / 60).toFixed(1)} minutes
+                {:else}
+                  Next session: {(breakDurationSec / 60).toFixed(1)} minutes
+                {/if}
+              </p>
+            </div>
           </div>
-          <p class="text-xs text-muted-foreground">
-            Current: {(breakDurationSec / 60).toFixed(1)} minutes
-          </p>
-        </div>
-      </div>
         </div>
       </CollapsibleContent>
     </section>
