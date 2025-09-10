@@ -51,6 +51,16 @@
 
   const focusOptions = [10, 15, 20, 25, 30, 45, 50, 60, 90];
   const breakOptions = [2, 3, 4, 5, 8, 10, 12, 15, 20];
+
+  // Computed button properties
+  const buttonText = $derived(
+    currentPhase === 'idle' ? 'Start Focus Session' :
+    running ? 'Pause' : 'Resume'
+  );
+
+  const ButtonIcon = $derived(
+    currentPhase === 'idle' || !running ? Play : Pause
+  );
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
@@ -101,18 +111,12 @@
                 running ? pause() : resume();
               }
             }}
-            class="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-4 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl"
+            class="{currentPhase === 'idle'
+              ? 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white'
+              : 'bg-accent hover:bg-accent/90 text-accent-foreground'} px-8 py-4 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl"
           >
-            {#if currentPhase === 'idle'}
-              <Play class="w-5 h-5 mr-2" />
-              Start Focus Session
-            {:else if running}
-              <Pause class="w-5 h-5 mr-2" />
-              Pause
-            {:else}
-              <Play class="w-5 h-5 mr-2" />
-              Resume
-            {/if}
+            <ButtonIcon class="w-5 h-5 mr-2" />
+            {buttonText}
           </Button>
 
           {#if currentPhase !== 'idle'}
