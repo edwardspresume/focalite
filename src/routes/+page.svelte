@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { invoke } from '@tauri-apps/api/core';
-  import TimerView from '$lib/components/TimerView.svelte';
   import BreakView from '$lib/components/BreakView.svelte';
+  import TimerView from '$lib/components/TimerView.svelte';
+  import { invoke } from '@tauri-apps/api/core';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
   // Base state
   let focusDurationSec = $state(25 * 60); // 25 minutes
   let breakDurationSec = $state(5 * 60); // 5 minutes
-  let customFocus = $state("");
-  let customBreak = $state("");
+  let customFocus = $state('');
+  let customBreak = $state('');
   let currentPhase: TimerPhase = $state('idle');
   let startedAt: number | null = $state(null);
   let now = $state(Date.now());
@@ -17,7 +17,6 @@
   let sessionsCompleted = $state(0);
   let totalFocusTime = $state(0);
   let breaksCompleted = $state(0);
-
 
   // Derived state
   const currentDuration = $derived(() =>
@@ -27,8 +26,9 @@
         ? breakDurationSec
         : 0
   );
-  const elapsed = $derived(() =>
-    (startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec
+  const elapsed = $derived(
+    () =>
+      (startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec
   );
   const remaining = $derived(() => Math.max(currentDuration() - elapsed(), 0));
   const running = $derived(() => startedAt !== null && remaining() > 0);
@@ -40,8 +40,12 @@
     currentPhase === 'idle'
       ? 'Ready to Focus'
       : currentPhase === 'focus'
-        ? running() ? 'Focus Time' : 'Focus Paused'
-        : running() ? 'Break Time' : 'Break Paused'
+        ? running()
+          ? 'Focus Time'
+          : 'Focus Paused'
+        : running()
+          ? 'Break Time'
+          : 'Break Paused'
   );
 
   // Progress ring constants - matching React version
@@ -154,10 +158,10 @@
     }
   }
 
-
   const getProgress = () => {
     if (currentPhase === 'idle') return 0;
-    const totalTime = currentPhase === 'focus' ? focusDurationSec : breakDurationSec;
+    const totalTime =
+      currentPhase === 'focus' ? focusDurationSec : breakDurationSec;
     return ((totalTime - remaining()) / totalTime) * ringCirc;
   };
 
@@ -184,36 +188,37 @@
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
-
 </script>
 
-{#if currentPhase === 'break'}
-  <BreakView
-    {formatTime}
-    {phaseLabel}
-    {getProgress}
-    {pause}
-    {handleEndBreak}
-  />
-{:else}
-  <TimerView
-    {currentPhase}
-    running={running()}
-    {formatTime}
-    {phaseLabel}
-    {getProgress}
-    {startFocus}
-    {pause}
-    {resume}
-    {reset}
-    {focusDurationSec}
-    {breakDurationSec}
-    {setFocusDuration}
-    {setBreakDuration}
-    bind:customFocus
-    bind:customBreak
-    {sessionsCompleted}
-    {totalFocusTime}
-    {breaksCompleted}
-  />
-{/if}
+<main class='py-10'>
+  {#if currentPhase === 'break'}
+    <BreakView
+      {formatTime}
+      {phaseLabel}
+      {getProgress}
+      {pause}
+      {handleEndBreak}
+    />
+  {:else}
+    <TimerView
+      {currentPhase}
+      running={running()}
+      {formatTime}
+      {phaseLabel}
+      {getProgress}
+      {startFocus}
+      {pause}
+      {resume}
+      {reset}
+      {focusDurationSec}
+      {breakDurationSec}
+      {setFocusDuration}
+      {setBreakDuration}
+      bind:customFocus
+      bind:customBreak
+      {sessionsCompleted}
+      {totalFocusTime}
+      {breaksCompleted}
+    />
+  {/if}
+</main>
