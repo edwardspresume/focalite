@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/button/button.svelte';
-  import Card from '$lib/components/ui/card/card.svelte';
-  import CardContent from '$lib/components/ui/card/card-content.svelte';
   import Badge from '$lib/components/ui/badge/badge.svelte';
-  import { Pause, Square, Coffee, Activity } from '@lucide/svelte';
+  import Button from '$lib/components/ui/button/button.svelte';
+  import CardContent from '$lib/components/ui/card/card-content.svelte';
+  import Card from '$lib/components/ui/card/card.svelte';
+  import { Activity, Coffee, Pause, Square } from '@lucide/svelte';
 
   type BreakProps = {
     formatTime: string;
@@ -23,11 +23,6 @@
 </script>
 
 <div class="max-w-2xl mx-auto space-y-8">
-  <!-- Header -->
-  <div class="text-center space-y-2">
-    <h1 class="text-4xl font-bold text-foreground">Focalite</h1>
-    <p class="text-muted-foreground text-lg">Focus timer with enforced breaks</p>
-  </div>
 
   <!-- Break Card -->
   <Card class="bg-card border-border shadow-lg">
