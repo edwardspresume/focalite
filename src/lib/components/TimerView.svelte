@@ -5,7 +5,15 @@
   import CardTitle from '$lib/components/ui/card/card-title.svelte';
   import Card from '$lib/components/ui/card/card.svelte';
   import Input from '$lib/components/ui/input/input.svelte';
-  import { BarChart3, Clock, Pause, Play, Settings, Square, Target } from '@lucide/svelte';
+  import {
+    BarChart3,
+    Clock,
+    Pause,
+    Play,
+    Settings,
+    Square,
+    Target,
+  } from '@lucide/svelte';
 
   type TimerProps = {
     currentPhase: 'focus' | 'break' | 'idle';
@@ -46,7 +54,7 @@
     customBreak = $bindable(),
     sessionsCompleted,
     totalFocusTime,
-    breaksCompleted
+    breaksCompleted,
   }: TimerProps = $props();
 
   const focusOptions = [10, 15, 20, 25, 30, 45, 50, 60, 90];
@@ -54,8 +62,11 @@
 
   // Computed button properties
   const buttonText = $derived(
-    currentPhase === 'idle' ? 'Start Focus Session' :
-    running ? 'Pause' : 'Resume'
+    currentPhase === 'idle'
+      ? 'Start Focus Session'
+      : running
+        ? 'Pause'
+        : 'Resume'
   );
 
   const ButtonIcon = $derived(
@@ -64,87 +75,94 @@
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
-
   <!-- Main Timer section -->
-  <section class='bg-accent border rounded-xl p-8 shadow-lg space-y-6'>
-        <!-- Timer Display -->
-          <div class="size-64 mx-auto relative">
-            <svg class="size-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="currentColor"
-                stroke-width="2"
-                fill="none"
-                class="text-border"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="currentColor"
-                stroke-width="3"
-                fill="none"
-                stroke-dasharray="283"
-                stroke-dashoffset={283 - getProgress()}
-                class="text-accent transition-all duration-1000 ease-linear"
-                stroke-linecap="round"
-              />
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <div class="text-6xl font-mono font-bold text-foreground">
-                {currentPhase === 'idle' ? "0:00" : formatTime}
-              </div>
-              <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
-            </div>
-          </div>
+  <section class="bg-accent border rounded-xl p-8 shadow-lg space-y-6">
+    <!-- Timer Display -->
+    <div class="size-64 mx-auto relative">
+      <svg class="size-full transform -rotate-90" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          stroke="currentColor"
+          stroke-width="2"
+          fill="none"
+          class="text-border"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          stroke="currentColor"
+          stroke-width="3"
+          fill="none"
+          stroke-dasharray="283"
+          stroke-dashoffset={283 - getProgress()}
+          class="text-primary transition-all duration-1000 ease-linear"
+          stroke-linecap="round"
+        />
+      </svg>
 
-        <!-- Control Buttons -->
-        <div class="flex justify-center gap-4">
-          <Button
-            size="lg"
-            onclick={() => {
-              if (currentPhase === 'idle') {
-                startFocus();
-              } else {
-                running ? pause() : resume();
-              }
-            }}
-            class="{currentPhase === 'idle'
-              ? 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white'
-              : 'bg-accent hover:bg-accent/90 text-accent-foreground'} px-8 py-4 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl"
-          >
-            <ButtonIcon class="w-5 h-5 mr-2" />
-            {buttonText}
-          </Button>
-
-          {#if currentPhase !== 'idle'}
-            <Button
-              size="lg"
-              variant="outline"
-              onclick={reset}
-              class="px-8 py-4 text-lg font-semibold rounded-xl bg-transparent"
-            >
-              <Square class="w-5 h-5 mr-2" />
-              Reset
-            </Button>
-          {/if}
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <div class="text-6xl font-mono font-bold text-foreground">
+          {currentPhase === 'idle' ? '0:00' : formatTime}
         </div>
+        <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
+      </div>
+    </div>
 
-        <div class="flex justify-center gap-6 text-sm text-muted-foreground">
-          <span>
-            <kbd class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono">Space</kbd>
-            start/pause/resume
-          </span>
-          <span>
-            <kbd class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono">Esc</kbd> reset
-          </span>
-          <span>
-            <kbd class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono">B</kbd> start break
-          </span>
-        </div>
-    </section>
+    <!-- Control Buttons -->
+    <div class="flex justify-center gap-4">
+      <Button
+        size="lg"
+        onclick={() => {
+          if (currentPhase === 'idle') {
+            startFocus();
+          } else {
+            running ? pause() : resume();
+          }
+        }}
+        class="text-lg font-semibold shadow-lg hover:shadow-xl cursor-pointer"
+      >
+        <ButtonIcon class="size-4" />
+        {buttonText}
+      </Button>
+
+      {#if currentPhase !== 'idle'}
+        <Button
+          size="lg"
+          variant="outline"
+          onclick={reset}
+          class="text-lg font-semibold cursor-pointer"
+        >
+          <Square class="size-4" />
+          Reset
+        </Button>
+      {/if}
+    </div>
+
+    <div class="flex justify-center gap-6 text-sm text-muted-foreground">
+      <span>
+        <kbd
+          class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono"
+          >Space</kbd
+        >
+        start/pause/resume
+      </span>
+      <span>
+        <kbd
+          class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono"
+          >Esc</kbd
+        > reset
+      </span>
+      <span>
+        <kbd
+          class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono"
+          >B</kbd
+        > start break
+      </span>
+    </div>
+  </section>
 
   <!-- Settings Panel -->
   <Card class="bg-card border-border shadow-lg">
@@ -158,14 +176,18 @@
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Focus Duration -->
         <div>
-          <h3 class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2">
+          <h3
+            class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
+          >
             <Target class="w-4 h-4" />
             Focus Duration
           </h3>
           <div class="flex flex-wrap gap-2 mb-3">
             {#each focusOptions as duration}
               <Button
-                variant={Math.floor(focusDurationSec / 60) === duration ? "default" : "outline"}
+                variant={Math.floor(focusDurationSec / 60) === duration
+                  ? 'default'
+                  : 'outline'}
                 size="sm"
                 onclick={() => setFocusDuration(duration)}
               >
@@ -183,19 +205,25 @@
               <span class="text-sm text-muted-foreground">min</span>
             </div>
           </div>
-          <p class="text-xs text-muted-foreground">Current: {(focusDurationSec / 60).toFixed(1)} minutes</p>
+          <p class="text-xs text-muted-foreground">
+            Current: {(focusDurationSec / 60).toFixed(1)} minutes
+          </p>
         </div>
 
         <!-- Break Duration -->
         <div>
-          <h3 class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2">
+          <h3
+            class="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2"
+          >
             <Clock class="w-4 h-4" />
             Break Duration
           </h3>
           <div class="flex flex-wrap gap-2 mb-3">
             {#each breakOptions as duration}
               <Button
-                variant={Math.floor(breakDurationSec / 60) === duration ? "default" : "outline"}
+                variant={Math.floor(breakDurationSec / 60) === duration
+                  ? 'default'
+                  : 'outline'}
                 size="sm"
                 onclick={() => setBreakDuration(duration)}
               >
@@ -213,7 +241,9 @@
               <span class="text-sm text-muted-foreground">min</span>
             </div>
           </div>
-          <p class="text-xs text-muted-foreground">Current: {(breakDurationSec / 60).toFixed(1)} minutes</p>
+          <p class="text-xs text-muted-foreground">
+            Current: {(breakDurationSec / 60).toFixed(1)} minutes
+          </p>
         </div>
       </div>
     </CardContent>
