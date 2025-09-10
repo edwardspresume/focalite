@@ -1,11 +1,11 @@
 <script lang="ts">
   import Button from '$lib/components/ui/button/button.svelte';
-  import Card from '$lib/components/ui/card/card.svelte';
   import CardContent from '$lib/components/ui/card/card-content.svelte';
   import CardHeader from '$lib/components/ui/card/card-header.svelte';
   import CardTitle from '$lib/components/ui/card/card-title.svelte';
+  import Card from '$lib/components/ui/card/card.svelte';
   import Input from '$lib/components/ui/input/input.svelte';
-  import { Play, Pause, Square, Settings, Clock, Target, BarChart3 } from '@lucide/svelte';
+  import { BarChart3, Clock, Pause, Play, Settings, Square, Target } from '@lucide/svelte';
 
   type TimerProps = {
     currentPhase: 'focus' | 'break' | 'idle';
@@ -54,20 +54,12 @@
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
-  <!-- Header -->
-  <div class="text-center space-y-2">
-    <h1 class="text-4xl font-bold text-foreground">Focalite</h1>
-    <p class="text-muted-foreground text-lg">Focus timer with enforced breaks</p>
-  </div>
 
-  <!-- Main Timer Card -->
-  <Card class="bg-card border-border shadow-lg">
-    <CardContent class="p-8">
-      <div class="text-center space-y-6">
+  <!-- Main Timer section -->
+  <section class='bg-accent border rounded-xl p-8 shadow-lg space-y-6'>
         <!-- Timer Display -->
-        <div class="relative">
-          <div class="w-64 h-64 mx-auto relative">
-            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+          <div class="size-64 mx-auto relative">
+            <svg class="size-full transform -rotate-90" viewBox="0 0 100 100">
               <circle
                 cx="50"
                 cy="50"
@@ -97,7 +89,6 @@
               <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
             </div>
           </div>
-        </div>
 
         <!-- Control Buttons -->
         <div class="flex justify-center gap-4">
@@ -149,9 +140,7 @@
             <kbd class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono">B</kbd> start break
           </span>
         </div>
-      </div>
-    </CardContent>
-  </Card>
+    </section>
 
   <!-- Settings Panel -->
   <Card class="bg-card border-border shadow-lg">
