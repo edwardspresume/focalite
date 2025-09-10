@@ -8,8 +8,6 @@
   // Base state
   let focusDurationSec = $state(25 * 60); // 25 minutes
   let breakDurationSec = $state(5 * 60); // 5 minutes
-  let customFocus = $state('');
-  let customBreak = $state('');
   let currentPhase: TimerPhase = $state('idle');
   let startedAt: number | null = $state(null);
   let now = $state(Date.now());
@@ -221,8 +219,6 @@
       {breakDurationSec}
       {setFocusDuration}
       {setBreakDuration}
-      bind:customFocus
-      bind:customBreak
       {sessionsCompleted}
       {totalFocusTime}
       {breaksCompleted}
