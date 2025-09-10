@@ -269,17 +269,17 @@
     </h2>
     <div class="grid grid-cols-3 gap-4 text-center">
       <div class="space-y-1">
-        <div class="text-2xl font-bold text-accent">{sessionsCompleted}</div>
+        <div class="text-2xl font-bold text-primary">{sessionsCompleted}</div>
         <div class="text-sm text-muted-foreground">Sessions</div>
       </div>
       <div class="space-y-1">
-        <div class="text-2xl font-bold text-accent">
+        <div class="text-2xl font-bold text-primary">
           {Math.floor(totalFocusTime / 60)}h {totalFocusTime % 60}m
         </div>
         <div class="text-sm text-muted-foreground">Focused</div>
       </div>
       <div class="space-y-1">
-        <div class="text-2xl font-bold text-accent">{breaksCompleted}</div>
+        <div class="text-2xl font-bold text-primary">{breaksCompleted}</div>
         <div class="text-sm text-muted-foreground">Breaks</div>
       </div>
     </div>
