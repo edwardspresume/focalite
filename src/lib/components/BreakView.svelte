@@ -25,12 +25,12 @@
 <div class="max-w-2xl mx-auto space-y-8">
 
   <!-- Break Card -->
-  <Card class="bg-card border-border shadow-lg">
+  <Card class="bg-accent border-border shadow-lg">
     <CardContent class="p-8">
       <div class="text-center space-y-6">
         <!-- Break Message -->
         <div class="space-y-2">
-          <div class="flex items-center justify-center gap-2 text-accent">
+          <div class="flex items-center justify-center gap-2 text-primary">
             <Coffee class="w-6 h-6" />
             <h2 class="text-2xl font-bold">Time to move!</h2>
           </div>
@@ -59,7 +59,7 @@
                 fill="none"
                 stroke-dasharray="283"
                 stroke-dashoffset={283 - getProgress()}
-                class="text-accent transition-all duration-1000 ease-linear"
+                class="text-primary transition-all duration-1000 ease-linear"
                 stroke-linecap="round"
               />
             </svg>
@@ -102,14 +102,14 @@
   </Card>
 
   <!-- Break Suggestions -->
-  <Card class="bg-card border-border shadow-lg">
+  <Card class="bg-accent border-border shadow-lg">
     <CardContent class="p-6">
       <h3 class="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
         <Activity class="w-5 h-5" />
         Break Suggestions
       </h3>
       <div class="grid grid-cols-2 gap-4">
-        <div class="p-4 rounded-lg bg-accent/10 border border-accent/20">
+        <div class="p-4 rounded-lg bg-primary/10 border border-primary/20">
           <h4 class="font-medium text-card-foreground mb-2">Physical Movement</h4>
           <ul class="text-sm text-muted-foreground space-y-1">
             <li>• Take a short walk</li>
@@ -117,7 +117,7 @@
             <li>• Practice deep breathing</li>
           </ul>
         </div>
-        <div class="p-4 rounded-lg bg-accent/10 border border-accent/20">
+        <div class="p-4 rounded-lg bg-primary/10 border border-primary/20">
           <h4 class="font-medium text-card-foreground mb-2">Mental Rest</h4>
           <ul class="text-sm text-muted-foreground space-y-1">
             <li>• Look out the window</li>
