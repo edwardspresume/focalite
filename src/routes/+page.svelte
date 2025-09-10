@@ -13,6 +13,14 @@
   import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
   import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
   import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
+  import Icon from '@iconify/svelte';
+  import walkIcon from '@iconify-icons/mdi/walk';
+  import playIcon from '@iconify-icons/mdi/play';
+  import pauseIcon from '@iconify-icons/mdi/pause';
+  import stopIcon from '@iconify-icons/mdi/stop';
+  import restartIcon from '@iconify-icons/mdi/restart';
+  import settingsIcon from '@iconify-icons/mdi/cog';
+  import keyboardIcon from '@iconify-icons/mdi/keyboard';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -199,7 +207,10 @@
 
       {#if currentPhase === 'break'}
         <div class="mb-4 text-center text-orange-600">
-          <div class="text-lg font-semibold">🚶‍♀️ Time to move!</div>
+          <div class="text-lg font-semibold flex items-center justify-center gap-2">
+            <Icon icon={walkIcon} class="w-6 h-6" />
+            Time to move!
+          </div>
           <div class="text-sm">Get up, stretch your legs, and take a refreshing walk</div>
         </div>
       {/if}
@@ -258,32 +269,53 @@
           onclick={startFocus}
           class="col-span-2"
           title="Start focus (Space)"
-        >Start Focus</Button>
+        >
+          <Icon icon={playIcon} class="w-4 h-4 mr-2" />
+          Start Focus
+        </Button>
       {:else}
         {#if running()}
           <Button
             onclick={pause}
             variant="secondary"
             title="Pause (Space)"
-          >Pause</Button>
+          >
+            <Icon icon={pauseIcon} class="w-4 h-4 mr-2" />
+            Pause
+          </Button>
         {:else}
           <Button
             onclick={resume}
             title="Resume (Space)"
-          >Resume</Button>
+          >
+            <Icon icon={playIcon} class="w-4 h-4 mr-2" />
+            Resume
+          </Button>
         {/if}
         <Button
           onclick={reset}
           variant="outline"
           title={currentPhase === 'break' ? 'End break early (Esc)' : 'Reset (Esc)'}
-        >{currentPhase === 'break' ? 'End Break Early' : 'Reset'}</Button>
+        >
+          <Icon icon={currentPhase === 'break' ? stopIcon : restartIcon} class="w-4 h-4 mr-2" />
+          {currentPhase === 'break' ? 'End Break Early' : 'Reset'}
+        </Button>
       {/if}
       </div>
 
       <div class="mt-3 flex justify-center gap-2 flex-wrap">
-        <Badge variant="secondary" class="text-xs">Space: start/pause/resume</Badge>
-        <Badge variant="secondary" class="text-xs">Esc: {currentPhase === 'break' ? 'end break' : 'reset'}</Badge>
-        <Badge variant="secondary" class="text-xs">B: start break</Badge>
+        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+          <Icon icon={keyboardIcon} class="w-3 h-3" />
+          Space: start/pause/resume
+        </Badge>
+        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+          <Icon icon={keyboardIcon} class="w-3 h-3" />
+          Esc: {currentPhase === 'break' ? 'end break' : 'reset'}
+        </Badge>
+        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+          <Icon icon={keyboardIcon} class="w-3 h-3" />
+          B: start break
+        </Badge>
       </div>
 
       <!-- Settings -->
@@ -291,7 +323,10 @@
         <Separator class="mt-6" />
         <Collapsible class="group">
           <CollapsibleTrigger class="list-none cursor-pointer select-none flex items-center justify-between py-2 w-full">
-            <span class="text-lg font-semibold">Session Settings</span>
+            <span class="text-lg font-semibold flex items-center gap-2">
+              <Icon icon={settingsIcon} class="w-5 h-5" />
+              Session Settings
+            </span>
             <span class="text-gray-500 group-data-[state=open]:rotate-180 transition-transform">▾</span>
           </CollapsibleTrigger>
 
