@@ -197,44 +197,67 @@
 
 </script>
 
-<main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
-  <Card class="w-full max-w-xl">
-    <CardHeader class="text-center">
-      <CardTitle class="text-3xl font-bold tracking-tight">Focalite</CardTitle>
-      <CardDescription>Focus timer with enforced breaks</CardDescription>
+<main class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
+  <Card class="w-full max-w-xl shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+    <CardHeader class="text-center pb-6">
+      <CardTitle class="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Focalite</CardTitle>
+      <CardDescription class="text-slate-600 text-lg mt-2">Focus timer with enforced breaks</CardDescription>
     </CardHeader>
     <CardContent>
 
       {#if currentPhase === 'break'}
-        <div class="mb-4 text-center text-orange-600">
-          <div class="text-lg font-semibold flex items-center justify-center gap-2">
-            <Icon icon={walkIcon} class="w-6 h-6" />
-            Time to move!
+        <div class="mb-6 text-center">
+          <div class="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-orange-100 to-amber-100 px-6 py-4 rounded-2xl border border-orange-200">
+            <Icon icon={walkIcon} class="w-7 h-7 text-orange-600" />
+            <div>
+              <div class="text-lg font-semibold text-orange-700">Time to move!</div>
+              <div class="text-sm text-orange-600">Get up, stretch your legs, and take a refreshing walk</div>
+            </div>
           </div>
-          <div class="text-sm">Get up, stretch your legs, and take a refreshing walk</div>
         </div>
       {/if}
 
       <!-- Timer Display with Progress Ring -->
       <div class="flex items-center justify-center mb-8">
-      <div class="relative" aria-label={phaseLabel} role="region">
+      <div class="relative p-4" aria-label={phaseLabel} role="region">
         {#key currentPhase}
           <svg
             width={ringSize}
             height={ringSize}
             viewBox={`0 0 ${ringSize} ${ringSize}`}
-            class="drop-shadow-sm"
+            class="drop-shadow-2xl filter"
             role="progressbar"
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow={Math.round(progress() * 100)}
           >
+            <!-- Background ring with subtle gradient -->
+            <defs>
+              <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f1f5f9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+              </linearGradient>
+              <linearGradient id="progress-gradient-focus" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+              </linearGradient>
+              <linearGradient id="progress-gradient-break" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
             <circle
               cx={ringSize / 2}
               cy={ringSize / 2}
               r={ringR}
-              stroke="currentColor"
-              class="text-gray-200"
+              stroke="url(#bg-gradient)"
               stroke-width={ringStroke}
               fill="none"
             />
@@ -243,34 +266,34 @@
                 cx={ringSize / 2}
                 cy={ringSize / 2}
                 r={ringR}
-                stroke="currentColor"
-                class={`${currentPhase === 'focus' ? 'text-green-500' : currentPhase === 'break' ? 'text-orange-500' : 'text-gray-300'}`}
+                stroke={currentPhase === 'focus' ? 'url(#progress-gradient-focus)' : currentPhase === 'break' ? 'url(#progress-gradient-break)' : '#cbd5e1'}
                 stroke-width={ringStroke}
                 stroke-linecap="round"
                 fill="none"
-                style={`stroke-dasharray: ${ringCirc * progress()}, ${ringCirc}; transition: stroke-dasharray 0.25s linear;`}
+                filter={progress() > 0 ? 'url(#glow)' : 'none'}
+                style={`stroke-dasharray: ${ringCirc * progress()}, ${ringCirc}; transition: stroke-dasharray 0.3s cubic-bezier(0.4, 0, 0.2, 1);`}
               />
             </g>
           </svg>
         {/key}
         <div class="absolute inset-0 grid place-items-center">
           <div class="text-center select-none">
-            <div class="text-6xl font-mono font-bold text-gray-900 tabular-nums" aria-live="polite">{formatTime}</div>
-            <div class="text-sm mt-1 text-gray-500">{phaseLabel}</div>
+            <div class="text-6xl font-mono font-bold bg-gradient-to-b from-slate-800 to-slate-600 bg-clip-text text-transparent tabular-nums drop-shadow-sm" aria-live="polite">{formatTime}</div>
+            <div class="text-base mt-2 font-medium text-slate-500">{phaseLabel}</div>
           </div>
         </div>
       </div>
       </div>
 
       <!-- Controls -->
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-2 gap-4">
       {#if currentPhase === 'idle'}
         <Button
           onclick={startFocus}
-          class="col-span-2"
+          class="col-span-2 h-14 text-lg font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl"
           title="Start focus (Space)"
         >
-          <Icon icon={playIcon} class="w-4 h-4 mr-2" />
+          <Icon icon={playIcon} class="w-5 h-5 mr-3" />
           Start Focus
         </Button>
       {:else}
@@ -278,6 +301,7 @@
           <Button
             onclick={pause}
             variant="secondary"
+            class="h-12 text-base font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 shadow-md hover:shadow-lg transition-all duration-200 rounded-xl"
             title="Pause (Space)"
           >
             <Icon icon={pauseIcon} class="w-4 h-4 mr-2" />
@@ -286,6 +310,7 @@
         {:else}
           <Button
             onclick={resume}
+            class="h-12 text-base font-medium bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl"
             title="Resume (Space)"
           >
             <Icon icon={playIcon} class="w-4 h-4 mr-2" />
@@ -295,6 +320,7 @@
         <Button
           onclick={reset}
           variant="outline"
+          class="h-12 text-base font-medium border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transition-all duration-200 rounded-xl"
           title={currentPhase === 'break' ? 'End break early (Esc)' : 'Reset (Esc)'}
         >
           <Icon icon={currentPhase === 'break' ? stopIcon : restartIcon} class="w-4 h-4 mr-2" />
@@ -303,16 +329,16 @@
       {/if}
       </div>
 
-      <div class="mt-3 flex justify-center gap-2 flex-wrap">
-        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+      <div class="mt-6 flex justify-center gap-2 flex-wrap">
+        <Badge variant="secondary" class="text-xs flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200">
           <Icon icon={keyboardIcon} class="w-3 h-3" />
           Space: start/pause/resume
         </Badge>
-        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+        <Badge variant="secondary" class="text-xs flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200">
           <Icon icon={keyboardIcon} class="w-3 h-3" />
           Esc: {currentPhase === 'break' ? 'end break' : 'reset'}
         </Badge>
-        <Badge variant="secondary" class="text-xs flex items-center gap-1">
+        <Badge variant="secondary" class="text-xs flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200">
           <Icon icon={keyboardIcon} class="w-3 h-3" />
           B: start break
         </Badge>
@@ -320,43 +346,53 @@
 
       <!-- Settings -->
       {#if currentPhase === 'idle'}
-        <Separator class="mt-6" />
+        <Separator class="mt-8" />
         <Collapsible class="group">
-          <CollapsibleTrigger class="list-none cursor-pointer select-none flex items-center justify-between py-2 w-full">
-            <span class="text-lg font-semibold flex items-center gap-2">
+          <CollapsibleTrigger class="list-none cursor-pointer select-none flex items-center justify-between py-4 w-full hover:bg-slate-50 rounded-lg px-2 transition-colors">
+            <span class="text-lg font-semibold flex items-center gap-3 text-slate-700">
               <Icon icon={settingsIcon} class="w-5 h-5" />
               Session Settings
             </span>
-            <span class="text-gray-500 group-data-[state=open]:rotate-180 transition-transform">▾</span>
+            <span class="text-slate-400 group-data-[state=open]:rotate-180 transition-transform duration-200">▾</span>
           </CollapsibleTrigger>
 
-          <CollapsibleContent class="mt-4 space-y-6">
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Presets</Label>
-              <div class="flex flex-wrap gap-2">
-                <Button onclick={() => applyPreset(25, 5)} variant="outline" size="sm" title="25 min focus / 5 min break">Pomodoro (25/5)</Button>
-                <Button onclick={() => applyPreset(50, 10)} variant="outline" size="sm" title="50 min focus / 10 min break">Long (50/10)</Button>
-                <Button onclick={() => applyPreset(15, 3)} variant="outline" size="sm" title="15 min focus / 3 min break">Quick (15/3)</Button>
+          <CollapsibleContent class="mt-4 space-y-8 px-2">
+            <div class="space-y-3">
+              <Label class="text-sm font-semibold text-slate-700">Presets</Label>
+              <div class="flex flex-wrap gap-3">
+                <Button onclick={() => applyPreset(25, 5)} variant="outline" size="sm" class="rounded-lg border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-colors" title="25 min focus / 5 min break">Pomodoro (25/5)</Button>
+                <Button onclick={() => applyPreset(50, 10)} variant="outline" size="sm" class="rounded-lg border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-colors" title="50 min focus / 10 min break">Long (50/10)</Button>
+                <Button onclick={() => applyPreset(15, 3)} variant="outline" size="sm" class="rounded-lg border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-colors" title="15 min focus / 3 min break">Quick (15/3)</Button>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Focus Duration</Label>
-              <div class="flex items-center gap-2 flex-wrap">
+            <div class="space-y-3">
+              <Label class="text-sm font-semibold text-slate-700">Focus Duration</Label>
+              <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex gap-2">
                   {#each [10, 15, 25, 45, 60] as minutes}
-                    <Button onclick={() => setFocusDuration(minutes)} variant={focusDurationSec === minutes * 60 ? 'default' : 'outline'} size="sm">{minutes}m</Button>
+                    <Button 
+                      onclick={() => setFocusDuration(minutes)} 
+                      variant={focusDurationSec === minutes * 60 ? 'default' : 'outline'} 
+                      size="sm"
+                      class={focusDurationSec === minutes * 60 
+                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md rounded-lg' 
+                        : 'rounded-lg border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-colors'
+                      }
+                    >
+                      {minutes}m
+                    </Button>
                   {/each}
                 </div>
-                <span class="text-gray-400">or</span>
-                <div class="flex items-center gap-1">
+                <span class="text-slate-400 text-sm">or</span>
+                <div class="flex items-center gap-2">
                   <Input
                     type="number"
                     min="0.1"
                     max="180"
                     step="0.1"
                     placeholder="Custom"
-                    class="w-24"
+                    class="w-24 rounded-lg border-slate-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                     onkeydown={(e) => {
                       if (e.key === 'Enter') {
                         const target = e.target as HTMLInputElement;
@@ -377,29 +413,39 @@
                       }
                     }}
                   />
-                  <span class="text-xs text-gray-500">min</span>
+                  <span class="text-xs text-slate-500 font-medium">min</span>
                 </div>
               </div>
-              <div class="text-xs text-gray-500">Current: {(focusDurationSec / 60).toFixed(1)} minutes</div>
+              <div class="text-xs text-slate-500 bg-slate-50 rounded-md px-3 py-1 inline-block">Current: {(focusDurationSec / 60).toFixed(1)} minutes</div>
             </div>
 
-            <div class="space-y-2">
-              <Label class="text-sm font-medium">Break Duration</Label>
-              <div class="flex items-center gap-2 flex-wrap">
+            <div class="space-y-3">
+              <Label class="text-sm font-semibold text-slate-700">Break Duration</Label>
+              <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex gap-2">
                   {#each [3, 5, 10, 15] as minutes}
-                    <Button onclick={() => setBreakDuration(minutes)} variant={breakDurationSec === minutes * 60 ? 'default' : 'outline'} size="sm">{minutes}m</Button>
+                    <Button 
+                      onclick={() => setBreakDuration(minutes)} 
+                      variant={breakDurationSec === minutes * 60 ? 'default' : 'outline'} 
+                      size="sm"
+                      class={breakDurationSec === minutes * 60 
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md rounded-lg' 
+                        : 'rounded-lg border-slate-300 hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700 transition-colors'
+                      }
+                    >
+                      {minutes}m
+                    </Button>
                   {/each}
                 </div>
-                <span class="text-gray-400">or</span>
-                <div class="flex items-center gap-1">
+                <span class="text-slate-400 text-sm">or</span>
+                <div class="flex items-center gap-2">
                   <Input
                     type="number"
                     min="0.1"
                     max="60"
                     step="0.1"
                     placeholder="Custom"
-                    class="w-24"
+                    class="w-24 rounded-lg border-slate-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
                     onkeydown={(e) => {
                       if (e.key === 'Enter') {
                         const target = e.target as HTMLInputElement;
@@ -420,10 +466,10 @@
                       }
                     }}
                   />
-                  <span class="text-xs text-gray-500">min</span>
+                  <span class="text-xs text-slate-500 font-medium">min</span>
                 </div>
               </div>
-              <div class="text-xs text-gray-500">Current: {(breakDurationSec / 60).toFixed(1)} minutes</div>
+              <div class="text-xs text-slate-500 bg-slate-50 rounded-md px-3 py-1 inline-block">Current: {(breakDurationSec / 60).toFixed(1)} minutes</div>
             </div>
           </CollapsibleContent>
         </Collapsible>
