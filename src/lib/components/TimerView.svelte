@@ -76,9 +76,9 @@
 
 <div class="max-w-4xl mx-auto space-y-8">
   <!-- Main Timer section -->
-  <section class="bg-accent border rounded-xl p-8 shadow-lg space-y-6">
+  <section class="bg-accent border rounded-xl p-8 shadow-lg gap-6 flex flex-col items-center">
     <!-- Timer Display -->
-    <div class="size-64 mx-auto relative">
+    <div class="size-64 relative">
       <svg class="size-full transform -rotate-90" viewBox="0 0 100 100">
         <circle
           cx="50"
@@ -112,7 +112,7 @@
     </div>
 
     <!-- Control Buttons -->
-    <div class="flex justify-center gap-4">
+    <div class="flex gap-4">
       <Button
         size="lg"
         onclick={() => {
@@ -141,7 +141,7 @@
       {/if}
     </div>
 
-    <div class="flex justify-center gap-6 text-sm text-muted-foreground">
+    <div class="flex gap-6 text-sm text-muted-foreground">
       <span>
         <kbd
           class="px-1.5 py-0.5 bg-border text-foreground rounded text-xs font-mono"
