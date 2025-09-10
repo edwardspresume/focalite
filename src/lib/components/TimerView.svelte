@@ -5,8 +5,12 @@
   import CardTitle from '$lib/components/ui/card/card-title.svelte';
   import Card from '$lib/components/ui/card/card.svelte';
   import Input from '$lib/components/ui/input/input.svelte';
+  import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
+  import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
+  import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
   import {
     BarChart3,
+    ChevronDown,
     Clock,
     Pause,
     Play,
@@ -72,6 +76,8 @@
   const ButtonIcon = $derived(
     currentPhase === 'idle' || !running ? Play : Pause
   );
+
+  let settingsOpen = $state(false);
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
@@ -165,14 +171,21 @@
   </section>
 
   <!-- Settings Panel -->
-  <Card class="bg-card border-border shadow-lg">
-    <CardHeader>
-      <CardTitle class="flex items-center gap-2 text-card-foreground">
-        <Settings class="w-5 h-5" />
-        Session Settings
-      </CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-6">
+  <Collapsible bind:open={settingsOpen}>
+    <Card class="bg-card border-border shadow-lg">
+      <CollapsibleTrigger class="w-full">
+        <CardHeader class="hover:bg-muted/50 transition-colors cursor-pointer">
+          <CardTitle class="flex items-center justify-between text-card-foreground">
+            <div class="flex items-center gap-2">
+              <Settings class="size-5" />
+              Session Settings
+            </div>
+            <ChevronDown class="size-4 transition-transform duration-200 {settingsOpen ? 'rotate-180' : ''}" />
+          </CardTitle>
+        </CardHeader>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <CardContent class="space-y-6">
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Focus Duration -->
         <div>
@@ -246,8 +259,10 @@
           </p>
         </div>
       </div>
-    </CardContent>
-  </Card>
+        </CardContent>
+      </CollapsibleContent>
+    </Card>
+  </Collapsible>
 
   <!-- Stats Preview -->
   <Card class="bg-card border-border shadow-lg">
