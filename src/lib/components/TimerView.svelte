@@ -1,9 +1,5 @@
 <script lang="ts">
   import Button from '$lib/components/ui/button/button.svelte';
-  import CardContent from '$lib/components/ui/card/card-content.svelte';
-  import CardHeader from '$lib/components/ui/card/card-header.svelte';
-  import CardTitle from '$lib/components/ui/card/card-title.svelte';
-  import Card from '$lib/components/ui/card/card.svelte';
   import Input from '$lib/components/ui/input/input.svelte';
   import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
   import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
@@ -172,20 +168,20 @@
 
   <!-- Settings Panel -->
   <Collapsible bind:open={settingsOpen}>
-    <Card class="bg-card border-border shadow-lg">
+    <section class="bg-accent border rounded-xl shadow-lg">
       <CollapsibleTrigger class="w-full">
-        <CardHeader class="hover:bg-muted/50 transition-colors cursor-pointer">
-          <CardTitle class="flex items-center justify-between text-card-foreground">
+        <header class="p-6 hover:bg-muted/50 transition-colors cursor-pointer rounded-t-xl">
+          <h2 class="flex items-center justify-between text-foreground text-xl font-semibold">
             <div class="flex items-center gap-2">
               <Settings class="size-5" />
               Session Settings
             </div>
             <ChevronDown class="size-4 transition-transform duration-200 {settingsOpen ? 'rotate-180' : ''}" />
-          </CardTitle>
-        </CardHeader>
+          </h2>
+        </header>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <CardContent class="space-y-6">
+        <div class="p-6 pt-0 space-y-6">
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Focus Duration -->
         <div>
@@ -259,36 +255,32 @@
           </p>
         </div>
       </div>
-        </CardContent>
+        </div>
       </CollapsibleContent>
-    </Card>
+    </section>
   </Collapsible>
 
   <!-- Stats Preview -->
-  <Card class="bg-card border-border shadow-lg">
-    <CardHeader>
-      <CardTitle class="flex items-center gap-2 text-card-foreground">
-        <BarChart3 class="w-5 h-5" />
-        Today's Progress
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div class="grid grid-cols-3 gap-4 text-center">
-        <div class="space-y-1">
-          <div class="text-2xl font-bold text-accent">{sessionsCompleted}</div>
-          <div class="text-sm text-muted-foreground">Sessions</div>
-        </div>
-        <div class="space-y-1">
-          <div class="text-2xl font-bold text-accent">
-            {Math.floor(totalFocusTime / 60)}h {totalFocusTime % 60}m
-          </div>
-          <div class="text-sm text-muted-foreground">Focused</div>
-        </div>
-        <div class="space-y-1">
-          <div class="text-2xl font-bold text-accent">{breaksCompleted}</div>
-          <div class="text-sm text-muted-foreground">Breaks</div>
-        </div>
+  <section class="bg-accent border rounded-xl p-8 shadow-lg space-y-6">
+    <h2 class="flex items-center gap-2 text-foreground text-xl font-semibold">
+      <BarChart3 class="size-5" />
+      Today's Progress
+    </h2>
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div class="space-y-1">
+        <div class="text-2xl font-bold text-accent">{sessionsCompleted}</div>
+        <div class="text-sm text-muted-foreground">Sessions</div>
       </div>
-    </CardContent>
-  </Card>
+      <div class="space-y-1">
+        <div class="text-2xl font-bold text-accent">
+          {Math.floor(totalFocusTime / 60)}h {totalFocusTime % 60}m
+        </div>
+        <div class="text-sm text-muted-foreground">Focused</div>
+      </div>
+      <div class="space-y-1">
+        <div class="text-2xl font-bold text-accent">{breaksCompleted}</div>
+        <div class="text-sm text-muted-foreground">Breaks</div>
+      </div>
+    </div>
+  </section>
 </div>
