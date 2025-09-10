@@ -239,6 +239,11 @@
           <div class="text-center select-none">
             <div class="text-6xl font-mono font-bold text-gray-900 tabular-nums" aria-live="polite">{formatTime}</div>
             <div class="text-sm mt-1 text-gray-500">{phaseLabel}</div>
+            {#if currentPhase === 'break'}
+              <div class="text-lg mt-4 text-orange-600 font-medium max-w-sm">
+                🚶‍♀️ Time to move! Get up, stretch your legs, and take a refreshing walk
+              </div>
+            {/if}
           </div>
         </div>
       </div>
