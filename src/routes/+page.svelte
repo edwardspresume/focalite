@@ -197,6 +197,13 @@
     </CardHeader>
     <CardContent>
 
+      {#if currentPhase === 'break'}
+        <div class="mb-4 text-center text-orange-600">
+          <div class="text-lg font-semibold">🚶‍♀️ Time to move!</div>
+          <div class="text-sm">Get up, stretch your legs, and take a refreshing walk</div>
+        </div>
+      {/if}
+
       <!-- Timer Display with Progress Ring -->
       <div class="flex items-center justify-center mb-8">
       <div class="relative" aria-label={phaseLabel} role="region">
@@ -239,11 +246,6 @@
           <div class="text-center select-none">
             <div class="text-6xl font-mono font-bold text-gray-900 tabular-nums" aria-live="polite">{formatTime}</div>
             <div class="text-sm mt-1 text-gray-500">{phaseLabel}</div>
-            {#if currentPhase === 'break'}
-              <div class="text-lg mt-4 text-orange-600 font-medium max-w-sm">
-                🚶‍♀️ Time to move! Get up, stretch your legs, and take a refreshing walk
-              </div>
-            {/if}
           </div>
         </div>
       </div>
