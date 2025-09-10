@@ -1,11 +1,10 @@
 <script lang="ts">
   import Button from '$lib/components/ui/button/button.svelte';
-  import Input from '$lib/components/ui/input/input.svelte';
-  import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
-  import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
   import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
+  import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
+  import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
   import {
-    BarChart3,
+    ChartBar,
     ChevronDown,
     Clock,
     Pause,
@@ -29,8 +28,6 @@
     breakDurationSec: number;
     setFocusDuration: (minutes: number) => void;
     setBreakDuration: (minutes: number) => void;
-    customFocus: string;
-    customBreak: string;
     sessionsCompleted: number;
     totalFocusTime: number;
     breaksCompleted: number;
@@ -50,8 +47,6 @@
     breakDurationSec,
     setFocusDuration,
     setBreakDuration,
-    customFocus = $bindable(),
-    customBreak = $bindable(),
     sessionsCompleted,
     totalFocusTime,
     breaksCompleted,
@@ -203,16 +198,6 @@
                 {duration}m
               </Button>
             {/each}
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-muted-foreground">or</span>
-              <Input
-                type="number"
-                placeholder="Custom"
-                bind:value={customFocus}
-                class="w-20 px-2 py-1 text-sm border border-border rounded bg-input"
-              />
-              <span class="text-sm text-muted-foreground">min</span>
-            </div>
           </div>
           <p class="text-xs text-muted-foreground">
             Current: {(focusDurationSec / 60).toFixed(1)} minutes
@@ -239,16 +224,6 @@
                 {duration}m
               </Button>
             {/each}
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-muted-foreground">or</span>
-              <Input
-                type="number"
-                placeholder="Custom"
-                bind:value={customBreak}
-                class="w-20 px-2 py-1 text-sm border border-border rounded bg-input"
-              />
-              <span class="text-sm text-muted-foreground">min</span>
-            </div>
           </div>
           <p class="text-xs text-muted-foreground">
             Current: {(breakDurationSec / 60).toFixed(1)} minutes
@@ -263,7 +238,7 @@
   <!-- Stats Preview -->
   <section class="bg-accent border rounded-xl p-8 shadow-lg space-y-6">
     <h2 class="flex items-center gap-2 text-foreground text-xl font-semibold">
-      <BarChart3 class="size-5" />
+      <ChartBar class="size-5" />
       Today's Progress
     </h2>
     <div class="grid grid-cols-3 gap-4 text-center">
