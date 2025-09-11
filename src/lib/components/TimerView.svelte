@@ -1,9 +1,9 @@
 <script lang="ts">
   import Button from '$lib/components/ui/button/button.svelte';
-  import Input from '$lib/components/ui/input/input.svelte';
   import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
   import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
   import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
+  import Input from '$lib/components/ui/input/input.svelte';
   import {
     ChartBar,
     ChevronDown,
@@ -70,11 +70,11 @@
   );
 
   let settingsOpen = $state(false);
-  
+
   // Custom input states
   let customFocusInput = $state('');
   let customBreakInput = $state('');
-  
+
   // Handle custom input validation and setting
   function handleCustomFocusInput(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -87,7 +87,7 @@
       customFocusInput = '';
     }
   }
-  
+
   function handleCustomBreakInput(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = parseInt(target.value);
@@ -99,14 +99,14 @@
       customBreakInput = '';
     }
   }
-  
+
   function handleFocusKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleCustomFocusInput(event);
     }
   }
-  
+
   function handleBreakKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -130,7 +130,7 @@
           stroke="currentColor"
           stroke-width="2"
           fill="none"
-          class="text-border"
+          class="{currentPhase === 'idle' ? 'text-primary' : 'text-border'}"
         />
         <circle
           cx="50"
