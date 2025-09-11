@@ -143,13 +143,26 @@
     breaksCompleted++;
   }
 
-  function playBreakCompleteSound() {
+  async function playBreakCompleteSound() {
     try {
-      const audio = new Audio('/break-complete.mp3');
-      audio.volume = 0.7; // Set volume to 70%
-      audio.play().catch(error => {
-        console.warn('Failed to play break complete sound:', error);
-      });
+      // Check if we're in Tauri (desktop app)
+      if (typeof window !== 'undefined' && '__TAURI__' in window) {
+        // Use Tauri's asset API to get the correct path
+        const { convertFileSrc } = await import('@tauri-apps/api/core');
+        const audioPath = convertFileSrc('break-complete.mp3');
+        const audio = new Audio(audioPath);
+        audio.volume = 0.7; // Set volume to 70%
+        audio.play().catch(error => {
+          console.warn('Failed to play break complete sound:', error);
+        });
+      } else {
+        // Web app - use static path
+        const audio = new Audio('/break-complete.mp3');
+        audio.volume = 0.7; // Set volume to 70%
+        audio.play().catch(error => {
+          console.warn('Failed to play break complete sound:', error);
+        });
+      }
     } catch (error) {
       console.warn('Failed to create audio element:', error);
     }
