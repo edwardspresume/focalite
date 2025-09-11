@@ -4,8 +4,8 @@
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
-  let focusDurationSec = $state(25 * 60);
-  let breakDurationSec = $state(5 * 60);
+  let focusDurationSec = $state(30 * 60);
+  let breakDurationSec = $state(3 * 60);
   let currentPhase: TimerPhase = $state('idle');
   let startedAt: number | null = $state(null);
   let now = $state(Date.now());
