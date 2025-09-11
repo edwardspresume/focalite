@@ -4,7 +4,7 @@ This file provides guidance to when working with code in this repository.
 
 ## Project Overview
 
-**Focalite** is a Windows desktop focus timer (Pomodoro-style) with enforced break overlays, built with Tauri v2 and Svelte 5.
+**Focalite** is a Windows desktop focus timer (Pomodoro-style), built with Tauri v2 and Svelte 5.
 
 - **Stack**: Tauri v2, Svelte 5 with Runes, TypeScript, Tailwind CSS
 - **Target Platform**: Windows (WebView2)
@@ -78,9 +78,7 @@ pnpm check:watch
 ### Core Feature Requirements
 
 - Focus timer that transitions to automatic break timer
-- Break enforcement via fullscreen overlay windows on all monitors
-- Overlay properties: `fullscreen:true`, `alwaysOnTop:true`, `decorations:false`, `skipTaskbar:true`, `focus:true`
-- User interaction blocked until overlay is explicitly closed via center button
+
 
 ### Code Standards
 
