@@ -1,7 +1,6 @@
 <script lang="ts">
   import BreakView from '$lib/components/BreakView.svelte';
   import TimerView from '$lib/components/TimerView.svelte';
-  import { invoke } from '@tauri-apps/api/core';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -78,7 +77,6 @@
       // Break completed, play sound and return to idle
       playBreakCompleteSound();
       breaksCompleted++;
-      exitBreakMode();
       currentPhase = 'idle';
       startedAt = null;
       baseElapsedSec = 0;
@@ -94,18 +92,11 @@
     now = startedAt;
   }
 
-  async function startBreak() {
+  function startBreak() {
     currentPhase = 'break';
     baseElapsedSec = 0;
     startedAt = Date.now();
     now = startedAt;
-
-    // Make window fullscreen and always on top for break mode
-    try {
-      await invoke('enter_break_mode');
-    } catch (error) {
-      console.error('Failed to enter break mode:', error);
-    }
   }
 
   function pause() {
@@ -120,26 +111,15 @@
     now = startedAt;
   }
 
-  async function reset() {
-    if (currentPhase === 'break') {
-      await exitBreakMode();
-    }
+  function reset() {
     currentPhase = 'idle';
     startedAt = null;
     baseElapsedSec = 0;
   }
 
-  async function exitBreakMode() {
-    try {
-      await invoke('exit_break_mode');
-    } catch (error) {
-      console.error('Failed to exit break mode:', error);
-    }
-  }
-
-  async function handleEndBreak() {
+  function handleEndBreak() {
     playBreakCompleteSound();
-    await reset();
+    reset();
     breaksCompleted++;
   }
 
