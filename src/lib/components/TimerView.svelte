@@ -18,7 +18,7 @@
   type TimerProps = {
     currentPhase: 'focus' | 'break' | 'idle';
     running: boolean;
-    formatTime: string;
+    formatTime: () => string;
     phaseLabel: string;
     getProgress: () => number;
     startFocus: () => void;
@@ -56,62 +56,43 @@
   const focusOptions = [10, 15, 20, 25, 30, 45, 50, 60, 90];
   const breakOptions = [2, 3, 4, 5, 8, 10, 12, 15, 20];
 
-  // Computed button properties
   const buttonText = $derived(
-    currentPhase === 'idle'
-      ? 'Start Focus Session'
-      : running
-        ? 'Pause'
-        : 'Resume'
+    currentPhase === 'idle' ? 'Start Focus Session' :
+    running ? 'Pause' : 'Resume'
   );
 
-  const ButtonIcon = $derived(
-    currentPhase === 'idle' || !running ? Play : Pause
-  );
+  const ButtonIcon = $derived(currentPhase === 'idle' || !running ? Play : Pause);
 
   let settingsOpen = $state(false);
-
-  // Custom input states
   let customFocusInput = $state('');
   let customBreakInput = $state('');
 
-  // Handle custom input validation and setting
-  function handleCustomFocusInput(event: Event) {
+  function handleCustomInput(value: string, setter: (minutes: number) => void): string {
+    const num = parseInt(value);
+    if (num && num > 0 && num <= 999 && currentPhase === 'idle') {
+      setter(num);
+      return '';
+    }
+    return value && currentPhase === 'idle' ? '' : value;
+  }
+
+  function onFocusInput(event: Event) {
     const target = event.target as HTMLInputElement;
-    const value = parseInt(target.value);
-    if (value && value > 0 && value <= 999 && currentPhase === 'idle') {
-      setFocusDuration(value);
-      customFocusInput = '';
-    } else if (target.value && currentPhase === 'idle') {
-      // Clear invalid input
-      customFocusInput = '';
-    }
+    customFocusInput = handleCustomInput(target.value, setFocusDuration);
   }
 
-  function handleCustomBreakInput(event: Event) {
+  function onBreakInput(event: Event) {
     const target = event.target as HTMLInputElement;
-    const value = parseInt(target.value);
-    if (value && value > 0 && value <= 999 && currentPhase === 'idle') {
-      setBreakDuration(value);
-      customBreakInput = '';
-    } else if (target.value && currentPhase === 'idle') {
-      // Clear invalid input
-      customBreakInput = '';
-    }
+    customBreakInput = handleCustomInput(target.value, setBreakDuration);
   }
 
-  function handleFocusKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleCustomFocusInput(event);
-    }
-  }
-
-  function handleBreakKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleCustomBreakInput(event);
-    }
+  function onKeydown(handler: (event: Event) => void) {
+    return (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handler(event);
+      }
+    };
   }
 </script>
 
@@ -148,7 +129,7 @@
 
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <div class="text-6xl font-mono font-bold text-foreground">
-          {currentPhase === 'idle' ? '0:00' : formatTime}
+          {currentPhase === 'idle' ? '0:00' : formatTime()}
         </div>
         <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
       </div>
@@ -158,13 +139,7 @@
     <div class="flex gap-4">
       <Button
         size="lg"
-        onclick={() => {
-          if (currentPhase === 'idle') {
-            startFocus();
-          } else {
-            running ? pause() : resume();
-          }
-        }}
+        onclick={() => currentPhase === 'idle' ? startFocus() : (running ? pause() : resume())}
         class="text-lg font-semibold shadow-lg hover:shadow-xl cursor-pointer"
       >
         <ButtonIcon class="size-4" />
@@ -264,8 +239,8 @@
                   min="1"
                   max="999"
                   bind:value={customFocusInput}
-                  onblur={handleCustomFocusInput}
-                  onkeydown={handleFocusKeydown}
+                  onblur={onFocusInput}
+                  onkeydown={onKeydown(onFocusInput)}
                   disabled={currentPhase !== 'idle'}
                   class="w-32"
                 />
@@ -312,8 +287,8 @@
                   min="1"
                   max="999"
                   bind:value={customBreakInput}
-                  onblur={handleCustomBreakInput}
-                  onkeydown={handleBreakKeydown}
+                  onblur={onBreakInput}
+                  onkeydown={onKeydown(onBreakInput)}
                   disabled={currentPhase !== 'idle'}
                   class="w-32"
                 />
