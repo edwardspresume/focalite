@@ -175,11 +175,12 @@
     baseElapsedSec = 0;
   }
 
-  function handleEndBreak() {
+  function handleEndBreak(manual = false) {
     playSound('break-complete.mp3', 1.0);
     breaksCompleted++;
-    console.log('Break ended, autoLoop is:', autoLoop);
-    if (autoLoop) {
+    console.log('Break ended, autoLoop is:', autoLoop, 'manual:', manual);
+    
+    if (autoLoop && !manual) {
       console.log('Starting new focus session due to autoLoop');
       startFocus();
     } else {
@@ -196,6 +197,10 @@
     if (!running) breakDurationSec = minutes * 60;
   }
 
+  function endBreakEarly() {
+    handleEndBreak(true);
+  }
+
 </script>
 
 <main class="py-10 px-4">
@@ -207,7 +212,7 @@
   </header>
 
   {#if currentPhase === 'break'}
-    <BreakView {formatTime} {phaseLabel} {getProgress} {pause} {resume} {handleEndBreak} {running} />
+    <BreakView {formatTime} {phaseLabel} {getProgress} {pause} {resume} handleEndBreak={endBreakEarly} {running} />
   {:else}
     <TimerView
       {currentPhase}
