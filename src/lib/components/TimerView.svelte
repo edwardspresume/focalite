@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from '$lib/components/ui/button/button.svelte';
+  import Input from '$lib/components/ui/input/input.svelte';
   import CollapsibleContent from '$lib/components/ui/collapsible/collapsible-content.svelte';
   import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
   import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
@@ -69,6 +70,49 @@
   );
 
   let settingsOpen = $state(false);
+  
+  // Custom input states
+  let customFocusInput = $state('');
+  let customBreakInput = $state('');
+  
+  // Handle custom input validation and setting
+  function handleCustomFocusInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+    if (value && value > 0 && value <= 999 && currentPhase === 'idle') {
+      setFocusDuration(value);
+      customFocusInput = '';
+    } else if (target.value && currentPhase === 'idle') {
+      // Clear invalid input
+      customFocusInput = '';
+    }
+  }
+  
+  function handleCustomBreakInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = parseInt(target.value);
+    if (value && value > 0 && value <= 999 && currentPhase === 'idle') {
+      setBreakDuration(value);
+      customBreakInput = '';
+    } else if (target.value && currentPhase === 'idle') {
+      // Clear invalid input
+      customBreakInput = '';
+    }
+  }
+  
+  function handleFocusKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleCustomFocusInput(event);
+    }
+  }
+  
+  function handleBreakKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleCustomBreakInput(event);
+    }
+  }
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
@@ -213,6 +257,20 @@
                   </Button>
                 {/each}
               </div>
+              <div class="flex gap-2 items-center mb-3">
+                <Input
+                  type="number"
+                  placeholder="Custom minutes"
+                  min="1"
+                  max="999"
+                  bind:value={customFocusInput}
+                  onblur={handleCustomFocusInput}
+                  onkeydown={handleFocusKeydown}
+                  disabled={currentPhase !== 'idle'}
+                  class="w-32"
+                />
+                <span class="text-sm text-muted-foreground">minutes</span>
+              </div>
               <p class="text-xs text-muted-foreground">
                 {#if currentPhase === 'idle'}
                   Current: {(focusDurationSec / 60).toFixed(1)} minutes
@@ -246,6 +304,20 @@
                     {duration}m
                   </Button>
                 {/each}
+              </div>
+              <div class="flex gap-2 items-center mb-3">
+                <Input
+                  type="number"
+                  placeholder="Custom minutes"
+                  min="1"
+                  max="999"
+                  bind:value={customBreakInput}
+                  onblur={handleCustomBreakInput}
+                  onkeydown={handleBreakKeydown}
+                  disabled={currentPhase !== 'idle'}
+                  class="w-32"
+                />
+                <span class="text-sm text-muted-foreground">minutes</span>
               </div>
               <p class="text-xs text-muted-foreground">
                 {#if currentPhase === 'idle'}
