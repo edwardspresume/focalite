@@ -176,8 +176,8 @@
 
   function handleEndBreak() {
     playSound('break-complete.mp3', 1.0);
-    reset();
     breaksCompleted++;
+    startFocus();
   }
 
   function setFocusDuration(minutes: number) {
