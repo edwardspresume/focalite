@@ -13,6 +13,7 @@
   let sessionsCompleted = $state(0);
   let totalFocusTime = $state(0);
   let breaksCompleted = $state(0);
+  let autoLoop = $state(false);
 
   const currentDuration = $derived(
     (currentPhase as string) === 'focus' ? focusDurationSec :
@@ -177,7 +178,11 @@
   function handleEndBreak() {
     playSound('break-complete.mp3', 1.0);
     breaksCompleted++;
-    startFocus();
+    if (autoLoop) {
+      startFocus();
+    } else {
+      reset();
+    }
   }
 
   function setFocusDuration(minutes: number) {
@@ -186,6 +191,10 @@
 
   function setBreakDuration(minutes: number) {
     if (!running) breakDurationSec = minutes * 60;
+  }
+
+  function setAutoLoop(enabled: boolean) {
+    autoLoop = enabled;
   }
 </script>
 
@@ -217,6 +226,8 @@
       {sessionsCompleted}
       {totalFocusTime}
       {breaksCompleted}
+      {autoLoop}
+      {setAutoLoop}
     />
   {/if}
 </main>

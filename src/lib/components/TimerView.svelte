@@ -4,12 +4,14 @@
   import CollapsibleTrigger from '$lib/components/ui/collapsible/collapsible-trigger.svelte';
   import Collapsible from '$lib/components/ui/collapsible/collapsible.svelte';
   import Input from '$lib/components/ui/input/input.svelte';
+  import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
   import {
     ChartBar,
     ChevronDown,
     Clock,
     Pause,
     Play,
+    RotateCcw,
     Settings,
     Square,
     Target,
@@ -32,6 +34,8 @@
     sessionsCompleted: number;
     totalFocusTime: number;
     breaksCompleted: number;
+    autoLoop: boolean;
+    setAutoLoop: (enabled: boolean) => void;
   };
 
   let {
@@ -51,6 +55,8 @@
     sessionsCompleted,
     totalFocusTime,
     breaksCompleted,
+    autoLoop,
+    setAutoLoop,
   }: TimerProps = $props();
 
   const focusOptions = [10, 15, 20, 25, 30, 45, 50, 60, 90];
@@ -301,6 +307,26 @@
                   Next session: {(breakDurationSec / 60).toFixed(1)} minutes
                 {/if}
               </p>
+            </div>
+          </div>
+
+          <!-- Auto Loop Setting -->
+          <div class="border-t pt-6">
+            <div class="flex items-center space-x-3">
+              <Checkbox bind:checked={autoLoop} />
+              <div class="grid gap-1.5 leading-none">
+                <button
+                  type="button"
+                  class="text-sm font-medium leading-none text-left flex items-center gap-2 cursor-pointer hover:text-foreground"
+                  onclick={() => setAutoLoop(!autoLoop)}
+                >
+                  <RotateCcw class="w-4 h-4" />
+                  Auto loop sessions
+                </button>
+                <p class="text-xs text-muted-foreground">
+                  Automatically start a new focus session after each break completes
+                </p>
+              </div>
             </div>
           </div>
         </div>
