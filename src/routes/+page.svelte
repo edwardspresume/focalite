@@ -130,11 +130,25 @@
     now = startedAt;
   }
 
+  async function focusWindow() {
+    if (typeof window !== 'undefined' && '__TAURI__' in window) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('focus_window');
+      } catch (error) {
+        console.warn('Failed to focus window:', error);
+      }
+    }
+  }
+
   function startBreak() {
     currentPhase = 'break';
     baseElapsedSec = 0;
     startedAt = Date.now();
     now = startedAt;
+    
+    // Focus the window when break starts
+    focusWindow();
     
     // Add a small delay to ensure UI transition is complete
     setTimeout(() => {
