@@ -97,6 +97,7 @@
     baseElapsedSec = 0;
     startedAt = Date.now();
     now = startedAt;
+    playBreakStartSound();
   }
 
   function pause() {
@@ -123,6 +124,31 @@
     breaksCompleted++;
   }
 
+  async function playBreakStartSound() {
+    try {
+      // Check if we're in Tauri (desktop app)
+      if (typeof window !== 'undefined' && '__TAURI__' in window) {
+        // Use Tauri's asset API to get the correct path
+        const { convertFileSrc } = await import('@tauri-apps/api/core');
+        const audioPath = convertFileSrc('break-start.mp3');
+        const audio = new Audio(audioPath);
+        audio.volume = 1; // Set volume to 100%
+        audio.play().catch((error) => {
+          console.warn('Failed to play break start sound:', error);
+        });
+      } else {
+        // Web app - use static path
+        const audio = new Audio('/break-start.mp3');
+        audio.volume = 1; // Set volume to 100%
+        audio.play().catch((error) => {
+          console.warn('Failed to play break start sound:', error);
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to create audio element:', error);
+    }
+  }
+
   async function playBreakCompleteSound() {
     try {
       // Check if we're in Tauri (desktop app)
@@ -132,14 +158,14 @@
         const audioPath = convertFileSrc('break-complete.mp3');
         const audio = new Audio(audioPath);
         audio.volume = 0.7; // Set volume to 70%
-        audio.play().catch(error => {
+        audio.play().catch((error) => {
           console.warn('Failed to play break complete sound:', error);
         });
       } else {
         // Web app - use static path
         const audio = new Audio('/break-complete.mp3');
         audio.volume = 0.7; // Set volume to 70%
-        audio.play().catch(error => {
+        audio.play().catch((error) => {
           console.warn('Failed to play break complete sound:', error);
         });
       }
@@ -195,13 +221,13 @@
   });
 </script>
 
-<main class='py-10'>
-
+<main class="py-10">
   <header class="text-center space-y-2 mb-8">
     <h1 class="text-4xl font-bold">Focalite</h1>
-    <p class="text-muted-foreground text-lg">Focus timer with enforced breaks</p>
+    <p class="text-muted-foreground text-lg">
+      Focus timer with enforced breaks
+    </p>
   </header>
-
 
   {#if currentPhase === 'break'}
     <BreakView
