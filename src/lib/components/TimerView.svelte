@@ -74,8 +74,8 @@
   let customBreakInput = $state('');
 
   function handleCustomInput(value: string, setter: (minutes: number) => void): string {
-    const num = parseInt(value);
-    if (num && num > 0 && num <= 999 && currentPhase === 'idle') {
+    const num = parseFloat(value);
+    if (!isNaN(num) && num >= 0.1 && num <= 999 && currentPhase === 'idle') {
       setter(num);
       return '';
     }
@@ -242,8 +242,9 @@
                 <Input
                   type="number"
                   placeholder="Custom minutes"
-                  min="1"
+                  min="0.1"
                   max="999"
+                  step="0.1"
                   bind:value={customFocusInput}
                   onblur={onFocusInput}
                   onkeydown={onKeydown(onFocusInput)}
@@ -290,8 +291,9 @@
                 <Input
                   type="number"
                   placeholder="Custom minutes"
-                  min="1"
+                  min="0.1"
                   max="999"
+                  step="0.1"
                   bind:value={customBreakInput}
                   onblur={onBreakInput}
                   onkeydown={onKeydown(onBreakInput)}
