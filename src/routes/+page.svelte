@@ -178,9 +178,12 @@
   function handleEndBreak() {
     playSound('break-complete.mp3', 1.0);
     breaksCompleted++;
+    console.log('Break ended, autoLoop is:', autoLoop);
     if (autoLoop) {
+      console.log('Starting new focus session due to autoLoop');
       startFocus();
     } else {
+      console.log('Resetting to idle state');
       reset();
     }
   }
@@ -193,9 +196,6 @@
     if (!running) breakDurationSec = minutes * 60;
   }
 
-  function setAutoLoop(enabled: boolean) {
-    autoLoop = enabled;
-  }
 </script>
 
 <main class="py-10 px-4">
@@ -226,8 +226,7 @@
       {sessionsCompleted}
       {totalFocusTime}
       {breaksCompleted}
-      {autoLoop}
-      {setAutoLoop}
+      bind:autoLoop
     />
   {/if}
 </main>
