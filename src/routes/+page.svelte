@@ -75,7 +75,8 @@
       totalFocusTime += Math.floor(focusDurationSec / 60);
       startBreak();
     } else if (currentPhase === 'break') {
-      // Break completed, return to idle
+      // Break completed, play sound and return to idle
+      playBreakCompleteSound();
       breaksCompleted++;
       exitBreakMode();
       currentPhase = 'idle';
@@ -137,8 +138,21 @@
   }
 
   async function handleEndBreak() {
+    playBreakCompleteSound();
     await reset();
     breaksCompleted++;
+  }
+
+  function playBreakCompleteSound() {
+    try {
+      const audio = new Audio('/break-complete.mp3');
+      audio.volume = 0.7; // Set volume to 70%
+      audio.play().catch(error => {
+        console.warn('Failed to play break complete sound:', error);
+      });
+    } catch (error) {
+      console.warn('Failed to create audio element:', error);
+    }
   }
 
   function setFocusDuration(minutes: number) {
