@@ -1,8 +1,20 @@
 
 #[tauri::command]
 async fn focus_window(window: tauri::Window) -> Result<(), String> {
-    window.set_focus().map_err(|e| e.to_string())?;
-    window.unminimize().map_err(|e| e.to_string())?;
+    // Try to ensure the window is visible and in front.
+    // On Windows, stealing focus can be restricted; combining these helps.
+    if let Err(e) = window.unminimize() {
+        eprintln!("unminimize failed: {e}");
+    }
+    if let Err(e) = window.show() {
+        eprintln!("show failed: {e}");
+    }
+    if let Err(e) = window.set_focus() {
+        eprintln!("set_focus failed: {e}");
+    }
+    if let Err(e) = window.request_user_attention(Some(tauri::UserAttentionType::Critical)) {
+        eprintln!("request_user_attention failed: {e}");
+    }
     Ok(())
 }
 
