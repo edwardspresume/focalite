@@ -18,18 +18,18 @@
     (currentPhase as string) === 'focus' ? focusDurationSec :
     (currentPhase as string) === 'break' ? breakDurationSec : 0
   );
-  
+
   const elapsed = $derived((startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec);
   const remaining = $derived(Math.max(currentDuration - elapsed, 0));
   const running = $derived(startedAt !== null && remaining > 0);
   const isTimerComplete = $derived(startedAt !== null && remaining === 0);
-  
+
   const phaseLabel = $derived(
     currentPhase === 'idle' ? 'Ready to Focus' :
     currentPhase === 'focus' ? (running ? 'Focus Time' : 'Focus Paused') :
     running ? 'Break Time' : 'Break Paused'
   );
-  
+
   const formatTime = $derived(() => {
     const mins = Math.floor(remaining / 60);
     const secs = remaining % 60;
@@ -62,7 +62,7 @@
 
   $effect(() => {
     if (typeof window === 'undefined') return;
-    
+
     function onKey(e: KeyboardEvent) {
       if (e.code === 'Space') {
         e.preventDefault();
@@ -75,7 +75,7 @@
         if (currentPhase !== 'break') startBreak();
       }
     }
-    
+
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
@@ -83,35 +83,35 @@
   async function playSound(filename: string, volume = 1) {
     try {
       let audioPath: string;
-      
+
       if (typeof window !== 'undefined' && '__TAURI__' in window) {
         const { convertFileSrc } = await import('@tauri-apps/api/core');
         audioPath = convertFileSrc(filename);
       } else {
         audioPath = `/${filename}`;
       }
-      
+
       console.log(`Attempting to play sound: ${filename} at volume ${volume} from path: ${audioPath}`);
-      
+
       const audio = new Audio(audioPath);
       audio.volume = volume;
-      
+
       // Add error and success event listeners for debugging
       audio.addEventListener('error', (e) => {
         console.error(`Audio error for ${filename}:`, e);
       });
-      
+
       audio.addEventListener('canplaythrough', () => {
         console.log(`Audio ${filename} can play through`);
       });
-      
+
       // Try to play the audio
       try {
         await audio.play();
         console.log(`Successfully started playing ${filename}`);
       } catch (playError) {
         console.warn(`Failed to play ${filename}:`, playError);
-        
+
         // If autoplay is blocked, try to play with user interaction
         if (playError.name === 'NotAllowedError') {
           console.log(`Autoplay blocked for ${filename}, will try again on next user interaction`);
@@ -146,10 +146,10 @@
     baseElapsedSec = 0;
     startedAt = Date.now();
     now = startedAt;
-    
+
     // Focus the window when break starts
     focusWindow();
-    
+
     // Add a small delay to ensure UI transition is complete
     setTimeout(() => {
       playSound('break-start.mp3', 1.0);
@@ -189,7 +189,7 @@
   }
 </script>
 
-<main class="py-10">
+<main class="py-10 px-4">
   <header class="text-center space-y-2 mb-8">
     <h1 class="text-4xl font-bold">Focalite</h1>
     <p class="text-muted-foreground text-lg">
@@ -200,7 +200,7 @@
   {#if currentPhase === 'break'}
     <BreakView {formatTime} {phaseLabel} {getProgress} {pause} {resume} {handleEndBreak} {running} />
   {:else}
-    <TimerView 
+    <TimerView
       {currentPhase}
       {running}
       {formatTime}
