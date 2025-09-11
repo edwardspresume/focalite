@@ -91,9 +91,32 @@
         audioPath = `/${filename}`;
       }
       
+      console.log(`Attempting to play sound: ${filename} at volume ${volume} from path: ${audioPath}`);
+      
       const audio = new Audio(audioPath);
       audio.volume = volume;
-      audio.play().catch(error => console.warn(`Failed to play ${filename}:`, error));
+      
+      // Add error and success event listeners for debugging
+      audio.addEventListener('error', (e) => {
+        console.error(`Audio error for ${filename}:`, e);
+      });
+      
+      audio.addEventListener('canplaythrough', () => {
+        console.log(`Audio ${filename} can play through`);
+      });
+      
+      // Try to play the audio
+      try {
+        await audio.play();
+        console.log(`Successfully started playing ${filename}`);
+      } catch (playError) {
+        console.warn(`Failed to play ${filename}:`, playError);
+        
+        // If autoplay is blocked, try to play with user interaction
+        if (playError.name === 'NotAllowedError') {
+          console.log(`Autoplay blocked for ${filename}, will try again on next user interaction`);
+        }
+      }
     } catch (error) {
       console.warn(`Failed to create audio for ${filename}:`, error);
     }
@@ -112,7 +135,11 @@
     baseElapsedSec = 0;
     startedAt = Date.now();
     now = startedAt;
-    playSound('break-start.mp3');
+    
+    // Add a small delay to ensure UI transition is complete
+    setTimeout(() => {
+      playSound('break-start.mp3', 1.0);
+    }, 100);
   }
 
   function pause() {
@@ -134,7 +161,7 @@
   }
 
   function handleEndBreak() {
-    playSound('break-complete.mp3', 0.7);
+    playSound('break-complete.mp3', 1.0);
     reset();
     breaksCompleted++;
   }
