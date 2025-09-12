@@ -42,6 +42,16 @@ pnpm check
 pnpm check:watch
 ```
 
+### Package Management
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run Tauri commands
+pnpm tauri [command]
+```
+
 ## Architecture
 
 ### Frontend Structure (`/src`)
@@ -50,6 +60,11 @@ pnpm check:watch
 - `/src/routes/+page.svelte` - Main application entry
 - `/src/app.html` - HTML template
 - `/src/app.css` - Global styles with Tailwind
+- `/src/lib/components/` - Component library
+  - `TimerView.svelte` - Main timer display component
+  - `BreakView.svelte` - Break timer display component
+  - `ui/` - Reusable UI components (shadcn/ui components)
+- `/src/lib/utils.ts` - Utility functions
 
 ### Backend Structure (`/src-tauri`)
 
@@ -64,6 +79,8 @@ pnpm check:watch
 - `svelte.config.js` - Configured for static adapter (SPA mode for Tauri)
 - `vite.config.js` - Tailwind and SvelteKit integration, Tauri-specific dev server settings
 - `tsconfig.json` - TypeScript configuration with strict mode
+- `components.json` - shadcn/ui component configuration
+- `.mcp.json` - MCP (Model Context Protocol) configuration
 
 ## Development Guidelines
 
@@ -78,22 +95,29 @@ pnpm check:watch
 ### Core Feature Requirements
 
 - Focus timer that transitions to automatic break timer
-
+- Audio notifications for timer transitions (break-start.mp3)
+- Visual progress indicators with circular dashOffset animations
 
 ### Code Standards
 
 - TypeScript strict mode enabled
-- Tailwind CSS for styling
+- Tailwind CSS v4 for styling
 - Components should be under 200-300 LOC
 - Use `$derived` for computed values to avoid redundant work
 - Prefer `$state.raw()` for large collections when deep reactivity isn't needed
+- UI components library: shadcn/ui with bits-ui
+- Icon libraries: @lucide/svelte
 
 ### Build and Deployment
 
 - Frontend builds to static files for Tauri consumption
 - Development server runs on port 1420 (Tauri requirement)
 - Cross-platform considerations for Windows target from WSL development environment
+- GitHub Actions workflows:
+  - `build.yml` - Automated build pipeline
+  - `claude.yml` - Claude PR Assistant
+  - `claude-code-review.yml` - Claude Code Review workflow
 
 ## Project Context
 
-This is a hobby project for building a productivity tool with strict break enforcement. The application emphasizes simplicity and focused user experience, with the core innovation being the enforced break overlay system that prevents work continuation during break periods.
+This is a hobby project for building a productivity tool focused on helping users maintain focus through timed work sessions with automatic break reminders.

@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@iconify-icons/mdi':
-        specifier: ^1.2.48
-        version: 1.2.48
-      '@iconify/svelte':
-        specifier: ^5.0.1
-        version: 5.0.1(svelte@5.38.8)
       '@tauri-apps/api':
         specifier: ^2
         version: 2.8.0
@@ -239,17 +233,6 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
-
-  '@iconify-icons/mdi@1.2.48':
-    resolution: {integrity: sha512-51bfNoRLhYDfxSu0Nyi/uRVq6q/tP4TyEc0vvuNwImrXpxrRJUAWJF2A36CfBkXm3hO9IBlph/CD/XNDJKgG6w==}
-
-  '@iconify/svelte@5.0.1':
-    resolution: {integrity: sha512-nR1ApafyeRDcsx6ytd+0mzaY0ASYfG5YBW9dN8rUWxwi792/HX401qAZEkXSjT0iHm2Dgua+PwXDs/3ttJhkqQ==}
-    peerDependencies:
-      svelte: '>4.0.0'
-
-  '@iconify/types@2.0.0':
-    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@internationalized/date@3.9.0':
     resolution: {integrity: sha512-yaN3brAnHRD+4KyyOsJyk49XUvj2wtbNACSqg0bz3u8t2VuzhC8Q5dfRnrSxjnnbDb+ienBnkn1TzQfE154vyg==}
@@ -1056,17 +1039,6 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
-
-  '@iconify-icons/mdi@1.2.48':
-    dependencies:
-      '@iconify/types': 2.0.0
-
-  '@iconify/svelte@5.0.1(svelte@5.38.8)':
-    dependencies:
-      '@iconify/types': 2.0.0
-      svelte: 5.38.8
-
-  '@iconify/types@2.0.0': {}
 
   '@internationalized/date@3.9.0':
     dependencies:
