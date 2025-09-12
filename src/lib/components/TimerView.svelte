@@ -20,9 +20,9 @@
   type TimerProps = {
     currentPhase: 'focus' | 'break' | 'idle';
     running: boolean;
-    formatTime: () => string;
+    timeLabel: string;
     phaseLabel: string;
-    getProgress: () => number;
+    dashOffset: number;
     startFocus: () => void;
     pause: () => void;
     resume: () => void;
@@ -40,9 +40,9 @@
   let {
     currentPhase,
     running,
-    formatTime,
+    timeLabel,
     phaseLabel,
-    getProgress,
+    dashOffset,
     startFocus,
     pause,
     resume,
@@ -70,6 +70,9 @@
   let settingsOpen = $state(false);
   let customFocusInput = $state('');
   let customBreakInput = $state('');
+
+  const focusMinutes = $derived(Math.floor(focusDurationSec / 60));
+  const breakMinutes = $derived(Math.floor(breakDurationSec / 60));
 
   function handleCustomInput(value: string, setter: (minutes: number) => void): string {
     const num = parseFloat(value);
@@ -125,7 +128,7 @@
           stroke-width="3"
           fill="none"
           stroke-dasharray="283"
-          stroke-dashoffset={283 - getProgress()}
+          stroke-dashoffset={dashOffset}
           class="text-primary transition-all duration-1000 ease-linear"
           stroke-linecap="round"
         />
@@ -133,7 +136,7 @@
 
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <div class="text-6xl font-mono font-bold text-foreground">
-          {currentPhase === 'idle' ? '0:00' : formatTime()}
+          {timeLabel}
         </div>
         <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
       </div>
@@ -222,13 +225,13 @@
               <div class="flex flex-wrap gap-2 mb-3">
                 {#each focusOptions as duration}
                   <Button
-                    variant={Math.floor(focusDurationSec / 60) === duration
+                    variant={focusMinutes === duration
                       ? 'default'
                       : 'outline'}
                     size="sm"
                     disabled={currentPhase !== 'idle'}
                     onclick={() => setFocusDuration(duration)}
-                    class={Math.floor(focusDurationSec / 60) === duration
+                    class={focusMinutes === duration
                       ? 'ring-2 ring-primary/50 shadow-md'
                       : ''}
                   >
@@ -271,13 +274,13 @@
               <div class="flex flex-wrap gap-2 mb-3">
                 {#each breakOptions as duration}
                   <Button
-                    variant={Math.floor(breakDurationSec / 60) === duration
+                    variant={breakMinutes === duration
                       ? 'default'
                       : 'outline'}
                     size="sm"
                     disabled={currentPhase !== 'idle'}
                     onclick={() => setBreakDuration(duration)}
-                    class={Math.floor(breakDurationSec / 60) === duration
+                    class={breakMinutes === duration
                       ? 'ring-2 ring-primary/50 shadow-md'
                       : ''}
                   >

@@ -16,8 +16,8 @@
   let autoLoop = $state(false);
 
   const currentDuration = $derived(
-    (currentPhase as string) === 'focus' ? focusDurationSec :
-    (currentPhase as string) === 'break' ? breakDurationSec : 0
+    (currentPhase as TimerPhase) === 'focus' ? focusDurationSec :
+    (currentPhase as TimerPhase) === 'break' ? breakDurationSec : 0
   );
 
   const elapsed = $derived((startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec);
@@ -31,16 +31,21 @@
     running ? 'Break Time' : 'Break Paused'
   );
 
-  const formatTime = $derived(() => {
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
-    return `${mins}:${String(secs).padStart(2, '0')}`;
+  // Display helpers
+  const timeLabel = $derived.by(() => {
+    const secs = Math.max(remaining, 0);
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins}:${String(s).padStart(2, '0')}`;
   });
 
-  const getProgress = $derived(() => {
-    if (currentPhase === 'idle') return 0;
+  // 2 * Math.PI * r with r=45, rounded to match template usage
+  const CIRC = 283;
+  const dashOffset = $derived.by(() => {
+    if (currentPhase === 'idle') return CIRC;
     const totalTime = currentPhase === 'focus' ? focusDurationSec : breakDurationSec;
-    return ((totalTime - remaining) / totalTime) * (2 * Math.PI * 45);
+    const ratio = totalTime > 0 ? (totalTime - remaining) / totalTime : 0;
+    return Math.max(CIRC - ratio * CIRC, 0);
   });
 
   $effect(() => {
@@ -62,8 +67,6 @@
   });
 
   $effect(() => {
-    if (typeof window === 'undefined') return;
-
     function onKey(e: KeyboardEvent) {
       if (e.code === 'Space') {
         e.preventDefault();
@@ -76,50 +79,22 @@
         if (currentPhase !== 'break') startBreak();
       }
     }
-
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
   async function playSound(filename: string, volume = 1) {
     try {
-      let audioPath: string;
-
+      let audioPath = `/${filename}`;
       if (typeof window !== 'undefined' && '__TAURI__' in window) {
         const { convertFileSrc } = await import('@tauri-apps/api/core');
         audioPath = convertFileSrc(filename);
-      } else {
-        audioPath = `/${filename}`;
       }
-
-      console.log(`Attempting to play sound: ${filename} at volume ${volume} from path: ${audioPath}`);
-
       const audio = new Audio(audioPath);
       audio.volume = volume;
-
-      // Add error and success event listeners for debugging
-      audio.addEventListener('error', (e) => {
-        console.error(`Audio error for ${filename}:`, e);
-      });
-
-      audio.addEventListener('canplaythrough', () => {
-        console.log(`Audio ${filename} can play through`);
-      });
-
-      // Try to play the audio
-      try {
-        await audio.play();
-        console.log(`Successfully started playing ${filename}`);
-      } catch (playError) {
-        console.warn(`Failed to play ${filename}:`, playError);
-
-        // If autoplay is blocked, try to play with user interaction
-        if (playError.name === 'NotAllowedError') {
-          console.log(`Autoplay blocked for ${filename}, will try again on next user interaction`);
-        }
-      }
-    } catch (error) {
-      console.warn(`Failed to create audio for ${filename}:`, error);
+      await audio.play().catch(() => {/* ignore autoplay errors */});
+    } catch {
+      // noop — optional sound
     }
   }
 
@@ -178,13 +153,9 @@
   function handleEndBreak(manual = false) {
     playSound('break-complete.mp3', 1.0);
     breaksCompleted++;
-    console.log('Break ended, autoLoop is:', autoLoop, 'manual:', manual);
-    
     if (autoLoop && !manual) {
-      console.log('Starting new focus session due to autoLoop');
       startFocus();
     } else {
-      console.log('Resetting to idle state');
       reset();
     }
   }
@@ -212,14 +183,14 @@
   </header>
 
   {#if currentPhase === 'break'}
-    <BreakView {formatTime} {phaseLabel} {getProgress} {pause} {resume} handleEndBreak={endBreakEarly} {running} />
+    <BreakView {timeLabel} {phaseLabel} {dashOffset} {pause} {resume} handleEndBreak={endBreakEarly} {running} />
   {:else}
     <TimerView
       {currentPhase}
       {running}
-      {formatTime}
+      {timeLabel}
       {phaseLabel}
-      {getProgress}
+      {dashOffset}
       {startFocus}
       {pause}
       {resume}

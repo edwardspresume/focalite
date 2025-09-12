@@ -6,16 +6,16 @@
   import { Activity, Coffee, Pause, Play, Square } from '@lucide/svelte';
 
   type BreakProps = {
-    formatTime: () => string;
+    timeLabel: string;
     phaseLabel: string;
-    getProgress: () => number;
+    dashOffset: number;
     pause: () => void;
     resume: () => void;
     handleEndBreak: () => void;
     running: boolean;
   };
 
-  let { formatTime, phaseLabel, getProgress, pause, resume, handleEndBreak, running }: BreakProps = $props();
+  let { timeLabel, phaseLabel, dashOffset, pause, resume, handleEndBreak, running }: BreakProps = $props();
 </script>
 
 <div class="max-w-2xl mx-auto space-y-8">
@@ -54,13 +54,13 @@
                 stroke-width="3"
                 fill="none"
                 stroke-dasharray="283"
-                stroke-dashoffset={283 - getProgress()}
+                stroke-dashoffset={dashOffset}
                 class="text-primary transition-all duration-1000 ease-linear"
                 stroke-linecap="round"
               />
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <div class="text-6xl font-mono font-bold text-foreground">{formatTime()}</div>
+              <div class="text-6xl font-mono font-bold text-foreground">{timeLabel}</div>
               <div class="text-muted-foreground text-sm mt-2">{phaseLabel}</div>
             </div>
           </div>
