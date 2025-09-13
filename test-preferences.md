@@ -2,7 +2,7 @@
 
 ## Implementation Summary
 
-I've successfully implemented persistent storage for your Focalite app using Tauri's Store plugin. Here's what was done:
+I've successfully implemented persistent storage for your Focalite app using Tauri's Store plugin and Svelte 5 best practices. Here's what was done:
 
 ### 1. **Installed Dependencies**
 - Added `tauri-plugin-store` to Rust dependencies in `src-tauri/Cargo.toml`
@@ -18,12 +18,13 @@ I've successfully implemented persistent storage for your Focalite app using Tau
   - `savePreferences()` and helper functions to persist changes
   - Default values: 30 min focus, 3 min break, autoLoop off
 
-### 4. **Updated Main Component**
-- Modified `/src/routes/+page.svelte` to:
-  - Load preferences on component mount
+### 4. **Updated Main Component (Following Svelte 5 Best Practices)**
+- Modified `/src/routes/+page.svelte` to use `$effect` runes instead of `onMount`:
+  - Load preferences once on component initialization using `$effect`
   - Auto-save when focus duration changes (when not running)
   - Auto-save when break duration changes (when not running)
   - Auto-save when auto-loop toggle changes
+  - Proper reactive dependency tracking with granular effects
 
 ## How It Works
 
