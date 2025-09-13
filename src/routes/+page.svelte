@@ -174,7 +174,7 @@
 
 </script>
 
-<main class="py-10 px-4">
+<main class="p-6">
   <header class="text-center space-y-2 mb-8">
     <h1 class="text-4xl font-bold">Focalite</h1>
     <p class="text-muted-foreground text-lg">
