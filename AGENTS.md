@@ -8,7 +8,7 @@ This file provides guidance to when working with code in this repository.
 
 - **Stack**: Tauri v2, Svelte 5 with Runes, TypeScript, Tailwind CSS
 - **Target Platform**: Windows (WebView2)
-- **App Identifier**: com.ed_linux.focalite
+- **App Identifier**: com.edlinux.focalite
 - **Package Manager**: pnpm
 
 ## Development Commands

@@ -1,9 +1,11 @@
 [package]
 name = "focalite"
 version = "0.3.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Windows Pomodoro focus timer (Tauri v2 + Svelte 5)"
+authors = ["Edwards Presume"]
 edition = "2021"
+license = "MIT"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -23,3 +25,10 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+[profile.release]
+# Smaller, optimized Windows binaries for Tauri apps
+lto = true
+codegen-units = 1
+strip = true
+opt-level = "s"
+panic = "abort"
