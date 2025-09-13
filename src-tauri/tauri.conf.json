@@ -12,9 +12,21 @@
   "app": {
     "windows": [
       {
-        "title": "focalite",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Focalite",
+        "width": 860,
+        "height": 560,
+        "minWidth": 640,
+        "minHeight": 420,
+        "resizable": true,
+        "center": true,
+        "alwaysOnTop": false,
+        "decorations": true,
+        "shadow": true,
+        "skipTaskbar": false,
+        "fileDropEnabled": false,
+        "focus": true,
+        "visible": true
       }
     ],
     "security": {
@@ -30,7 +42,6 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ],
-    "resources": ["../static/break-complete.mp3", "../static/break-start.mp3"]
+    ]
   }
 }
