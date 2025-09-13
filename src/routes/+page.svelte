@@ -1,7 +1,12 @@
 <script lang="ts">
   import BreakView from '$lib/components/BreakView.svelte';
   import TimerView from '$lib/components/TimerView.svelte';
-  import { loadPreferences, saveFocusDuration, saveBreakDuration, saveAutoLoop } from '$lib/stores/preferences';
+  import {
+    loadPreferences,
+    saveAutoLoop,
+    saveBreakDuration,
+    saveFocusDuration,
+  } from '$lib/stores/preferences';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -17,20 +22,29 @@
   let autoLoop = $state(false);
   let preferencesLoaded = $state(false);
 
-  const currentDuration = $derived(
-    (currentPhase as TimerPhase) === 'focus' ? focusDurationSec :
-    (currentPhase as TimerPhase) === 'break' ? breakDurationSec : 0
-  );
+  const currentDuration = $derived.by(() => {
+    if (currentPhase === 'focus') return focusDurationSec;
+    if (currentPhase === 'break') return breakDurationSec;
+    return 0;
+  });
 
-  const elapsed = $derived((startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec);
+  const elapsed = $derived(
+    (startedAt ? Math.floor((now - startedAt) / 1000) : 0) + baseElapsedSec
+  );
   const remaining = $derived(Math.max(currentDuration - elapsed, 0));
   const running = $derived(startedAt !== null && remaining > 0);
   const isTimerComplete = $derived(startedAt !== null && remaining === 0);
 
   const phaseLabel = $derived(
-    currentPhase === 'idle' ? 'Ready to Focus' :
-    currentPhase === 'focus' ? (running ? 'Focus Time' : 'Focus Paused') :
-    running ? 'Break Time' : 'Break Paused'
+    currentPhase === 'idle'
+      ? 'Ready to Focus'
+      : currentPhase === 'focus'
+        ? running
+          ? 'Focus Time'
+          : 'Focus Paused'
+        : running
+          ? 'Break Time'
+          : 'Break Paused'
   );
 
   // Display helpers
@@ -45,7 +59,8 @@
   const CIRC = 283;
   const dashOffset = $derived.by(() => {
     if (currentPhase === 'idle') return CIRC;
-    const totalTime = currentPhase === 'focus' ? focusDurationSec : breakDurationSec;
+    const totalTime =
+      currentPhase === 'focus' ? focusDurationSec : breakDurationSec;
     const ratio = totalTime > 0 ? (totalTime - remaining) / totalTime : 0;
     return Math.max(CIRC - ratio * CIRC, 0);
   });
@@ -64,7 +79,9 @@
 
   $effect(() => {
     if (!running) return;
-    const id = setInterval(() => { now = Date.now(); }, 250);
+    const id = setInterval(() => {
+      now = Date.now();
+    }, 250);
     return () => clearInterval(id);
   });
 
@@ -100,22 +117,18 @@
     }
   });
 
-  $effect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        if (currentPhase === 'idle') startFocus();
-        else if (running) pause();
-        else resume();
-      } else if (e.key === 'Escape') {
-        reset();
-      } else if (e.key === 'b' || e.key === 'B') {
-        if (currentPhase !== 'break') startBreak();
-      }
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (currentPhase === 'idle') startFocus();
+      else if (running) pause();
+      else resume();
+    } else if (e.key === 'Escape') {
+      reset();
+    } else if (e.key === 'b' || e.key === 'B') {
+      if (currentPhase !== 'break') startBreak();
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  });
+  }
 
   async function playSound(filename: string, volume = 1) {
     try {
@@ -126,7 +139,9 @@
       }
       const audio = new Audio(audioPath);
       audio.volume = volume;
-      await audio.play().catch(() => {/* ignore autoplay errors */});
+      await audio.play().catch(() => {
+        /* ignore autoplay errors */
+      });
     } catch {
       // noop — optional sound
     }
@@ -191,8 +206,9 @@
   function endBreakEarly() {
     handleEndBreak(true);
   }
-
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <main class="p-6">
   <header class="text-center space-y-2 mb-8">
@@ -203,7 +219,15 @@
   </header>
 
   {#if currentPhase === 'break'}
-    <BreakView {timeLabel} {phaseLabel} {dashOffset} {pause} {resume} handleEndBreak={endBreakEarly} {running} />
+    <BreakView
+      {timeLabel}
+      {phaseLabel}
+      {dashOffset}
+      {pause}
+      {resume}
+      handleEndBreak={endBreakEarly}
+      {running}
+    />
   {:else}
     <TimerView
       {currentPhase}
