@@ -24,7 +24,6 @@
         "decorations": true,
         "shadow": true,
         "skipTaskbar": false,
-        "fileDropEnabled": false,
         "focus": true,
         "visible": true
       }
