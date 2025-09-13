@@ -86,23 +86,35 @@
   });
 
   // Save focus duration when it changes (but not while timer is running)
+  let previousFocusMinutes = $state<number | null>(null);
   $effect(() => {
     if (!preferencesLoaded || running) return;
     const focusMinutes = Math.floor(focusDurationSec / 60);
-    saveFocusDuration(focusMinutes);
+    if (previousFocusMinutes !== null && previousFocusMinutes !== focusMinutes) {
+      saveFocusDuration(focusMinutes);
+    }
+    previousFocusMinutes = focusMinutes;
   });
 
   // Save break duration when it changes (but not while timer is running)
+  let previousBreakMinutes = $state<number | null>(null);
   $effect(() => {
     if (!preferencesLoaded || running) return;
     const breakMinutes = Math.floor(breakDurationSec / 60);
-    saveBreakDuration(breakMinutes);
+    if (previousBreakMinutes !== null && previousBreakMinutes !== breakMinutes) {
+      saveBreakDuration(breakMinutes);
+    }
+    previousBreakMinutes = breakMinutes;
   });
 
   // Save auto-loop setting when it changes
+  let previousAutoLoop = $state<boolean | null>(null);
   $effect(() => {
     if (!preferencesLoaded) return;
-    saveAutoLoop(autoLoop);
+    if (previousAutoLoop !== null && previousAutoLoop !== autoLoop) {
+      saveAutoLoop(autoLoop);
+    }
+    previousAutoLoop = autoLoop;
   });
 
   $effect(() => {
