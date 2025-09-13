@@ -14,8 +14,8 @@
       {
         "label": "main",
         "title": "Focalite",
-        "width": 800,
-        "height": 630,
+        "width": 850,
+        "height": 900,
         "minWidth": 640,
         "minHeight": 420,
         "resizable": true,
