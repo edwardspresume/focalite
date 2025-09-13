@@ -28,10 +28,10 @@ I've successfully implemented persistent storage for your Focalite app using Tau
 
 ## How It Works
 
-1. **Storage Location**: The preferences are stored in a `preferences.json` file in the app's data directory:
-   - Windows: `%APPDATA%/com.focalite.app/preferences.json`
-   - macOS: `~/Library/Application Support/com.focalite.app/preferences.json`
-   - Linux: `~/.config/com.focalite.app/preferences.json`
+1. **Storage Location**: The preferences are stored in a `preferences.json` file in the app's data directory (managed by Tauri Store using the app identifier `com.edlinux.focalite`):
+   - Windows: `%APPDATA%/com.edlinux.focalite/preferences.json`
+   - macOS: `~/Library/Application Support/com.edlinux.focalite/preferences.json`
+   - Linux: `~/.config/com.edlinux.focalite/preferences.json`
 
 2. **Persistence**:
    - Settings are automatically saved whenever the user changes them
@@ -39,22 +39,22 @@ I've successfully implemented persistent storage for your Focalite app using Tau
    - The data persists across app restarts indefinitely
 
 3. **Data Stored**:
-   - `focusDurationMin`: Focus session duration in minutes
-   - `breakDurationMin`: Break duration in minutes
+   - `focusDurationMin`: Focus session duration in minutes (supports decimals)
+   - `breakDurationMin`: Break duration in minutes (supports decimals)
    - `autoLoop`: Whether to automatically start a new focus session after a break
 
 ## Testing the Implementation
 
 To test that preferences persist:
 
-1. **Build and run the app**:
+1. **Build and run the app (Tauri runtime required for persistence)**:
    ```bash
-   npm run tauri dev
+   pnpm tauri dev
    ```
 
 2. **Change settings**:
-   - Adjust the focus duration slider
-   - Adjust the break duration slider
+   - Adjust the focus duration using preset buttons or the custom minutes input (supports decimals, e.g., 25.5)
+   - Adjust the break duration using preset buttons or the custom minutes input (supports decimals)
    - Toggle the auto-loop checkbox
 
 3. **Close the app** completely
@@ -67,3 +67,4 @@ To test that preferences persist:
 - Settings are saved only when the timer is not running to avoid conflicts
 - Error handling is included to fallback to defaults if loading fails
 - The store uses a singleton pattern to avoid multiple file handles
+- Preference persistence requires running under the Tauri runtime. Using `pnpm dev` (frontend-only) will not load/save preferences; use `pnpm tauri dev` instead.

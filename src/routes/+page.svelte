@@ -89,7 +89,7 @@
   let previousFocusMinutes = $state<number | null>(null);
   $effect(() => {
     if (!preferencesLoaded || running) return;
-    const focusMinutes = Math.floor(focusDurationSec / 60);
+    const focusMinutes = focusDurationSec / 60;
     if (previousFocusMinutes !== null && previousFocusMinutes !== focusMinutes) {
       saveFocusDuration(focusMinutes);
     }
@@ -100,7 +100,7 @@
   let previousBreakMinutes = $state<number | null>(null);
   $effect(() => {
     if (!preferencesLoaded || running) return;
-    const breakMinutes = Math.floor(breakDurationSec / 60);
+    const breakMinutes = breakDurationSec / 60;
     if (previousBreakMinutes !== null && previousBreakMinutes !== breakMinutes) {
       saveBreakDuration(breakMinutes);
     }

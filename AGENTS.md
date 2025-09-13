@@ -39,6 +39,8 @@ pnpm build
 pnpm preview
 ```
 
+Note: Preference persistence works only under the Tauri runtime. Using `pnpm dev` (frontend-only) will not load/save preferences; use `pnpm tauri dev` when testing persistence.
+
 ### Type Checking and Validation
 
 ```bash
