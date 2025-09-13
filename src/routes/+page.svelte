@@ -1,6 +1,8 @@
 <script lang="ts">
   import BreakView from '$lib/components/BreakView.svelte';
   import TimerView from '$lib/components/TimerView.svelte';
+  import { loadPreferences, saveFocusDuration, saveBreakDuration, saveAutoLoop } from '$lib/stores/preferences';
+  import { onMount } from 'svelte';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -14,6 +16,7 @@
   let totalFocusTime = $state(0);
   let breaksCompleted = $state(0);
   let autoLoop = $state(false);
+  let preferencesLoaded = $state(false);
 
   const currentDuration = $derived(
     (currentPhase as TimerPhase) === 'focus' ? focusDurationSec :
@@ -48,10 +51,33 @@
     return Math.max(CIRC - ratio * CIRC, 0);
   });
 
+  onMount(async () => {
+    const prefs = await loadPreferences();
+    focusDurationSec = prefs.focusDurationMin * 60;
+    breakDurationSec = prefs.breakDurationMin * 60;
+    autoLoop = prefs.autoLoop;
+    preferencesLoaded = true;
+  });
+
   $effect(() => {
     if (!running) return;
     const id = setInterval(() => { now = Date.now(); }, 250);
     return () => clearInterval(id);
+  });
+
+  $effect(() => {
+    if (!preferencesLoaded || running) return;
+    saveFocusDuration(Math.floor(focusDurationSec / 60));
+  });
+
+  $effect(() => {
+    if (!preferencesLoaded || running) return;
+    saveBreakDuration(Math.floor(breakDurationSec / 60));
+  });
+
+  $effect(() => {
+    if (!preferencesLoaded) return;
+    saveAutoLoop(autoLoop);
   });
 
   $effect(() => {
