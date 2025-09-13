@@ -85,6 +85,8 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
   - `TimerView.svelte` - Main timer display component
   - `BreakView.svelte` - Break timer display component
   - `ui/` - Reusable UI components (shadcn/ui components)
+- `/src/lib/stores/` - State management
+  - `preferences.ts` - Persistent preferences using Tauri Store
 - `/src/lib/utils.ts` - Utility functions
 
 ### Backend Structure (`/src-tauri`)
