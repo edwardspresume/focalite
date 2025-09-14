@@ -94,7 +94,7 @@
       // Initialize previous value without saving on first load
       previousFocusMinutes = focusMinutes;
     } else if (previousFocusMinutes !== focusMinutes) {
-      saveFocusDuration(focusMinutes);
+      saveFocusDuration(focusMinutes).catch(console.error);
       previousFocusMinutes = focusMinutes;
     }
   });
@@ -108,7 +108,7 @@
       // Initialize previous value without saving on first load
       previousBreakMinutes = breakMinutes;
     } else if (previousBreakMinutes !== breakMinutes) {
-      saveBreakDuration(breakMinutes);
+      saveBreakDuration(breakMinutes).catch(console.error);
       previousBreakMinutes = breakMinutes;
     }
   });
@@ -121,7 +121,7 @@
       // Initialize previous value without saving on first load
       previousAutoLoop = autoLoop;
     } else if (previousAutoLoop !== autoLoop) {
-      saveAutoLoop(autoLoop);
+      saveAutoLoop(autoLoop).catch(console.error);
       previousAutoLoop = autoLoop;
     }
   });

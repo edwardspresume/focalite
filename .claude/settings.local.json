@@ -7,7 +7,8 @@
       "mcp__svelte-llm__list_sections",
       "mcp__svelte-llm__get_documentation",
       "Bash(npm run dev:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

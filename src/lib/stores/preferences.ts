@@ -16,7 +16,13 @@ let store: Store | null = null;
 
 async function getStore(): Promise<Store> {
   if (!store) {
-    store = await load('preferences.json');
+    try {
+      store = await load('preferences.json');
+      console.log('Store loaded successfully');
+    } catch (error) {
+      console.error('Failed to load store:', error);
+      throw error;
+    }
   }
   return store;
 }
@@ -46,17 +52,22 @@ export async function savePreferences(preferences: Partial<Preferences>): Promis
 
     if (preferences.focusDurationMin !== undefined) {
       await store.set('focusDurationMin', preferences.focusDurationMin);
+      console.log('Saved focusDurationMin:', preferences.focusDurationMin);
     }
     if (preferences.breakDurationMin !== undefined) {
       await store.set('breakDurationMin', preferences.breakDurationMin);
+      console.log('Saved breakDurationMin:', preferences.breakDurationMin);
     }
     if (preferences.autoLoop !== undefined) {
       await store.set('autoLoop', preferences.autoLoop);
+      console.log('Saved autoLoop:', preferences.autoLoop);
     }
 
     await store.save();
+    console.log('Preferences saved to disk');
   } catch (error) {
     console.error('Failed to save preferences:', error);
+    throw error;
   }
 }
 
