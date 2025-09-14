@@ -90,10 +90,13 @@
   $effect(() => {
     if (!preferencesLoaded || running) return;
     const focusMinutes = focusDurationSec / 60;
-    if (previousFocusMinutes !== null && previousFocusMinutes !== focusMinutes) {
+    if (previousFocusMinutes === null) {
+      // Initialize previous value without saving on first load
+      previousFocusMinutes = focusMinutes;
+    } else if (previousFocusMinutes !== focusMinutes) {
       saveFocusDuration(focusMinutes);
+      previousFocusMinutes = focusMinutes;
     }
-    previousFocusMinutes = focusMinutes;
   });
 
   // Save break duration when it changes (but not while timer is running)
@@ -101,20 +104,26 @@
   $effect(() => {
     if (!preferencesLoaded || running) return;
     const breakMinutes = breakDurationSec / 60;
-    if (previousBreakMinutes !== null && previousBreakMinutes !== breakMinutes) {
+    if (previousBreakMinutes === null) {
+      // Initialize previous value without saving on first load
+      previousBreakMinutes = breakMinutes;
+    } else if (previousBreakMinutes !== breakMinutes) {
       saveBreakDuration(breakMinutes);
+      previousBreakMinutes = breakMinutes;
     }
-    previousBreakMinutes = breakMinutes;
   });
 
   // Save auto-loop setting when it changes
   let previousAutoLoop = $state<boolean | null>(null);
   $effect(() => {
     if (!preferencesLoaded) return;
-    if (previousAutoLoop !== null && previousAutoLoop !== autoLoop) {
+    if (previousAutoLoop === null) {
+      // Initialize previous value without saving on first load
+      previousAutoLoop = autoLoop;
+    } else if (previousAutoLoop !== autoLoop) {
       saveAutoLoop(autoLoop);
+      previousAutoLoop = autoLoop;
     }
-    previousAutoLoop = autoLoop;
   });
 
   $effect(() => {
