@@ -95,9 +95,10 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 
 - Rust-based Tauri backend
 - `src/main.rs` - Main entry point
-- `src/lib.rs` - Library exports
+- `src/lib.rs` - Library exports with plugin initialization
 - `tauri.conf.json` - Tauri configuration
 - `Cargo.toml` - Rust dependencies
+- `capabilities/default.json` - Plugin permissions (includes `store:default` for persistence)
 
 ### Key Configuration Files
 

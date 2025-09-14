@@ -10,6 +10,7 @@ I've successfully implemented persistent storage for your Focalite app using Tau
 
 ### 2. **Initialized Store Plugin**
 - Updated `src-tauri/src/lib.rs` to register the store plugin with Tauri
+- **CRITICAL**: Added `"store:default"` permission to `src-tauri/capabilities/default.json` (required for Tauri v2)
 
 ### 3. **Created Preferences Module**
 - Created `/src/lib/stores/preferences.ts` with:
@@ -68,3 +69,12 @@ To test that preferences persist:
 - Error handling is included to fallback to defaults if loading fails
 - The store uses a singleton pattern to avoid multiple file handles
 - Preference persistence requires running under the Tauri runtime. Using `pnpm dev` (frontend-only) will not load/save preferences; use `pnpm tauri dev` instead.
+
+## Common Issues
+
+**If preferences aren't persisting:**
+
+1. Ensure `"store:default"` permission is added to `src-tauri/capabilities/default.json`
+2. Check browser console for save operation logs
+3. Verify you're using `pnpm tauri dev` (not `pnpm dev`)
+4. Rebuild the app after permission changes
