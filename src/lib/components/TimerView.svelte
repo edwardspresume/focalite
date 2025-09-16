@@ -26,6 +26,7 @@
     totalFocusTime: number;
     breaksCompleted: number;
     autoLoop: boolean;
+    setAutoLoop: (enabled: boolean) => void;
   };
 
   let {
@@ -45,7 +46,8 @@
     sessionsCompleted,
     totalFocusTime,
     breaksCompleted,
-    autoLoop = $bindable(false),
+    autoLoop,
+    setAutoLoop,
   }: TimerProps = $props();
 
   const buttonText = $derived(
@@ -149,7 +151,8 @@
     {breakDurationSec}
     {setFocusDuration}
     {setBreakDuration}
-    bind:autoLoop
+    {autoLoop}
+    {setAutoLoop}
   />
 
   <!-- Stats Preview -->

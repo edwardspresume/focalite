@@ -77,6 +77,11 @@
     });
   });
 
+  function setAutoLoop(enabled: boolean) {
+    autoLoop = enabled;
+    saveAutoLoop(enabled).catch(console.error);
+  }
+
   $effect(() => {
     if (!running) return;
     const id = setInterval(() => {
@@ -85,46 +90,6 @@
     return () => clearInterval(id);
   });
 
-  // Save focus duration when it changes (but not while timer is running)
-  let previousFocusMinutes = $state<number | null>(null);
-  $effect(() => {
-    if (!preferencesLoaded || running) return;
-    const focusMinutes = focusDurationSec / 60;
-    if (previousFocusMinutes === null) {
-      // Initialize previous value without saving on first load
-      previousFocusMinutes = focusMinutes;
-    } else if (previousFocusMinutes !== focusMinutes) {
-      saveFocusDuration(focusMinutes).catch(console.error);
-      previousFocusMinutes = focusMinutes;
-    }
-  });
-
-  // Save break duration when it changes (but not while timer is running)
-  let previousBreakMinutes = $state<number | null>(null);
-  $effect(() => {
-    if (!preferencesLoaded || running) return;
-    const breakMinutes = breakDurationSec / 60;
-    if (previousBreakMinutes === null) {
-      // Initialize previous value without saving on first load
-      previousBreakMinutes = breakMinutes;
-    } else if (previousBreakMinutes !== breakMinutes) {
-      saveBreakDuration(breakMinutes).catch(console.error);
-      previousBreakMinutes = breakMinutes;
-    }
-  });
-
-  // Save auto-loop setting when it changes
-  let previousAutoLoop = $state<boolean | null>(null);
-  $effect(() => {
-    if (!preferencesLoaded) return;
-    if (previousAutoLoop === null) {
-      // Initialize previous value without saving on first load
-      previousAutoLoop = autoLoop;
-    } else if (previousAutoLoop !== autoLoop) {
-      saveAutoLoop(autoLoop).catch(console.error);
-      previousAutoLoop = autoLoop;
-    }
-  });
 
   $effect(() => {
     if (!isTimerComplete) return;
@@ -217,11 +182,17 @@
   }
 
   function setFocusDuration(minutes: number) {
-    if (!running) focusDurationSec = minutes * 60;
+    if (!running) {
+      focusDurationSec = minutes * 60;
+      saveFocusDuration(minutes).catch(console.error);
+    }
   }
 
   function setBreakDuration(minutes: number) {
-    if (!running) breakDurationSec = minutes * 60;
+    if (!running) {
+      breakDurationSec = minutes * 60;
+      saveBreakDuration(minutes).catch(console.error);
+    }
   }
 
   function endBreakEarly() {
@@ -267,7 +238,8 @@
       {sessionsCompleted}
       {totalFocusTime}
       {breaksCompleted}
-      bind:autoLoop
+      {autoLoop}
+      {setAutoLoop}
     />
   {/if}
 </main>

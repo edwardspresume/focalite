@@ -14,6 +14,7 @@
     setFocusDuration: (minutes: number) => void;
     setBreakDuration: (minutes: number) => void;
     autoLoop: boolean;
+    setAutoLoop: (enabled: boolean) => void;
   };
 
   let {
@@ -22,7 +23,8 @@
     breakDurationSec,
     setFocusDuration,
     setBreakDuration,
-    autoLoop = $bindable(false)
+    autoLoop,
+    setAutoLoop
   }: Props = $props();
 
   let settingsOpen = $state(false);
@@ -170,12 +172,12 @@
         <!-- Auto Loop Setting -->
         <div class="border-t pt-6">
           <div class="flex items-center space-x-3">
-            <Checkbox bind:checked={autoLoop} />
+            <Checkbox checked={autoLoop} onchange={() => setAutoLoop(!autoLoop)} />
             <div class="grid gap-1.5 leading-none">
               <button
                 type="button"
                 class="text-sm font-medium leading-none text-left flex items-center gap-2 cursor-pointer hover:text-foreground"
-                onclick={() => (autoLoop = !autoLoop)}
+                onclick={() => setAutoLoop(!autoLoop)}
               >
                 <RotateCcw class="w-4 h-4" />
                 Auto loop sessions
