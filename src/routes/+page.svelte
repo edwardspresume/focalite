@@ -200,6 +200,8 @@
     // Add a small delay to ensure UI transition is complete
     setTimeout(() => {
       playSound('break-start.mp3', 1.0);
+      // Toast: Break started
+      sendToast('Break started', timeLabel).catch(() => {});
     }, 100);
   }
 
@@ -223,6 +225,8 @@
 
   function handleEndBreak(manual = false) {
     playSound('break-complete.mp3', 1.0);
+    // Toast: Break complete
+    sendToast('Break complete', 'Time to focus').catch(() => {});
     breaksCompleted++;
     // Add break minutes (full duration or elapsed if ended early)
     const addBreakMin = manual
@@ -270,6 +274,31 @@
     };
 
     saveTodayProgress(progress).catch(console.warn);
+  }
+
+  // Cross-runtime notification helper: prefers Tauri plugin, falls back to Web Notifications
+  async function sendToast(title: string, body?: string) {
+    try {
+      if (typeof window !== 'undefined' && '__TAURI__' in window) {
+        const { isPermissionGranted, requestPermission, sendNotification } = await import(
+          '@tauri-apps/plugin-notification'
+        );
+        let granted = await isPermissionGranted();
+        if (!granted) {
+          granted = await requestPermission();
+        }
+        if (granted) {
+          await sendNotification({ title, body });
+        } else {
+          console.warn('Notification permission denied by user');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      if (error instanceof Error && error.message.includes('not found')) {
+        console.warn('Note: On Windows, notifications only work when running from installation folder');
+      }
+    }
   }
 </script>
 
