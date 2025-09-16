@@ -7,6 +7,14 @@
     saveBreakDuration,
     saveFocusDuration,
   } from '$lib/stores/preferences';
+  import {
+    getLocalDateString,
+    loadTodayProgress,
+    resetAndSaveForToday,
+    saveTodayProgress,
+    saveTodayProgressThrottled,
+    type DailyProgress,
+  } from '$lib/stores/progress';
 
   type TimerPhase = 'focus' | 'break' | 'idle';
 
@@ -19,8 +27,11 @@
   let sessionsCompleted = $state(0);
   let totalFocusTime = $state(0);
   let breaksCompleted = $state(0);
+  let totalBreakTime = $state(0);
   let autoLoop = $state(false);
   let preferencesLoaded = $state(false);
+  let progressLoaded = $state(false);
+  let progressDate = $state(''); // YYYY-MM-DD for the persisted record
 
   const currentDuration = $derived.by(() => {
     if (currentPhase === 'focus') return focusDurationSec;
@@ -77,6 +88,19 @@
     });
   });
 
+  // Load today's progress once on component initialization
+  $effect(() => {
+    if (progressLoaded) return;
+    loadTodayProgress().then((p) => {
+      progressDate = p.date;
+      sessionsCompleted = p.sessionsCompleted;
+      breaksCompleted = p.breaksCompleted;
+      totalFocusTime = p.focusMinutes;
+      totalBreakTime = p.breakMinutes;
+      progressLoaded = true;
+    });
+  });
+
   function setAutoLoop(enabled: boolean) {
     autoLoop = enabled;
     saveAutoLoop(enabled).catch(console.error);
@@ -86,6 +110,30 @@
     if (!running) return;
     const id = setInterval(() => {
       now = Date.now();
+
+      // Detect midnight rollover (local time) and start a fresh record
+      const today = getLocalDateString(new Date());
+      if (progressDate && progressDate !== today) {
+        progressDate = today;
+        sessionsCompleted = 0;
+        breaksCompleted = 0;
+        totalFocusTime = 0;
+        totalBreakTime = 0;
+        // Persist fresh record for the new day
+        resetAndSaveForToday().catch(console.warn);
+      }
+
+      // Throttled persistence of today's totals while running
+      if (progressLoaded && progressDate) {
+        const snapshot: DailyProgress = {
+          date: progressDate,
+          sessionsCompleted,
+          breaksCompleted,
+          focusMinutes: totalFocusTime,
+          breakMinutes: totalBreakTime,
+        };
+        saveTodayProgressThrottled(snapshot, 15000).catch(() => {});
+      }
     }, 250);
     return () => clearInterval(id);
   });
@@ -97,6 +145,16 @@
     if (currentPhase === 'focus') {
       sessionsCompleted++;
       totalFocusTime += Math.floor(focusDurationSec / 60);
+      // Persist on meaningful change (session end)
+      if (progressDate) {
+        void saveTodayProgress({
+          date: progressDate,
+          sessionsCompleted,
+          breaksCompleted,
+          focusMinutes: totalFocusTime,
+          breakMinutes: totalBreakTime,
+        });
+      }
       startBreak();
     } else if (currentPhase === 'break') {
       handleEndBreak();
@@ -174,6 +232,22 @@
   function handleEndBreak(manual = false) {
     playSound('break-complete.mp3', 1.0);
     breaksCompleted++;
+    // Add break minutes (full duration or elapsed if ended early)
+    const addBreakMin = manual
+      ? Math.floor(elapsed / 60)
+      : Math.floor(breakDurationSec / 60);
+    totalBreakTime += addBreakMin;
+
+    // Persist on meaningful change (break end)
+    if (progressDate) {
+      void saveTodayProgress({
+        date: progressDate,
+        sessionsCompleted,
+        breaksCompleted,
+        focusMinutes: totalFocusTime,
+        breakMinutes: totalBreakTime,
+      });
+    }
     if (autoLoop && !manual) {
       startFocus();
     } else {
