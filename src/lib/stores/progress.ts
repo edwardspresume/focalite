@@ -42,30 +42,34 @@ export function getLocalDateString(d: Date): string {
 }
 
 function snapshotString(p: DailyProgress): string {
-  return `${p.date}|${p.sessionsCompleted}|${p.breaksCompleted}|${p.focusMinutes}|${p.breakMinutes}`;
+  return JSON.stringify(p);
 }
 
 /** Load today's progress. If stored date != today, reset and return fresh totals. */
 export async function loadTodayProgress(): Promise<DailyProgress> {
+  const today = getLocalDateString(new Date());
+
   try {
     const s = await getStore();
-    const stored = (await s.get<DailyProgress>('dailyProgress')) || undefined;
-    const today = getLocalDateString(new Date());
+    const stored = await s.get<DailyProgress>('dailyProgress');
 
+    // Always ensure we have today's record
+    const progress = (!stored || stored.date !== today)
+      ? { ...DEFAULT_PROGRESS(), date: today }
+      : stored;
+
+    // Save if we created a fresh record
     if (!stored || stored.date !== today) {
-      const fresh = { ...DEFAULT_PROGRESS(), date: today };
       try {
-        await s.set('dailyProgress', fresh);
+        await s.set('dailyProgress', progress);
         await s.save();
       } catch (e) {
         console.warn('Could not save reset daily progress (non-Tauri dev?):', e);
       }
-      lastSnapshot = snapshotString(fresh);
-      return fresh;
     }
 
-    lastSnapshot = snapshotString(stored);
-    return stored;
+    lastSnapshot = snapshotString(progress);
+    return progress;
   } catch (error) {
     console.warn('loadTodayProgress failed, returning defaults:', error);
     const fresh = DEFAULT_PROGRESS();

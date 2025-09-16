@@ -146,15 +146,7 @@
       sessionsCompleted++;
       totalFocusTime += Math.floor(focusDurationSec / 60);
       // Persist on meaningful change (session end)
-      if (progressDate) {
-        void saveTodayProgress({
-          date: progressDate,
-          sessionsCompleted,
-          breaksCompleted,
-          focusMinutes: totalFocusTime,
-          breakMinutes: totalBreakTime,
-        });
-      }
+      updateProgress();
       startBreak();
     } else if (currentPhase === 'break') {
       handleEndBreak();
@@ -239,15 +231,8 @@
     totalBreakTime += addBreakMin;
 
     // Persist on meaningful change (break end)
-    if (progressDate) {
-      void saveTodayProgress({
-        date: progressDate,
-        sessionsCompleted,
-        breaksCompleted,
-        focusMinutes: totalFocusTime,
-        breakMinutes: totalBreakTime,
-      });
-    }
+    updateProgress();
+
     if (autoLoop && !manual) {
       startFocus();
     } else {
@@ -271,6 +256,20 @@
 
   function endBreakEarly() {
     handleEndBreak(true);
+  }
+
+  function updateProgress() {
+    if (!progressDate) return;
+
+    const progress: DailyProgress = {
+      date: progressDate,
+      sessionsCompleted,
+      breaksCompleted,
+      focusMinutes: totalFocusTime,
+      breakMinutes: totalBreakTime,
+    };
+
+    saveTodayProgress(progress).catch(console.warn);
   }
 </script>
 
