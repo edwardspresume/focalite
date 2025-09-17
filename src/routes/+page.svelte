@@ -225,8 +225,6 @@
 
   function handleEndBreak(manual = false) {
     playSound('break-complete.mp3', 1.0);
-    // Toast: Break complete
-    sendToast('Break complete', 'Time to focus').catch(() => {});
     breaksCompleted++;
     // Add break minutes (full duration or elapsed if ended early)
     const addBreakMin = manual
