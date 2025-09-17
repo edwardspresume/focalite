@@ -274,6 +274,17 @@
     saveTodayProgress(progress).catch(console.warn);
   }
 
+  function resetDailyProgress() {
+    sessionsCompleted = 0;
+    breaksCompleted = 0;
+    totalFocusTime = 0;
+    totalBreakTime = 0;
+
+    if (progressDate) {
+      resetAndSaveForToday().catch(console.warn);
+    }
+  }
+
   // Cross-runtime notification helper: prefers Tauri plugin, falls back to Web Notifications
   async function sendToast(title: string, body?: string) {
     try {
@@ -341,6 +352,7 @@
       {breaksCompleted}
       {autoLoop}
       {setAutoLoop}
+      {resetDailyProgress}
     />
   {/if}
 </main>

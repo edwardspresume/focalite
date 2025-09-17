@@ -5,6 +5,7 @@
     ChartBar,
     Pause,
     Play,
+    RotateCcw,
     Square,
   } from '@lucide/svelte';
 
@@ -27,6 +28,7 @@
     breaksCompleted: number;
     autoLoop: boolean;
     setAutoLoop: (enabled: boolean) => void;
+    resetDailyProgress: () => void;
   };
 
   let {
@@ -48,6 +50,7 @@
     breaksCompleted,
     autoLoop,
     setAutoLoop,
+    resetDailyProgress,
   }: TimerProps = $props();
 
   const buttonText = $derived(
@@ -157,10 +160,21 @@
 
   <!-- Stats Preview -->
   <section class="bg-accent border rounded-xl p-8 shadow-lg space-y-6">
-    <h2 class="flex items-center gap-2 text-foreground text-xl font-semibold">
-      <ChartBar class="size-5" />
-      Today's Progress
-    </h2>
+    <div class="flex items-center justify-between">
+      <h2 class="flex items-center gap-2 text-foreground text-xl font-semibold">
+        <ChartBar class="size-5" />
+        Today's Progress
+      </h2>
+      <Button
+        size="sm"
+        variant="outline"
+        onclick={resetDailyProgress}
+        class="text-sm font-medium cursor-pointer"
+      >
+        <RotateCcw class="size-4" />
+        Reset
+      </Button>
+    </div>
     <div class="grid grid-cols-3 gap-4 text-center">
       <div class="space-y-1">
         <div class="text-2xl font-bold text-primary">{sessionsCompleted}</div>
