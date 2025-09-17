@@ -283,7 +283,8 @@
         );
         let granted = await isPermissionGranted();
         if (!granted) {
-          granted = await requestPermission();
+          const permission = await requestPermission();
+          granted = permission === 'granted';
         }
         if (granted) {
           await sendNotification({ title, body });
