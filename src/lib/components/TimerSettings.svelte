@@ -172,7 +172,7 @@
         <!-- Auto Loop Setting -->
         <div class="border-t pt-6">
           <div class="flex items-center space-x-3">
-            <Checkbox checked={autoLoop} onchange={() => setAutoLoop(!autoLoop)} />
+            <Checkbox bind:checked={autoLoop} onCheckedChange={(checked) => setAutoLoop(checked)} />
             <div class="grid gap-1.5 leading-none">
               <button
                 type="button"

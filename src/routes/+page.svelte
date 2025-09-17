@@ -235,6 +235,10 @@
     // Persist on meaningful change (break end)
     updateProgress();
 
+    // Reset timer state before starting next phase
+    startedAt = null;
+    baseElapsedSec = 0;
+
     if (autoLoop && !manual) {
       startFocus();
     } else {
