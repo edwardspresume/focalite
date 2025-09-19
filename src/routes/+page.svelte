@@ -1,28 +1,16 @@
 <script lang="ts">
+	import { ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
+
 	import FocusTimer from '$lib/components/FocusTimer.svelte';
+	import ProgressPanel from '$lib/components/ProgressPanel.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
-	import { ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 </script>
 
-<main class="flex h-dvh flex-col p-6">
-	<h1 class="mb-8 text-center text-4xl font-bold">Focalite</h1>
+<main class="p-6">
+	<h1 class="mb-10 text-center text-4xl font-bold">Focalite</h1>
 
-	<Tabs.Root value="timer" class="flex h-full flex-col justify-between gap-8">
-		<div class="mx-auto max-w-4xl">
-			<Tabs.Content value="timer">
-				<FocusTimer />
-			</Tabs.Content>
-
-			<Tabs.Content value="settings">
-				<SettingsPanel />
-			</Tabs.Content>
-
-			<Tabs.Content value="progress">
-				<SettingsPanel />
-			</Tabs.Content>
-		</div>
-
+	<Tabs.Root value="timer" class="gap-10">
 		<Tabs.List class="mx-auto">
 			<Tabs.Trigger value="timer">
 				<Timer />
@@ -39,5 +27,19 @@
 				<span>Progress</span>
 			</Tabs.Trigger>
 		</Tabs.List>
+
+		<div class="mx-auto max-w-4xl">
+			<Tabs.Content value="timer">
+				<FocusTimer />
+			</Tabs.Content>
+
+			<Tabs.Content value="settings">
+				<SettingsPanel />
+			</Tabs.Content>
+
+			<Tabs.Content value="progress">
+				<ProgressPanel />
+			</Tabs.Content>
+		</div>
 	</Tabs.Root>
 </main>
