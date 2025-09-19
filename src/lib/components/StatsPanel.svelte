@@ -16,12 +16,12 @@
 		{ day: 'Sun', minutes: 45 }
 	];
 
-	const chartConfig = {
-		minutes: {
-			label: 'Focus Minutes',
-			color: 'hsl(var(--primary))'
-		}
-	} satisfies Chart.ChartConfig;
+    const chartConfig = {
+        minutes: {
+            label: 'Focus Minutes',
+            color: 'var(--primary)'
+        }
+    } satisfies Chart.ChartConfig;
 
 	// Placeholder stats
 	const todayStats = {
@@ -43,52 +43,52 @@
 
 <div class="space-y-6 p-6">
 	<!-- Daily Stats Cards -->
-	<div>
-		<h3 class="text-lg font-semibold mb-4">Today's Overview</h3>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-			<!-- Sessions Card -->
-			<div class="bg-card rounded-lg border p-4">
-				<div class="flex items-center justify-between">
-					<div>
-						<p class="text-sm text-muted-foreground">Sessions</p>
-						<p class="text-2xl font-bold">{todayStats.sessions}</p>
-					</div>
-					<div class="rounded-full bg-primary/10 p-3">
-						<CheckCircle class="h-5 w-5 text-primary" />
-					</div>
-				</div>
-				<p class="text-xs text-muted-foreground mt-2">Completed today</p>
-			</div>
+    <div>
+        <h3 class="text-lg font-semibold mb-4">Today's Overview</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Sessions Card -->
+            <div class="bg-card rounded-xl border p-4 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="shrink-0 rounded-lg bg-primary/10 p-3 text-primary">
+                        <CheckCircle class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm text-muted-foreground">Sessions</p>
+                        <p class="truncate text-3xl font-semibold leading-tight">{todayStats.sessions}</p>
+                        <p class="text-xs text-muted-foreground mt-1">Completed today</p>
+                    </div>
+                </div>
+            </div>
 
-			<!-- Focus Time Card -->
-			<div class="bg-card rounded-lg border p-4">
-				<div class="flex items-center justify-between">
-					<div>
-						<p class="text-sm text-muted-foreground">Focus Time</p>
-						<p class="text-2xl font-bold">{formatTime(todayStats.focusTime)}</p>
-					</div>
-					<div class="rounded-full bg-blue-500/10 p-3">
-						<Target class="h-5 w-5 text-blue-500" />
-					</div>
-				</div>
-				<p class="text-xs text-muted-foreground mt-2">Total focus duration</p>
-			</div>
+            <!-- Focus Time Card -->
+            <div class="bg-card rounded-xl border p-4 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="shrink-0 rounded-lg bg-blue-500/10 p-3 text-blue-600 dark:text-blue-400">
+                        <Target class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm text-muted-foreground">Focus Time</p>
+                        <p class="truncate text-3xl font-semibold leading-tight">{formatTime(todayStats.focusTime)}</p>
+                        <p class="text-xs text-muted-foreground mt-1">Total focus duration</p>
+                    </div>
+                </div>
+            </div>
 
-			<!-- Breaks Card -->
-			<div class="bg-card rounded-lg border p-4">
-				<div class="flex items-center justify-between">
-					<div>
-						<p class="text-sm text-muted-foreground">Breaks</p>
-						<p class="text-2xl font-bold">{todayStats.breaks}</p>
-					</div>
-					<div class="rounded-full bg-green-500/10 p-3">
-						<Coffee class="h-5 w-5 text-green-500" />
-					</div>
-				</div>
-				<p class="text-xs text-muted-foreground mt-2">Breaks taken</p>
-			</div>
-		</div>
-	</div>
+            <!-- Breaks Card -->
+            <div class="bg-card rounded-xl border p-4 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="shrink-0 rounded-lg bg-green-500/10 p-3 text-green-600 dark:text-green-400">
+                        <Coffee class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm text-muted-foreground">Breaks</p>
+                        <p class="truncate text-3xl font-semibold leading-tight">{todayStats.breaks}</p>
+                        <p class="text-xs text-muted-foreground mt-1">Breaks taken</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 	<!-- Weekly Chart -->
 	<div>
