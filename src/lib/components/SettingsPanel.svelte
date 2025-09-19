@@ -47,7 +47,7 @@
 	}
 </script>
 
-<section class="rounded-2xl border bg-accent p-6 shadow-lg">
+<section class="rounded-2xl border bg-background p-6 shadow-lg">
 	<header class="mb-6 flex items-center gap-2">
 		<Settings class="size-5 text-primary" />
 		<h2 class="text-lg font-semibold">Session Settings</h2>
@@ -56,7 +56,7 @@
 	<!-- Settings Grid -->
 	<div class="grid gap-8 md:grid-cols-2">
 		<!-- Focus Duration -->
-		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
+		<fieldset class="space-y-3 rounded-xl border bg-accent p-4">
 			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 				<Target class="size-4" />
 				<span>Focus Duration</span>
@@ -108,7 +108,7 @@
 		</fieldset>
 
 		<!-- Break Duration -->
-		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
+		<fieldset class="space-y-3 rounded-xl border bg-accent p-4">
 			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
 				<Coffee class="size-4" />
 				<span>Break Duration</span>
@@ -160,7 +160,7 @@
 	</div>
 
 	<!-- Behavior -->
-	<div class="mt-6 rounded-xl border bg-background/40 p-4">
+	<div class="mt-6 rounded-xl border bg-accent p-4">
 		<h3 class="mb-3 text-sm font-medium text-muted-foreground">Behavior</h3>
 
 		<div class="flex items-start justify-between gap-4">

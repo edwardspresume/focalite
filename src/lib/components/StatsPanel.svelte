@@ -47,7 +47,7 @@
         <h3 class="text-lg font-semibold mb-4">Today's Overview</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Sessions Card -->
-            <div class="bg-card rounded-xl border p-4 shadow-sm">
+            <div class="bg-background rounded-xl border p-4 shadow-sm">
                 <div class="flex items-center gap-4">
                     <div class="shrink-0 rounded-lg bg-primary/10 p-3 text-primary">
                         <CheckCircle class="h-5 w-5" />
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Focus Time Card -->
-            <div class="bg-card rounded-xl border p-4 shadow-sm">
+            <div class="bg-background rounded-xl border p-4 shadow-sm">
                 <div class="flex items-center gap-4">
                     <div class="shrink-0 rounded-lg bg-blue-500/10 p-3 text-blue-600 dark:text-blue-400">
                         <Target class="h-5 w-5" />
@@ -75,7 +75,7 @@
             </div>
 
             <!-- Breaks Card -->
-            <div class="bg-card rounded-xl border p-4 shadow-sm">
+            <div class="bg-background rounded-xl border p-4 shadow-sm">
                 <div class="flex items-center gap-4">
                     <div class="shrink-0 rounded-lg bg-green-500/10 p-3 text-green-600 dark:text-green-400">
                         <Coffee class="h-5 w-5" />
@@ -99,7 +99,7 @@
 				<span>Focus Minutes</span>
 			</div>
 		</div>
-		<div class="rounded-lg border bg-card p-6">
+		<div class="rounded-lg border bg-background p-6">
 			<Chart.Container config={chartConfig} class="h-[250px] w-full">
 				<BarChart
 					data={chartData}

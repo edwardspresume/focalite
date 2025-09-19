@@ -3,7 +3,7 @@
 	import Button from './ui/button/button.svelte';
 </script>
 
-<section class="grid place-items-center gap-6 rounded-xl border bg-accent p-8 shadow-lg">
+<section class="grid place-items-center gap-6 rounded-xl border bg-background p-8 shadow-lg">
 	<!-- Timer Display -->
 	<figure class="relative size-64">
 		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
