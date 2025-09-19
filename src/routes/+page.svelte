@@ -5,11 +5,11 @@
 	import { ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 </script>
 
-<main class="p-6 h-dvh flex flex-col">
+<main class="flex h-dvh flex-col p-6">
 	<h1 class="mb-8 text-center text-4xl font-bold">Focalite</h1>
 
-	<Tabs.Root value="timer" class="h-full flex flex-col justify-between">
-		<div class="max-w-4xl mx-auto">
+	<Tabs.Root value="timer" class="flex h-full flex-col justify-between">
+		<div class="mx-auto max-w-4xl">
 			<Tabs.Content value="timer">
 				<FocusTimer />
 			</Tabs.Content>
@@ -28,12 +28,14 @@
 				<Timer />
 				<span>Timer</span>
 			</Tabs.Trigger>
+
 			<Tabs.Trigger value="settings">
 				<Settings />
 				<span>Settings</span>
 			</Tabs.Trigger>
+
 			<Tabs.Trigger value="progress">
-				<ChartColumnIncreasing class='text-primary' />
+				<ChartColumnIncreasing />
 				<span>Progress</span>
 			</Tabs.Trigger>
 		</Tabs.List>
