@@ -8,7 +8,7 @@
 <main class="flex h-dvh flex-col p-6">
 	<h1 class="mb-8 text-center text-4xl font-bold">Focalite</h1>
 
-	<Tabs.Root value="timer" class="flex h-full flex-col justify-between">
+	<Tabs.Root value="timer" class="flex h-full flex-col justify-between gap-8">
 		<div class="mx-auto max-w-4xl">
 			<Tabs.Content value="timer">
 				<FocusTimer />
