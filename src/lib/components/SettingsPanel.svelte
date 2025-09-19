@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
-	import { Clock, Settings, Timer } from 'lucide-svelte';
+	import { Coffee, Settings, Target } from 'lucide-svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
@@ -58,7 +58,7 @@
 		<!-- Focus Duration -->
 		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
 			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-				<Clock class="size-4" />
+				<Target class="size-4" />
 				<span>Focus Duration</span>
 			</h3>
 
@@ -110,7 +110,7 @@
 		<!-- Break Duration -->
 		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
 			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-				<Timer class="size-4" />
+				<Coffee class="size-4" />
 				<span>Break Duration</span>
 			</h3>
 

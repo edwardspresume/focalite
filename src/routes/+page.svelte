@@ -2,8 +2,8 @@
 	import { ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 
 	import FocusTimer from '$lib/components/FocusTimer.svelte';
-	import ProgressPanel from '$lib/components/ProgressPanel.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
+	import StatsPanel from '$lib/components/StatsPanel.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 </script>
 
@@ -22,9 +22,9 @@
 				<span>Settings</span>
 			</Tabs.Trigger>
 
-			<Tabs.Trigger value="progress">
+			<Tabs.Trigger value="stats">
 				<ChartColumnIncreasing />
-				<span>Progress</span>
+				<span>Stats</span>
 			</Tabs.Trigger>
 		</Tabs.List>
 
@@ -37,8 +37,8 @@
 				<SettingsPanel />
 			</Tabs.Content>
 
-			<Tabs.Content value="progress">
-				<ProgressPanel />
+			<Tabs.Content value="stats">
+				<StatsPanel />
 			</Tabs.Content>
 		</div>
 	</Tabs.Root>
