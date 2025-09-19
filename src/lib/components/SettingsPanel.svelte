@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { Switch } from '$lib/components/ui/switch';
 	import { Clock, Settings, Timer } from 'lucide-svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
@@ -125,13 +126,6 @@
 				Automatically start a new focus session after each break completes
 			</p>
 		</div>
-		<Button
-			variant={autoLoop ? 'default' : 'outline'}
-			size="sm"
-			onclick={() => (autoLoop = !autoLoop)}
-			class="transition-all"
-		>
-			{autoLoop ? 'ON' : 'OFF'}
-		</Button>
+		<Switch bind:checked={autoLoop} />
 	</div>
 </section>

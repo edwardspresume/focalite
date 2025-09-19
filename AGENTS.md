@@ -2,6 +2,10 @@
 
 This file provides guidance to when working with code in this repository.
 
+## Important Notes
+
+**Current Year**: 2025 - When performing web searches or accessing current information, use 2025 as the current year for accurate and up-to-date results.
+
 ## Project Overview
 
 **Focalite** is a Windows desktop focus timer (Pomodoro-style), built with Tauri v2 and Svelte 5.
