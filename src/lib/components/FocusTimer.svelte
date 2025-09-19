@@ -5,8 +5,8 @@
 
 <section class="grid place-items-center gap-6 rounded-xl border bg-accent p-8 shadow-lg">
 	<!-- Timer Display -->
-	<div class="relative size-64">
-		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100">
+	<figure class="relative size-64">
+		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
 			<circle
 				cx="50"
 				cy="50"
@@ -16,6 +16,7 @@
 				fill="none"
 				class="text-primary"
 			/>
+
 			<circle
 				cx="50"
 				cy="50"
@@ -29,11 +30,11 @@
 			/>
 		</svg>
 
-		<div class="absolute inset-0 flex flex-col items-center justify-center">
-			<div class="font-mono text-6xl font-bold text-foreground">0:00</div>
-			<div class="mt-2 text-sm text-muted-foreground">Ready to Focus</div>
-		</div>
-	</div>
+		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
+			<time class="font-mono text-6xl font-bold text-foreground">0:00</time>
+			<p class="mt-2 text-sm text-muted-foreground">Ready to Focus</p>
+		</figcaption>
+	</figure>
 
 	<!-- Control Buttons -->
 	<div class="flex gap-4">
