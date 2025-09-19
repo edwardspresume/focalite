@@ -13,6 +13,8 @@
 	let customBreakDuration = $state('');
 	let autoLoop = $state(false);
 
+	const uid = $props.id();
+
 	function selectFocusDuration(duration: number) {
 		selectedFocusDuration = duration;
 		customFocusDuration = '';
@@ -36,96 +38,145 @@
 			selectedBreakDuration = value;
 		}
 	}
+
+	function onFocusKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') handleCustomFocus();
+	}
+	function onBreakKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') handleCustomBreak();
+	}
 </script>
 
-<section class="rounded-xl border bg-accent p-8 shadow-lg">
+<section class="rounded-2xl border bg-accent p-6 shadow-lg">
 	<header class="mb-6 flex items-center gap-2">
-		<Settings class="size-5" />
+		<Settings class="size-5 text-primary" />
 		<h2 class="text-lg font-semibold">Session Settings</h2>
 	</header>
 
-	<!-- Focus Duration Section -->
-	<div class="mb-8">
-		<div class="mb-4 flex items-center gap-2">
-			<Clock class="h-4 w-4" />
-			<h3 class="font-medium">Focus Duration</h3>
-		</div>
+	<!-- Settings Grid -->
+	<div class="grid gap-8 md:grid-cols-2">
+		<!-- Focus Duration -->
+		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
+			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+				<Clock class="size-4" />
+				<span>Focus Duration</span>
+			</h3>
 
-		<div class="mb-4 grid grid-cols-3 gap-2">
-			{#each focusOptions as duration (duration)}
-				<Button
-					variant={selectedFocusDuration === duration ? 'default' : 'outline'}
-					size="sm"
-					onclick={() => selectFocusDuration(duration)}
-					class="transition-all"
-				>
-					{duration}m
-				</Button>
-			{/each}
-		</div>
-
-		<div class="flex items-center gap-2">
-			<Input
-				bind:value={customFocusDuration}
-				placeholder="Custom minutes"
-				type="number"
-				min="1"
-				max="999"
-				class="flex-1"
-				onchange={handleCustomFocus}
-			/>
-			<span class="text-sm text-muted-foreground">minutes</span>
-		</div>
-		<p class="mt-2 text-xs text-muted-foreground">
-			Current: {selectedFocusDuration} minutes
-		</p>
-	</div>
-
-	<!-- Break Duration Section -->
-	<div class="mb-8">
-		<div class="mb-4 flex items-center gap-2">
-			<Timer class="h-4 w-4" />
-			<h3 class="font-medium">Break Duration</h3>
-		</div>
-
-		<div class="mb-4 grid grid-cols-4 gap-2">
-			{#each breakOptions as duration (duration)}
-				<Button
-					variant={selectedBreakDuration === duration ? 'default' : 'outline'}
-					size="sm"
-					onclick={() => selectBreakDuration(duration)}
-					class="transition-all"
-				>
-					{duration}m
-				</Button>
-			{/each}
-		</div>
-
-		<div class="flex items-center gap-2">
-			<Input
-				bind:value={customBreakDuration}
-				placeholder="Custom minutes"
-				type="number"
-				min="1"
-				max="60"
-				class="flex-1"
-				onchange={handleCustomBreak}
-			/>
-			<span class="text-sm text-muted-foreground">minutes</span>
-		</div>
-		<p class="mt-2 text-xs text-muted-foreground">
-			Current: {selectedBreakDuration} minutes
-		</p>
-	</div>
-
-	<!-- Auto Loop Section -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h3 class="font-medium">Auto loop sessions</h3>
-			<p class="text-sm text-muted-foreground">
-				Automatically start a new focus session after each break completes
+			<p id="{uid}-focus-desc" class="text-xs text-muted-foreground">
+				Choose a preset or enter a custom number of minutes.
 			</p>
+
+			<div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+				{#each focusOptions as duration (duration)}
+					<Button
+						size="sm"
+						class="rounded-full"
+						title={`${duration} minutes`}
+						aria-pressed={selectedFocusDuration === duration}
+						onclick={() => selectFocusDuration(duration)}
+						variant={selectedFocusDuration === duration ? 'default' : 'outline'}
+					>
+						{duration}m
+					</Button>
+				{/each}
+			</div>
+
+			<div class="relative">
+				<label for="{uid}-focus-custom" class="sr-only">Custom focus minutes</label>
+				<Input
+					id="{uid}-focus-custom"
+					bind:value={customFocusDuration}
+					min="1"
+					max="999"
+					class="pr-12"
+					type="number"
+					inputmode="numeric"
+					placeholder="Custom minutes"
+					aria-describedby="{uid}-focus-desc {uid}-focus-current"
+					onchange={handleCustomFocus}
+					onkeydown={onFocusKeydown}
+				/>
+				<span
+					class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground"
+					>min</span
+				>
+			</div>
+
+			<p id="{uid}-focus-current" class="text-xs text-muted-foreground">
+				Selected: {selectedFocusDuration} minutes
+			</p>
+		</fieldset>
+
+		<!-- Break Duration -->
+		<fieldset class="space-y-3 rounded-xl border bg-background/40 p-4">
+			<h3 class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+				<Timer class="size-4" />
+				<span>Break Duration</span>
+			</h3>
+
+			<p id="{uid}-break-desc" class="text-xs text-muted-foreground">
+				Short breaks help you reset. Pick a preset or enter custom minutes.
+			</p>
+
+			<div class="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
+				{#each breakOptions as duration (duration)}
+					<Button
+						size="sm"
+						title={`${duration} minutes`}
+						class="rounded-full"
+						aria-pressed={selectedBreakDuration === duration}
+						onclick={() => selectBreakDuration(duration)}
+						variant={selectedBreakDuration === duration ? 'default' : 'outline'}
+					>
+						{duration}m
+					</Button>
+				{/each}
+			</div>
+
+			<div class="relative">
+				<label for="{uid}-break-custom" class="sr-only">Custom break minutes</label>
+				<Input
+					type="number"
+					min="1"
+					max="60"
+					class="pr-12"
+					id="{uid}-break-custom"
+					placeholder="Custom minutes"
+					bind:value={customBreakDuration}
+					inputmode="numeric"
+					aria-describedby="{uid}-break-desc {uid}-break-current"
+					onchange={handleCustomBreak}
+					onkeydown={onBreakKeydown}
+				/>
+				<span
+					class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground"
+					>min</span
+				>
+			</div>
+			<p id="{uid}-break-current" class="text-xs text-muted-foreground">
+				Selected: {selectedBreakDuration} minutes
+			</p>
+		</fieldset>
+	</div>
+
+	<!-- Behavior -->
+	<div class="mt-6 rounded-xl border bg-background/40 p-4">
+		<h3 class="mb-3 text-sm font-medium text-muted-foreground">Behavior</h3>
+
+		<div class="flex items-start justify-between gap-4">
+			<button
+				class="text-left"
+				aria-expanded={autoLoop}
+				aria-controls="{uid}-autoloop-desc"
+				onclick={() => (autoLoop = !autoLoop)}
+			>
+				<h4 class="font-medium text-foreground">Auto loop sessions</h4>
+				<p id="{uid}-autoloop-desc" class="max-w-prose text-sm text-muted-foreground">
+					Automatically start a new focus session after each break completes.
+				</p>
+			</button>
+
+			<Switch aria-label="Auto loop sessions" bind:checked={autoLoop} />
 		</div>
-		<Switch bind:checked={autoLoop} />
 	</div>
 </section>
