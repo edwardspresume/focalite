@@ -19,7 +19,7 @@
     const chartConfig = {
         minutes: {
             label: 'Focus Minutes',
-            color: 'var(--primary)'
+            color: 'color-mix(in oklch, var(--primary) 70%, white)'
         }
     } satisfies Chart.ChartConfig;
 
