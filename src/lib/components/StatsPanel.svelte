@@ -99,7 +99,7 @@
 				<span>Focus Minutes</span>
 			</div>
 		</div>
-		<div class="rounded-md border bg-background p-6">
+		<div class="rounded-md border bg-background p-6 shadow-sm">
 			<Chart.Container config={chartConfig} class="h-[250px] w-full">
 				<BarChart
 					data={chartData}

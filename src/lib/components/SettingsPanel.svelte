@@ -47,7 +47,7 @@
 	}
 </script>
 
-<section class="rounded-lg border bg-background p-6 shadow-lg">
+<section class="rounded-lg border bg-background p-6 shadow-md">
 	<header class="mb-6 flex items-center gap-2">
 		<Settings class="size-5 text-primary" />
 		<h2 class="text-lg font-semibold">Session Settings</h2>

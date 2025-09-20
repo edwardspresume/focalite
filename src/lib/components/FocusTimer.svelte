@@ -3,7 +3,7 @@
 	import Button from './ui/button/button.svelte';
 </script>
 
-<section class="grid place-items-center gap-6 rounded-lg border bg-background p-8 shadow-lg">
+<section class="grid place-items-center gap-6 rounded-lg border bg-background p-8 shadow-md">
 	<!-- Timer Display -->
 	<figure class="relative size-64">
 		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
@@ -38,7 +38,7 @@
 
 	<!-- Control Buttons -->
 	<div class="flex gap-4">
-		<Button size="lg" class="cursor-pointer text-lg font-semibold shadow-lg hover:shadow-xl">
+		<Button size="lg" class="cursor-pointer text-lg font-semibold shadow-sm hover:shadow-md">
 			<Play class="size-4" />
 			Start Focus Session
 		</Button>
