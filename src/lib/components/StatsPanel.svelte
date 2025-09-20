@@ -44,7 +44,7 @@
 <div class="space-y-6 p-6">
 	<!-- Daily Stats Cards -->
     <div>
-        <h3 class="text-lg font-semibold mb-4">Today's Overview</h3>
+        <h3 class="text-lg font-semibold mb-4">Today's Focus</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Sessions Card -->
             <div class="bg-background rounded-md border p-4 shadow-sm">
@@ -93,7 +93,7 @@
 	<!-- Weekly Chart -->
 	<div>
 		<div class="mb-4 flex items-center justify-between">
-			<h3 class="text-lg font-semibold">Weekly Focus</h3>
+			<h3 class="text-lg font-semibold">Weekly Overview</h3>
 			<div class="flex items-center gap-2 text-sm text-muted-foreground">
 				<ChartNoAxesColumnIncreasing class="h-4 w-4" />
 				<span>Focus Minutes</span>
