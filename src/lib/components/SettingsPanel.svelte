@@ -68,8 +68,7 @@
 				Choose a preset or enter custom minutes.
 			</p>
 
-			<!-- TODO: Figure out if there's a simpler way to do the grid layout that is Equivalent-->
-			<div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+			<div class="grid grid-cols-[repeat(auto-fit,minmax(3rem,1fr))] gap-2">
 				{#each focusOptions as duration (duration)}
 					<Button
 						size="sm"
@@ -122,7 +121,7 @@
 				Short breaks help you reset. Choose a preset or enter custom minutes.
 			</p>
 
-			<div class="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
+			<div class="grid grid-cols-[repeat(auto-fit,minmax(3rem,1fr))] gap-2">
 				{#each breakOptions as duration (duration)}
 					<Button
 						size="sm"
