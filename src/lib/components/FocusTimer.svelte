@@ -3,7 +3,7 @@
 	import Button from './ui/button/button.svelte';
 </script>
 
-<section class="grid place-items-center gap-6 rounded-xl border bg-background p-8 shadow-lg">
+<section class="grid place-items-center gap-6 rounded-lg border bg-background p-8 shadow-lg">
 	<!-- Timer Display -->
 	<figure class="relative size-64">
 		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
@@ -46,14 +46,14 @@
 
 	<div class="flex gap-6 text-sm text-muted-foreground">
 		<span>
-			<kbd class="rounded bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Space</kbd>
+			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Space</kbd>
 			start/pause/resume
 		</span>
 		<span>
-			<kbd class="rounded bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Esc</kbd> reset
+			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Esc</kbd> reset
 		</span>
 		<span>
-			<kbd class="rounded bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">B</kbd> start break
+			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">B</kbd> start break
 		</span>
 	</div>
 </section>
