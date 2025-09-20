@@ -15,53 +15,93 @@ This file provides guidance to when working with code in this repository.
 - **App Identifier**: com.focalite.app
 - **Package Manager**: pnpm
 
-### Core Feature Requirements
+## Focalite — Logic, Features, and UI Overview
 
-#### Timer Functionality
+## Product Overview
 
-- **Centralized Timer Logic**: Single timer store manages all focus and break timer state
-- Pomodoro-style focus timer with automatic break transitions
-- Customizable focus and break durations with preset options
-- Auto-loop mode for continuous focus/break cycles
-- Real-time timer display with minutes:seconds format
-- Pause/resume functionality with elapsed time tracking
+- Windows desktop Pomodoro-style focus timer built with Tauri v2 and Svelte 5 (Runes).
+- Targets WebView2 on Windows; also supports web runtime for development and preview.
 
-#### User Interface
+## Initialization & Startup
 
-- **Tab-based Navigation**: Timer, Break, Settings, and Stats panels (always clickable)
-- **Smart Auto-tab Switching**: Automatically switches to break tab when break starts, back to timer when break completes
-- **Persistent Settings Access**: Settings tab always accessible with visual indicators for when changes apply
-- Visual progress indicators with circular SVG animations using stroke-dashoffset
-- Settings panel with preset duration options and custom input
-- **Real-time Statistics Dashboard**: Live session tracking with completion rates and streaks
-- **Historical Progress Charts**: Weekly focus time visualization with D3/LayerChart
-- Break activity suggestions for physical movement and mental rest
+- Load persisted user preferences and daily progress from the Tauri Store on app launch.
+- If no preferences exist, initialize user defaults for durations: Focus = 30:00 and Break = 03:00.
+- Hydrate UI from stored values: timers display selected durations; settings reflect current preferences.
+- Note: Persistence is environment-specific — in the browser we use `localStorage`; in the desktop app we use the Tauri Store, which persists to a JSON file on the local filesystem. Data does not sync between runtimes.
 
-#### Notifications & Feedback
+## Navigation & Tabs
 
-- Audio notifications for timer events (break-start.mp3, break-complete.mp3)
-- Desktop toast notifications via Tauri notification plugin
+- Always-clickable tabs: Timer, Break, Settings, and Stats are accessible in all timer states.
+- Smart auto-tab switching: switch to Break tab when a break starts; switch back to Timer tab when a break completes.
+- Settings always accessible; provide visual indicators when changes will apply on the next session rather than the current one.
 
-#### Data Management
+## Timers & Phases (Centralized)
 
-- **Persistent Storage**: User preferences and daily progress via Tauri Store plugin
-- **Automatic Loading**: Preferences and progress loaded on app startup
-- **Daily Progress Tracking**: Sessions, focus time, breaks with automatic midnight rollover
-- **Throttled Saving**: Progress saved every 15 seconds during active sessions, immediately on completion
-- **Historical Data**: Weekly/monthly progress charts with 30-day retention
-- **Reset Functionality**: Reset daily progress and statistics
+- Single centralized timer store (`src/lib/stores/timer.svelte.ts`) is the source of truth for both Focus and Break.
+- Phases: `idle` | `focus` | `break` with a single 250ms interval driving all timing.
+- `$derived` values compute elapsed, remaining, progress (0–1), formatted time (MM:SS), and SVG stroke-dashoffset for the progress ring.
+- Independence: Focus and Break timers are independent controls; starting one stops the other if running.
 
-#### Controls & Interaction
+## Session Flows
 
-- Keyboard shortcuts (Space: play/pause/resume, Esc: reset)
-- Manual timer controls (start, pause, resume, reset, end break early, start break early)
-- **Start Break Early**: Users can manually start break during focus sessions via Break tab
-- **Always Clickable Tabs**: All navigation tabs remain accessible regardless of timer state
+- Focus Flow
+  - Start Focus: begins a focus session using the selected focus duration.
+  - While running: controls switch to Pause and Reset; elapsed time is tracked.
+  - Pause/Resume: toggles counting without losing elapsed time.
+  - Reset: returns the focus timer to the selected duration.
+  - On completion: automatically transition to Break and auto-switch to the Break tab.
+- Break Flow
+  - Break tab always shows the selected break duration (even during Focus).
+  - Start Break: ends Focus (if running) and starts Break immediately.
+  - End Break Early: ends the current Break and returns control to the user.
+- Auto-loop
+  - Focus completion always transitions to Break (regardless of Auto-loop).
+  - When enabled, Break completion auto-starts Focus; otherwise remain idle and await user action after Break.
+  - Manual overrides take precedence: a manually started Break does not engage auto-loop on its completion for that cycle.
 
-#### Platform Support
+## Display & Controls
 
-- Cross-runtime compatibility (Tauri desktop and web browser)
-- Windows-optimized with WebView2 runtime
+- Timer Display: idle shows the selected duration; running shows remaining time in MM:SS.
+- Keyboard Shortcuts: Space toggles play/pause/resume; Escape resets the active session.
+- Manual Controls: start, pause, resume, reset, start break early, end break early.
+- Visual Progress: circular SVG animation using stroke-dashoffset reflects progress.
+
+## Settings
+
+- Defaults: Focus 30 minutes; Break 3 minutes.
+- Presets and custom duration inputs available.
+- Persistence: all preference changes save immediately to the Tauri Store JSON file.
+- Application timing: changes reflect in displays immediately; timing changes apply to the next started session when appropriate.
+
+## Notifications & Feedback
+
+- Audio: play `break-start.mp3` at break start and `break-complete.mp3` at break completion.
+- Desktop: send a Tauri desktop notification when a break ends to alert the user.
+
+## Data, Progress & Persistence
+
+- Storage: Desktop (Tauri) uses the Tauri Store plugin (JSON file on the local filesystem). Browser uses `localStorage`.
+- Separation: Browser `localStorage` and the desktop file store are independent and do not sync.
+- Autosave: progress saved every 15 seconds during active sessions and immediately on completion.
+- Daily Rollover: at midnight, roll daily counters; maintain historical data with 30-day retention for charts.
+- Reset: action to reset daily progress and statistics.
+
+## Stats & History
+
+- Real-time dashboard shows sessions, completion rates, streaks.
+- Historical charts (weekly/monthly) visualize focus time (D3/LayerChart).
+
+## Architecture Highlights
+
+- Components: `FocusTimer.svelte`, `BreakTimer.svelte`, `SettingsPanel.svelte`, `StatsPanel.svelte`, `KeyboardShortcut.svelte`.
+- Stores: `timer.svelte.ts` (centralized timer), `preferences.svelte.ts` (persistent user prefs), `progress.svelte.ts` (daily + historical tracking).
+- Orchestration: `src/routes/+page.svelte` coordinates auto-loop and smart tab switching.
+
+## Implementation Notes (Svelte 5 Runes)
+
+- Use `$state` for reactive state and `$derived` for computed values; prefer `$derived` over `$effect` when possible.
+- Maintain a single interval in the store; avoid per-component timers.
+- Tailwind-first styling in components; keep global CSS minimal.
 
 ## Development Commands
 
@@ -84,7 +124,7 @@ pnpm build
 pnpm preview
 ```
 
-Note: Preference persistence works only under the Tauri runtime. Using `pnpm dev` (frontend-only) will not load/save preferences; use `pnpm tauri dev` when testing persistence.
+Note: In `pnpm dev` (browser), data persists via `localStorage`. In `pnpm tauri dev` (desktop), data persists via the Tauri Store on the filesystem. Use `pnpm tauri dev` when testing desktop/file persistence.
 
 ### Type Checking and Validation
 
@@ -251,15 +291,6 @@ class TimerStore {
 - **+page.svelte**: Orchestrates auto-loop logic and smart tab switching based on phase changes
 - **SettingsPanel.svelte**: Always accessible settings with visual indicators for when changes apply next session
 - **StatsPanel.svelte**: Displays real-time and historical progress data
-
-### State Flow
-
-1. User starts timer → `timer.startFocus()` → updates reactive state
-2. Components automatically re-render via `$derived` subscriptions
-3. Timer completion → automatic phase transition → UI updates
-4. Progress tracking → persisted to Tauri store → stats update
-5. Tab navigation → always available, auto-switches only on phase changes
-6. Early break → `timer.startBreakEarly()` from Break tab → ends focus, starts break immediately
 
 ## Svelte 5+ Specifics
 
