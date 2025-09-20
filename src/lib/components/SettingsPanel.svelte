@@ -5,37 +5,35 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
+	import { preferences, setFocusMinutes, setBreakMinutes, toggleAutoLoop } from '$lib/stores/preferences.svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
 
-	let selectedFocusDuration = $state(30);
-	let selectedBreakDuration = $state(3);
 	let customFocusDuration = $state('');
 	let customBreakDuration = $state('');
-	let autoLoop = $state(false);
 
 	function selectFocusDuration(duration: number) {
-		selectedFocusDuration = duration;
+		setFocusMinutes(duration);
 		customFocusDuration = '';
 	}
 
 	function selectBreakDuration(duration: number) {
-		selectedBreakDuration = duration;
+		setBreakMinutes(duration);
 		customBreakDuration = '';
 	}
 
 	function handleCustomFocus() {
 		const value = parseFloat(customFocusDuration);
 		if (value && value > 0) {
-			selectedFocusDuration = value;
+			setFocusMinutes(value);
 		}
 	}
 
 	function handleCustomBreak() {
 		const value = parseFloat(customBreakDuration);
 		if (value && value > 0) {
-			selectedBreakDuration = value;
+			setBreakMinutes(value);
 		}
 	}
 
@@ -74,9 +72,9 @@
 						size="sm"
 						class="rounded-full"
 						title={`${duration} minutes`}
-						aria-pressed={selectedFocusDuration === duration}
+						aria-pressed={preferences.focusMinutes === duration}
 						onclick={() => selectFocusDuration(duration)}
-						variant={selectedFocusDuration === duration ? 'default' : 'outline'}
+						variant={preferences.focusMinutes === duration ? 'default' : 'outline'}
 					>
 						{duration}m
 					</Button>
@@ -84,18 +82,18 @@
 			</div>
 
 			<div class="relative">
-				<Input
-					min="1"
-					max="999"
-					class="pr-12"
-					type="number"
-					inputmode="numeric"
-					placeholder="Custom minutes"
-					bind:value={customFocusDuration}
-					aria-label="Custom focus duration in minutes"
-					onchange={handleCustomFocus}
-					onkeydown={onFocusKeydown}
-				/>
+                <Input
+                    min="0.0166667"
+                    step="any"
+                    class="pr-12"
+                    type="number"
+                    inputmode="numeric"
+                    placeholder="Custom minutes"
+                    bind:value={customFocusDuration}
+                    aria-label="Custom focus duration in minutes"
+                    onchange={handleCustomFocus}
+                    onkeydown={onFocusKeydown}
+                />
 
 				<span
 					class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground dark:text-foreground/80"
@@ -104,7 +102,7 @@
 			</div>
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: {selectedFocusDuration} minutes
+				Selected: {preferences.focusMinutes} minutes
 			</p>
 		</fieldset>
 
@@ -127,9 +125,9 @@
 						size="sm"
 						class="rounded-full"
 						title={`${duration} minutes`}
-						aria-pressed={selectedBreakDuration === duration}
+						aria-pressed={preferences.breakMinutes === duration}
 						onclick={() => selectBreakDuration(duration)}
-						variant={selectedBreakDuration === duration ? 'default' : 'outline'}
+						variant={preferences.breakMinutes === duration ? 'default' : 'outline'}
 					>
 						{duration}m
 					</Button>
@@ -137,25 +135,25 @@
 			</div>
 
 			<div class="relative">
-				<Input
-					min="1"
-					max="60"
-					type="number"
-					class="pr-12"
-					inputmode="numeric"
-					placeholder="Custom minutes"
-					bind:value={customBreakDuration}
-					aria-label="Custom break duration in minutes"
-					onchange={handleCustomBreak}
-					onkeydown={onBreakKeydown}
-				/>
+                <Input
+                    min="0.0166667"
+                    step="any"
+                    type="number"
+                    class="pr-12"
+                    inputmode="numeric"
+                    placeholder="Custom minutes"
+                    bind:value={customBreakDuration}
+                    aria-label="Custom break duration in minutes"
+                    onchange={handleCustomBreak}
+                    onkeydown={onBreakKeydown}
+                />
 				<span
 					class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground dark:text-foreground/80"
 					>min</span
 				>
 			</div>
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: {selectedBreakDuration} minutes
+				Selected: {preferences.breakMinutes} minutes
 			</p>
 		</fieldset>
 	</div>
@@ -163,7 +161,7 @@
 	<div
 		class="mt-6 flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
 	>
-		<button onclick={() => (autoLoop = !autoLoop)}>
+		<button onclick={toggleAutoLoop}>
 			<h4 class="flex items-center gap-2 font-medium text-foreground">
 				<RefreshCw class="size-4" />
 				<span> Auto-loop sessions </span>
@@ -173,7 +171,7 @@
 			</p>
 		</button>
 
-		<Switch aria-label="Auto-loop sessions" bind:checked={autoLoop} />
+		<Switch aria-label="Auto-loop sessions" bind:checked={preferences.autoLoop} />
 	</div>
 
 	<div

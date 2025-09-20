@@ -118,8 +118,8 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 - `/src/app.html` - HTML template
 - `/src/app.css` - Global styles with Tailwind
 - `/src/lib/components/` - Component library
-  - `TimerView.svelte` - Main timer display component
-  - `BreakView.svelte` - Break timer display component
+  - `FocusTimer.svelte` - Main timer display component
+  - `BreakTimer.svelte` - Break timer display component
   - `ui/` - Reusable UI components (shadcn/ui components)
 - `/src/lib/stores/` - State management
   - `preferences.ts` - Persistent preferences using Tauri Store
