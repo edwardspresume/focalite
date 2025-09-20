@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
+	import { Activity, ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 
 	import FocusTimer from '$lib/components/FocusTimer.svelte';
+	import BreakTimer from '$lib/components/BreakTimer.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import StatsPanel from '$lib/components/StatsPanel.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -15,6 +16,11 @@
 			<Tabs.Trigger value="timer">
 				<Timer />
 				<span>Timer</span>
+			</Tabs.Trigger>
+
+			<Tabs.Trigger value="break">
+				<Activity />
+				<span>Break</span>
 			</Tabs.Trigger>
 
 			<Tabs.Trigger value="settings">
@@ -31,6 +37,10 @@
 		<div class="mx-auto max-w-4xl">
 			<Tabs.Content value="timer">
 				<FocusTimer />
+			</Tabs.Content>
+
+			<Tabs.Content value="break">
+				<BreakTimer />
 			</Tabs.Content>
 
 			<Tabs.Content value="settings">
