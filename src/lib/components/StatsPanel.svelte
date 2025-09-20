@@ -5,22 +5,26 @@
 		ChartNoAxesColumnIncreasing,
 		CircleCheckBig,
 		Coffee,
+		RotateCcw,
 		Target,
 		type Icon as IconType
 	} from 'lucide-svelte';
+	import { timer } from '$lib/stores/timer.svelte';
+	import { progress } from '$lib/stores/progress.svelte';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
+	import Button from './ui/button/button.svelte';
 
-	// Placeholder data for weekly chart
-	const chartData = [
-		{ day: 'Mon', minutes: 120 },
-		{ day: 'Tue', minutes: 90 },
-		{ day: 'Wed', minutes: 150 },
-		{ day: 'Thu', minutes: 180 },
-		{ day: 'Fri', minutes: 210 },
-		{ day: 'Sat', minutes: 60 },
-		{ day: 'Sun', minutes: 45 }
-	];
+	// Chart data - will be populated with real data when available
+	let chartData = $state([
+		{ day: 'Mon', minutes: 0 },
+		{ day: 'Tue', minutes: 0 },
+		{ day: 'Wed', minutes: 0 },
+		{ day: 'Thu', minutes: 0 },
+		{ day: 'Fri', minutes: 0 },
+		{ day: 'Sat', minutes: 0 },
+		{ day: 'Sun', minutes: 0 }
+	]);
 
 	const chartConfig = {
 		minutes: {
@@ -29,24 +33,49 @@
 		}
 	} satisfies Chart.ChartConfig;
 
-	// Placeholder stats (requested metrics)
-	const todayStats = {
-		// Focus Time (Today · WTD)
-		focusTodayMin: 220, // e.g., 3h 40m today
-		focusWtdMicro: 'WTD 3h 20m (↑18% vs last week)',
+	// Real-time stats derived from timer store
+	const todayStats = $derived.by(() => {
+		const completionRate = timer.sessionsCompleted > 0 ?
+			Math.round((timer.sessionsCompleted / (timer.sessionsCompleted + Math.max(0, timer.totalFocusTime / 25 - timer.sessionsCompleted))) * 100) : 100;
 
-		// Completion Rate
-		completionRate: 82, // %
-		completionMicro: 'Ignores <2m false starts',
+		const avgBreakTime = timer.breaksCompleted > 0 ?
+			Math.round(timer.totalBreakTime / timer.breaksCompleted) : 0;
 
-		// Consistency Streak (Current · Best)
-		streakCurrentDays: 3,
-		streakBestDays: 9,
+		return {
+			focusTodayMin: timer.totalFocusTime,
+			focusWtdMicro: `${timer.sessionsCompleted} sessions completed`,
+			completionRate,
+			completionMicro: `${timer.sessionsCompleted} focus sessions`,
+			streakCurrentDays: 1, // TODO: Calculate from historical data
+			streakBestDays: 1, // TODO: Calculate from historical data
+			breakAdherence: timer.breaksCompleted > 0 ? 95 : 100, // Placeholder calculation
+			breakMicro: `Avg break ${avgBreakTime}m`
+		};
+	});
 
-		// Break Adherence
-		breakAdherence: 91, // %
-		breakMicro: 'Avg break 5m'
-	};
+	// Load historical data for chart
+	$effect(() => {
+		if (progress.loaded) {
+			progress.getHistoricalProgress(7).then(data => {
+				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+				const today = new Date();
+
+				// Generate last 7 days
+				chartData = Array.from({ length: 7 }, (_, i) => {
+					const date = new Date(today);
+					date.setDate(date.getDate() - (6 - i));
+					const dayName = dayNames[date.getDay()];
+					const dateStr = date.toISOString().split('T')[0];
+
+					const dayData = data.find(d => d.date === dateStr);
+					return {
+						day: dayName,
+						minutes: dayData?.focusMinutes || 0
+					};
+				});
+			});
+		}
+	});
 
 	// Convert minutes to hours and minutes
 	function formatTime(minutes: number): string {
@@ -88,7 +117,18 @@
 <div class="space-y-6">
 	<!-- Daily Stats Section -->
 	<section>
-		<h3 class="mb-4 text-lg font-semibold">Today's Focus</h3>
+		<div class="mb-4 flex items-center justify-between">
+			<h3 class="text-lg font-semibold">Today's Focus</h3>
+			<Button
+				size="sm"
+				variant="outline"
+				onclick={progress.resetProgress}
+				class="text-sm font-medium"
+			>
+				<RotateCcw class="size-4" />
+				Reset Progress
+			</Button>
+		</div>
 
 		<div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
 			{@render metricCard(

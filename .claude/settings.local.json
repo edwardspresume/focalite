@@ -5,7 +5,9 @@
       "WebFetch(domain:lucide.dev)",
       "WebFetch(domain:svelte.dev)",
       "mcp__svelte-llm__list_sections",
-      "mcp__svelte-llm__get_documentation"
+      "mcp__svelte-llm__get_documentation",
+      "Bash(npm run check:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

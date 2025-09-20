@@ -19,16 +19,21 @@ This file provides guidance to when working with code in this repository.
 
 #### Timer Functionality
 
+- **Centralized Timer Logic**: Single timer store manages all focus and break timer state
 - Pomodoro-style focus timer with automatic break transitions
-- Customizable focus and break durations with preset options (10-90 min focus, 2-20 min break)
+- Customizable focus and break durations with preset options
 - Auto-loop mode for continuous focus/break cycles
 - Real-time timer display with minutes:seconds format
+- Pause/resume functionality with elapsed time tracking
 
 #### User Interface
 
-- Visual progress indicators with circular SVG animations
-- Settings panel
-- Session statistics dashboard (sessions completed, total focus/break time)
+- **Tab-based Navigation**: Timer, Break, Settings, and Stats panels
+- **Auto-tab Switching**: Automatically switches to break tab during break sessions
+- Visual progress indicators with circular SVG animations using stroke-dashoffset
+- Settings panel with preset duration options and custom input
+- **Real-time Statistics Dashboard**: Live session tracking with completion rates and streaks
+- **Historical Progress Charts**: Weekly focus time visualization with D3/LayerChart
 - Break activity suggestions for physical movement and mental rest
 
 #### Notifications & Feedback
@@ -38,9 +43,12 @@ This file provides guidance to when working with code in this repository.
 
 #### Data Management
 
-- Persistent storage of user preferences and progress via Tauri Store plugin
-- Daily progress tracking with automatic midnight rollover
-- Reset daily progress functionality
+- **Persistent Storage**: User preferences and daily progress via Tauri Store plugin
+- **Automatic Loading**: Preferences and progress loaded on app startup
+- **Daily Progress Tracking**: Sessions, focus time, breaks with automatic midnight rollover
+- **Throttled Saving**: Progress saved every 15 seconds during active sessions, immediately on completion
+- **Historical Data**: Weekly/monthly progress charts with 30-day retention
+- **Reset Functionality**: Reset daily progress and statistics
 
 #### Controls & Interaction
 
@@ -114,15 +122,20 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 ### Frontend Structure (`/src`)
 
 - Single-page Svelte 5 application using **Runes exclusively**
-- `/src/routes/+page.svelte` - Main application entry
+- `/src/routes/+page.svelte` - Main application entry with tab management and auto-loop logic
 - `/src/app.html` - HTML template
 - `/src/app.css` - Global styles with Tailwind
 - `/src/lib/components/` - Component library
-  - `FocusTimer.svelte` - Main timer display component
-  - `BreakTimer.svelte` - Break timer display component
+  - `FocusTimer.svelte` - Focus timer display component (uses centralized timer store)
+  - `BreakTimer.svelte` - Break timer display component (uses centralized timer store)
+  - `SettingsPanel.svelte` - User preferences and timer configuration
+  - `StatsPanel.svelte` - Progress tracking and historical data visualization
+  - `KeyboardShortcut.svelte` - Keyboard shortcut display component
   - `ui/` - Reusable UI components (shadcn/ui components)
-- `/src/lib/stores/` - State management
-  - `preferences.ts` - Persistent preferences using Tauri Store
+- `/src/lib/stores/` - Centralized state management using Svelte 5 Runes
+  - `timer.svelte.ts` - **Centralized timer store** with all timer logic and state
+  - `preferences.svelte.ts` - Persistent user preferences using Tauri Store
+  - `progress.svelte.ts` - Daily progress tracking and historical data persistence
 - `/src/lib/utils.ts` - Utility functions
 
 ### Backend Structure (`/src-tauri`)
@@ -148,6 +161,7 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 
 - **Simplicity First**: Prefer simple, clear, and concise solutions
 - **DRY (Don't Repeat Yourself)**: Actively avoid code duplication by reusing/refactoring existing functionality
+- **Centralized State Management**: Use shared stores (`.svelte.ts`) instead of duplicating logic across components
 - **Modularity**: Write clean, modular, reusable code for better maintainability
 - **File Size**: Keep components/modules under 200-300 lines; refactor larger files
 - **Environment Awareness**: Adapt code for dev/test/prod environments using environment variables
@@ -173,11 +187,70 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 ### Performance Optimization
 
 - **Algorithms**: Analyze and optimize data structures and algorithms for bottlenecks
+- **Reactive Efficiency**: Prefer `$derived` over `$effect` for computed values and synchronization
+- **Centralized Intervals**: Use single timer intervals instead of multiple component-level timers
 - **Memoization**: Use Svelte's `$derived` and caching techniques for expensive operations
 - **Data Structures**: Choose appropriate structures (`Map`, `Set`, `SvelteMap`, `SvelteSet`)
 - **Lazy Loading**: Implement `loading="lazy"` for images and below-the-fold assets
 - **Network Optimization**: Minimize payload size and use efficient data formats
 - **Svelte Runes**: Leverage Runes effectively for efficient state management and minimal re-renders
+
+## Timer Architecture
+
+### Centralized Timer Store (`timer.svelte.ts`)
+
+The application uses a **centralized timer store** pattern for optimal performance and maintainability:
+
+#### Key Design Principles
+
+- **Single Source of Truth**: All timer state (phase, timing, progress) managed in one reactive store
+- **Shared State**: Both FocusTimer and BreakTimer components consume the same store
+- **Efficient Reactivity**: Uses `$derived` for computed values instead of multiple `$effect` blocks
+- **Single Interval**: One 250ms interval handles all timing updates, not per-component timers
+
+#### Timer Store Structure
+
+```typescript
+class TimerStore {
+  // Core state
+  phase = $state<'idle' | 'focus' | 'break'>('idle');
+  startedAt = $state<number | null>(null);
+  baseElapsedSec = $state(0);
+  now = $state(Date.now());
+
+  // Computed values using $derived for efficiency
+  currentDuration = $derived.by(() => /* duration calculation */);
+  elapsed = $derived(/* elapsed time calculation */);
+  remaining = $derived(/* remaining time calculation */);
+  timeLabel = $derived.by(() => /* MM:SS formatting */);
+  progress = $derived.by(() => /* 0-1 progress calculation */);
+  dashOffset = $derived(/* SVG stroke-dashoffset for progress ring */);
+
+  // Methods: startFocus(), startBreak(), pause(), resume(), reset()
+}
+```
+
+#### Benefits of This Approach
+
+- **Performance**: Single interval, efficient `$derived` chains, minimal re-renders
+- **Consistency**: No state synchronization issues between components
+- **Maintainability**: Timer logic centralized, easier to debug and extend
+- **Memory Efficiency**: Shared reactive state instead of duplicate component state
+
+### Component Roles
+
+- **FocusTimer.svelte**: UI for focus sessions, consumes timer store
+- **BreakTimer.svelte**: UI for break sessions, consumes timer store
+- **+page.svelte**: Orchestrates auto-loop logic and tab switching
+- **SettingsPanel.svelte**: Modifies preferences that affect timer duration
+- **StatsPanel.svelte**: Displays real-time and historical progress data
+
+### State Flow
+
+1. User starts timer → `timer.startFocus()` → updates reactive state
+2. Components automatically re-render via `$derived` subscriptions
+3. Timer completion → automatic phase transition → UI updates
+4. Progress tracking → persisted to Tauri store → stats update
 
 ## Svelte 5+ Specifics
 

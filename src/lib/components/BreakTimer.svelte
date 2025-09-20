@@ -1,8 +1,23 @@
-<script>
-	import { Activity, Pause, Square } from 'lucide-svelte';
+<script lang="ts">
+	import { timer } from '$lib/stores/timer.svelte';
+	import { Activity, Pause, Play, Square } from 'lucide-svelte';
 	import Button from './ui/button/button.svelte';
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
+
+	function onKey(e: KeyboardEvent) {
+		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+
+		if (e.key === ' ') {
+			e.preventDefault();
+			if (timer.running) timer.pause();
+			else timer.resume();
+		} else if (e.key === 'Escape') {
+			timer.endBreakEarly();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={onKey} />
 
 <div class="space-y-6">
 	<!-- Break Timer Section -->
@@ -30,7 +45,7 @@
 					stroke="currentColor"
 					stroke-width="2"
 					fill="none"
-					class="text-border"
+					class="text-primary/30"
 				/>
 
 				<circle
@@ -40,26 +55,41 @@
 					stroke="currentColor"
 					stroke-width="3"
 					fill="none"
-					stroke-dasharray="283"
-					stroke-dashoffset="100"
-					class="text-primary transition-all duration-1000 ease-linear"
+					stroke-dasharray={timer.C}
+					stroke-dashoffset={timer.dashOffset}
+					class="text-primary transition-[stroke-dashoffset] duration-1000 ease-linear"
 					stroke-linecap="round"
 				/>
 			</svg>
 
 			<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
-				<time class="font-mono text-6xl font-bold text-foreground">2:57</time>
-				<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">On break</p>
+				<time
+					class="font-mono text-6xl font-bold text-foreground"
+					datetime={`PT${timer.remaining}S`}
+					aria-live="polite"
+				>
+					{timer.timeLabel}
+				</time>
+				<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
+					{timer.phaseLabel}
+				</p>
 			</figcaption>
 		</figure>
 
 		<!-- Control Buttons -->
 		<div class="flex gap-4">
-			<Button variant="outline" size="lg">
-				<Pause class="size-4" />
-				Pause
-			</Button>
-			<Button variant="destructive" size="lg">
+			{#if timer.running}
+				<Button variant="outline" size="lg" onclick={timer.pause}>
+					<Pause class="size-4" />
+					Pause
+				</Button>
+			{:else}
+				<Button variant="outline" size="lg" onclick={timer.resume}>
+					<Play class="size-4" />
+					Resume
+				</Button>
+			{/if}
+			<Button variant="destructive" size="lg" onclick={timer.endBreakEarly}>
 				<Square class="size-4" />
 				End Break
 			</Button>
@@ -67,7 +97,7 @@
 
 		<!-- Keyboard Shortcuts -->
 		<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
-			<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
+			<KeyboardShortcut key="Space" label="Pause/Resume" />
 			<KeyboardShortcut key="Esc" label="End Break" />
 		</div>
 	</section>
