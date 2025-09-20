@@ -54,15 +54,15 @@
 	<!-- Control Buttons -->
 	<div class="flex gap-4">
 		{#if timer.phase === 'idle'}
-			<Button size="lg" class="text-lg font-semibold shadow-sm hover:shadow-md" onclick={timer.startFocus}>
+			<Button size="lg" class="text-lg font-semibold shadow-sm hover:shadow-md" onclick={() => timer.startFocus()}>
 				<Play class="size-4" /> Start Focus
 			</Button>
 		{:else if timer.running}
-			<Button size="lg" variant="outline" onclick={timer.pause}><Pause class="size-4" /> Pause</Button>
-			<Button size="lg" variant="secondary" onclick={timer.reset}><RotateCcw class="size-4" /> Reset</Button>
+			<Button size="lg" variant="outline" onclick={() => timer.pause()}><Pause class="size-4" /> Pause</Button>
+			<Button size="lg" variant="secondary" onclick={() => timer.reset()}><RotateCcw class="size-4" /> Reset</Button>
 		{:else}
-			<Button size="lg" onclick={timer.resume}><Play class="size-4" /> Resume</Button>
-			<Button size="lg" variant="secondary" onclick={timer.reset}><RotateCcw class="size-4" /> Reset</Button>
+			<Button size="lg" onclick={() => timer.resume()}><Play class="size-4" /> Resume</Button>
+			<Button size="lg" variant="secondary" onclick={() => timer.reset()}><RotateCcw class="size-4" /> Reset</Button>
 		{/if}
 	</div>
 
