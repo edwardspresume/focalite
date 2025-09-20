@@ -59,39 +59,11 @@ class TimerStore {
 
 	dashOffset = $derived(this.C * (1 - this.progress));
 
-	constructor() {
-		// Auto-complete timer when time runs out
-		$effect(() => {
-			if (!this.isComplete) return;
-
-			if (this.phase === 'focus') {
-				this.sessionsCompleted++;
-				this.totalFocusTime += Math.floor(this.currentDuration / 60);
-				this.startBreak();
-			} else if (this.phase === 'break') {
-				this.breaksCompleted++;
-				this.totalBreakTime += Math.floor(this.currentDuration / 60);
-				this.reset();
-			}
-		});
-
-		// Timer interval management
-		$effect(() => {
-			if (!this.running) {
-				this.stopInterval();
-				return;
-			}
-
-			this.startInterval();
-			return () => this.stopInterval();
-		});
-	}
+	constructor() {}
 
 	private startInterval() {
 		this.stopInterval();
-		this.interval = setInterval(() => {
-			this.now = Date.now();
-		}, 250);
+		this.interval = setInterval(() => this.onTick(), 250);
 	}
 
 	private stopInterval() {
@@ -101,11 +73,34 @@ class TimerStore {
 		}
 	}
 
+	private onTick() {
+		this.now = Date.now();
+		// Handle completion immediately when remaining reaches zero
+		if (this.startedAt && this.remaining <= 0) {
+			this.onComplete();
+		}
+	}
+
+	private onComplete() {
+		// Ensure we don't keep ticking in this phase
+		this.stopInterval();
+		if (this.phase === 'focus') {
+			this.sessionsCompleted++;
+			this.totalFocusTime += Math.floor(this.currentDuration / 60);
+			this.startBreak();
+		} else if (this.phase === 'break') {
+			this.breaksCompleted++;
+			this.totalBreakTime += Math.floor(this.currentDuration / 60);
+			this.reset();
+		}
+	}
+
 	startFocus() {
 		this.phase = 'focus';
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
+		this.startInterval();
 	}
 
 	startBreak() {
@@ -113,24 +108,28 @@ class TimerStore {
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
+		this.startInterval();
 	}
 
 	pause() {
 		if (!this.startedAt) return;
 		this.baseElapsedSec = this.elapsed;
 		this.startedAt = null;
+		this.stopInterval();
 	}
 
 	resume() {
 		if (this.startedAt || this.phase === 'idle') return;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
+		this.startInterval();
 	}
 
 	reset() {
 		this.phase = 'idle';
 		this.startedAt = null;
 		this.baseElapsedSec = 0;
+		this.stopInterval();
 	}
 
 	endBreakEarly() {

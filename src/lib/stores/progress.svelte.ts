@@ -1,4 +1,4 @@
-import { load, type Store } from '@tauri-apps/plugin-store';
+import { load } from '@tauri-apps/plugin-store';
 import { timer } from './timer.svelte';
 
 export interface DailyProgress {
@@ -9,19 +9,67 @@ export interface DailyProgress {
 	breakMinutes: number;
 }
 
-let store: Store | null = null;
+// Minimal key/value store interface we rely on
+interface KVStore {
+  get<T>(key: string): Promise<T | undefined>;
+  set<T>(key: string, value: T): Promise<void>;
+  save(): Promise<void>;
+}
+
+let store: KVStore | null = null;
 let saveThrottleId: ReturnType<typeof setTimeout> | null = null;
 
-async function getStore(): Promise<Store> {
-	if (!store) {
-		try {
-			store = await load('progress.json');
-		} catch (error) {
-			console.error('Failed to load progress store:', error);
-			throw error;
-		}
-	}
-	return store;
+function isTauri(): boolean {
+  return typeof window !== 'undefined' && !!(window as any).__TAURI__;
+}
+
+class WebLocalStore implements KVStore {
+  private ns: string;
+  private cache: Record<string, unknown>;
+
+  constructor(filename: string) {
+    this.ns = `focalite:${filename}`;
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(this.ns) : null;
+      this.cache = raw ? JSON.parse(raw) : {};
+    } catch {
+      this.cache = {};
+    }
+  }
+
+  async get<T>(key: string): Promise<T | undefined> {
+    return this.cache[key] as T | undefined;
+  }
+
+  async set<T>(key: string, value: T): Promise<void> {
+    this.cache[key] = value as unknown;
+  }
+
+  async save(): Promise<void> {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(this.ns, JSON.stringify(this.cache));
+      }
+    } catch {
+      // noop
+    }
+  }
+}
+
+async function getStore(): Promise<KVStore> {
+  if (!store) {
+    try {
+      if (isTauri()) {
+        store = await load('progress.json');
+      } else {
+        store = new WebLocalStore('progress.json');
+      }
+    } catch (error) {
+      console.error('Failed to load progress store:', error);
+      store = new WebLocalStore('progress.json');
+    }
+  }
+  return store;
 }
 
 function getLocalDateString(date: Date): string {
@@ -29,13 +77,15 @@ function getLocalDateString(date: Date): string {
 }
 
 class ProgressStore {
-	date = $state(getLocalDateString(new Date()));
-	loaded = $state(false);
+  date = $state(getLocalDateString(new Date()));
+  loaded = $state(false);
+  private interval: ReturnType<typeof setInterval> | null = null;
+  private completionHandled = false;
 
-	constructor() {
-		this.loadTodayProgress();
-		this.watchTimerProgress();
-	}
+  constructor() {
+    this.loadTodayProgress();
+		this.startWatcher();
+  }
 
 	private async loadTodayProgress() {
 		try {
@@ -58,28 +108,40 @@ class ProgressStore {
 		}
 	}
 
-	private watchTimerProgress() {
-		// Save progress when sessions complete
-		$effect(() => {
-			if (!this.loaded) return;
+	private startWatcher() {
+		this.stopWatcher();
+		this.interval = setInterval(() => this.onTick(), 1000);
+	}
 
-			// Check for midnight rollover
-			const today = getLocalDateString(new Date());
-			if (this.date !== today) {
-				this.resetForNewDay(today);
-				return;
-			}
+	private stopWatcher() {
+		if (this.interval) {
+			clearInterval(this.interval);
+			this.interval = null;
+		}
+	}
 
-			// Throttled save during active sessions
-			if (timer.running) {
-				this.saveProgressThrottled();
-			}
+	private onTick() {
+		if (!this.loaded) return;
 
-			// Immediate save on session completion
-			if (timer.isComplete) {
-				this.saveProgressImmediate();
-			}
-		});
+		// Midnight rollover check (uses ISO date string)
+		const today = getLocalDateString(new Date());
+		if (this.date !== today) {
+			this.resetForNewDay(today);
+			return;
+		}
+
+		// Throttled save during active sessions
+		if (timer.running) {
+			this.saveProgressThrottled();
+		}
+
+		// Immediate save once upon session completion
+		if (timer.isComplete && !this.completionHandled) {
+			this.completionHandled = true;
+			this.saveProgressImmediate();
+		} else if (!timer.isComplete) {
+			this.completionHandled = false;
+		}
 	}
 
 	private resetForNewDay(newDate: string) {
