@@ -1,6 +1,7 @@
 <script>
 	import { Play } from 'lucide-svelte';
 	import Button from './ui/button/button.svelte';
+	import KeyboardShortcut from './KeyboardShortcut.svelte';
 </script>
 
 <section
@@ -48,30 +49,8 @@
 	</div>
 
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
-		<!-- TODO: turn this into a snippet -->
-		<span>
-			<kbd
-				class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground dark:bg-muted"
-			>
-				Space
-			</kbd>
-			Start/Pause/Resume
-		</span>
-
-		<span>
-			<kbd
-				class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground dark:bg-muted"
-				>Esc</kbd
-			>
-			Reset
-		</span>
-
-		<span>
-			<kbd
-				class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground dark:bg-muted"
-				>B</kbd
-			>
-			Start Break
-		</span>
+		<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
+		<KeyboardShortcut key="Esc" label="Reset" />
+		<KeyboardShortcut key="B" label="Start Break" />
 	</div>
 </section>

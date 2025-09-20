@@ -3,9 +3,15 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:lucide.dev)",
-      "WebFetch(domain:svelte.dev)"
+      "WebFetch(domain:svelte.dev)",
+      "mcp__svelte-llm__list_sections",
+      "mcp__svelte-llm__get_documentation"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "svelte-llm"
+  ]
 }

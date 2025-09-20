@@ -1,6 +1,7 @@
 <script>
 	import { Activity, Pause, Square } from 'lucide-svelte';
 	import Button from './ui/button/button.svelte';
+	import KeyboardShortcut from './KeyboardShortcut.svelte';
 </script>
 
 <div class="space-y-6">
@@ -66,21 +67,8 @@
 
 		<!-- Keyboard Shortcuts -->
 		<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
-			<span>
-				<kbd
-					class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground dark:bg-muted"
-					>Space</kbd
-				>
-				Start/Pause/Resume
-			</span>
-			<span>
-				<kbd
-					class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground dark:bg-muted"
-					>Esc</kbd
-				>
-				End Break
-			</span>
-
+			<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
+			<KeyboardShortcut key="Esc" label="End Break" />
 		</div>
 	</section>
 
