@@ -13,6 +13,9 @@ class TimerStore {
 	totalFocusTime = $state(0);
 	breaksCompleted = $state(0);
 	totalBreakTime = $state(0);
+	completedCycles = $state(0);
+	lastCompletedPhase = $state<TimerPhase | null>(null);
+	lastCompletionAt = $state<number | null>(null);
 
 	private interval: ReturnType<typeof setInterval> | undefined;
 
@@ -34,8 +37,10 @@ class TimerStore {
 	isComplete = $derived(this.startedAt !== null && this.remaining === 0);
 
 	// Display helpers
+	displaySeconds = $derived(this.phase === 'idle' ? this.currentDuration : this.remaining);
+
 	timeLabel = $derived.by(() => {
-		const secs = this.phase === 'idle' ? this.currentDuration : this.remaining;
+		const secs = this.displaySeconds;
 		const mins = Math.floor(secs / 60);
 		const s = secs % 60;
 		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
@@ -84,13 +89,19 @@ class TimerStore {
 	private onComplete() {
 		// Ensure we don't keep ticking in this phase
 		this.stopInterval();
-		if (this.phase === 'focus') {
+		const completedPhase = this.phase;
+		const completedMinutes = Math.floor(this.currentDuration / 60);
+		this.completedCycles++;
+		this.lastCompletedPhase = completedPhase;
+		this.lastCompletionAt = Date.now();
+
+		if (completedPhase === 'focus') {
 			this.sessionsCompleted++;
-			this.totalFocusTime += Math.floor(this.currentDuration / 60);
+			this.totalFocusTime += completedMinutes;
 			this.startBreak();
-		} else if (this.phase === 'break') {
+		} else if (completedPhase === 'break') {
 			this.breaksCompleted++;
-			this.totalBreakTime += Math.floor(this.currentDuration / 60);
+			this.totalBreakTime += completedMinutes;
 			this.reset();
 		}
 	}

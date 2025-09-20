@@ -39,14 +39,14 @@
 			/>
 		</svg>
 
-		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
-            <time
-                class="font-mono text-6xl font-bold text-foreground"
-                datetime={`PT${timer.remaining}S`}
-                aria-live="polite"
-            >
-                {timer.timeLabel}
-            </time>
+			<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
+	            <time
+	                class="font-mono text-6xl font-bold text-foreground"
+	                datetime={`PT${timer.displaySeconds}S`}
+	                aria-live="polite"
+	            >
+	                {timer.timeLabel}
+	            </time>
 			<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
 				{timer.phaseLabel}
 			</p>

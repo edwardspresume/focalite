@@ -1,11 +1,4 @@
-import { load } from '@tauri-apps/plugin-store';
-
-// Minimal key/value store interface we rely on
-interface KVStore {
-  get<T>(key: string): Promise<T | undefined>;
-  set<T>(key: string, value: T): Promise<void>;
-  save(): Promise<void>;
-}
+import { createStoreAccessor } from './kv-store';
 
 export interface Preferences {
 	focusMinutes: number;
@@ -19,64 +12,9 @@ const DEFAULT_PREFERENCES: Preferences = {
 	autoLoop: false
 };
 
-let store: KVStore | null = null;
 let loadPromise: Promise<void> | null = null;
 
-function isTauri(): boolean {
-  // Detect Tauri runtime presence safely
-  return typeof window !== 'undefined' && !!(window as any).__TAURI__;
-}
-
-class WebLocalStore implements KVStore {
-  private ns: string;
-  private cache: Record<string, unknown>;
-
-  constructor(filename: string) {
-    this.ns = `focalite:${filename}`;
-    try {
-      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(this.ns) : null;
-      this.cache = raw ? JSON.parse(raw) : {};
-    } catch {
-      this.cache = {};
-    }
-  }
-
-  async get<T>(key: string): Promise<T | undefined> {
-    return this.cache[key] as T | undefined;
-  }
-
-  async set<T>(key: string, value: T): Promise<void> {
-    this.cache[key] = value as unknown;
-  }
-
-  async save(): Promise<void> {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(this.ns, JSON.stringify(this.cache));
-      }
-    } catch {
-      // noop in web fallback
-    }
-  }
-}
-
-async function getStore(): Promise<KVStore> {
-  if (!store) {
-    try {
-      if (isTauri()) {
-        store = await load('preferences.json');
-      } else {
-        // Web/dev fallback (frontend-only `pnpm dev`): use localStorage-backed store
-        store = new WebLocalStore('preferences.json');
-      }
-    } catch (error) {
-      console.error('Failed to load store:', error);
-      // Last-resort fallback to in-memory web store to avoid crashing in dev
-      store = new WebLocalStore('preferences.json');
-    }
-  }
-  return store;
-}
+const getStore = createStoreAccessor('preferences.json');
 
 class PreferencesStore {
 	focusMinutes = $state(DEFAULT_PREFERENCES.focusMinutes);

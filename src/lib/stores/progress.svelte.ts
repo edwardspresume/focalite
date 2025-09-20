@@ -1,5 +1,5 @@
-import { load } from '@tauri-apps/plugin-store';
 import { timer } from './timer.svelte';
+import { createStoreAccessor } from './kv-store';
 
 export interface DailyProgress {
 	date: string; // YYYY-MM-DD
@@ -9,68 +9,8 @@ export interface DailyProgress {
 	breakMinutes: number;
 }
 
-// Minimal key/value store interface we rely on
-interface KVStore {
-  get<T>(key: string): Promise<T | undefined>;
-  set<T>(key: string, value: T): Promise<void>;
-  save(): Promise<void>;
-}
-
-let store: KVStore | null = null;
+const getStore = createStoreAccessor('progress.json');
 let saveThrottleId: ReturnType<typeof setTimeout> | null = null;
-
-function isTauri(): boolean {
-  return typeof window !== 'undefined' && !!(window as any).__TAURI__;
-}
-
-class WebLocalStore implements KVStore {
-  private ns: string;
-  private cache: Record<string, unknown>;
-
-  constructor(filename: string) {
-    this.ns = `focalite:${filename}`;
-    try {
-      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(this.ns) : null;
-      this.cache = raw ? JSON.parse(raw) : {};
-    } catch {
-      this.cache = {};
-    }
-  }
-
-  async get<T>(key: string): Promise<T | undefined> {
-    return this.cache[key] as T | undefined;
-  }
-
-  async set<T>(key: string, value: T): Promise<void> {
-    this.cache[key] = value as unknown;
-  }
-
-  async save(): Promise<void> {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(this.ns, JSON.stringify(this.cache));
-      }
-    } catch {
-      // noop
-    }
-  }
-}
-
-async function getStore(): Promise<KVStore> {
-  if (!store) {
-    try {
-      if (isTauri()) {
-        store = await load('progress.json');
-      } else {
-        store = new WebLocalStore('progress.json');
-      }
-    } catch (error) {
-      console.error('Failed to load progress store:', error);
-      store = new WebLocalStore('progress.json');
-    }
-  }
-  return store;
-}
 
 function getLocalDateString(date: Date): string {
 	return date.toISOString().split('T')[0];
@@ -80,7 +20,7 @@ class ProgressStore {
   date = $state(getLocalDateString(new Date()));
   loaded = $state(false);
   private interval: ReturnType<typeof setInterval> | null = null;
-  private completionHandled = false;
+  private lastPersistedCompletionAt = $state<number | null>(null);
 
   constructor() {
     this.loadTodayProgress();
@@ -102,6 +42,7 @@ class ProgressStore {
 
 			this.date = today;
 			this.loaded = true;
+			this.lastPersistedCompletionAt = timer.lastCompletionAt;
 		} catch (error) {
 			console.error('Failed to load today\'s progress:', error);
 			this.loaded = true;
@@ -135,12 +76,10 @@ class ProgressStore {
 			this.saveProgressThrottled();
 		}
 
-		// Immediate save once upon session completion
-		if (timer.isComplete && !this.completionHandled) {
-			this.completionHandled = true;
-			this.saveProgressImmediate();
-		} else if (!timer.isComplete) {
-			this.completionHandled = false;
+		// Immediate save once per completion event
+		const completionAt = timer.lastCompletionAt;
+		if (completionAt && completionAt !== this.lastPersistedCompletionAt) {
+			void this.saveProgressImmediate();
 		}
 	}
 
@@ -150,7 +89,12 @@ class ProgressStore {
 		timer.breaksCompleted = 0;
 		timer.totalFocusTime = 0;
 		timer.totalBreakTime = 0;
-		this.saveProgressImmediate();
+		if (saveThrottleId) {
+			clearTimeout(saveThrottleId);
+			saveThrottleId = null;
+		}
+		void this.saveProgressImmediate();
+		this.lastPersistedCompletionAt = timer.lastCompletionAt;
 	}
 
 	private saveProgressThrottled() {
@@ -175,6 +119,7 @@ class ProgressStore {
 
 			await store.set(this.date, progress);
 			await store.save();
+			this.lastPersistedCompletionAt = timer.lastCompletionAt;
 		} catch (error) {
 			console.error('Failed to save progress:', error);
 		}

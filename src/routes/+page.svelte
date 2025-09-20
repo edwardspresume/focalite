@@ -17,10 +17,15 @@
 	});
 
 	// Auto-loop functionality - automatically start focus after break completion
-	$effect(() => {
-		if (!timer.isComplete) return;
+	let lastHandledCompletion: number | null = null;
 
-		if (timer.phase === 'break' && preferences.autoLoop) {
+	$effect(() => {
+		const completionAt = timer.lastCompletionAt;
+		if (!completionAt || completionAt === lastHandledCompletion) return;
+
+		lastHandledCompletion = completionAt;
+
+		if (timer.lastCompletedPhase === 'break' && preferences.autoLoop && timer.phase === 'idle') {
 			// Auto-start next focus session
 			timer.startFocus();
 		}
