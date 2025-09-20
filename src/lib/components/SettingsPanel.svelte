@@ -6,7 +6,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
 
-	const uid = $props.id();
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
 
@@ -61,13 +60,11 @@
 			<h3
 				class="flex items-center gap-2 text-sm font-medium text-muted-foreground dark:text-foreground/80"
 			>
-				<!-- TODO: add Suitable text color for the icon -->
-				<Target class="size-4" />
+				<Target class="size-4 text-primary" />
 				<span>Focus Duration</span>
 			</h3>
 
-			<!-- TODO: Double check if there's a really good reason to why I need the ID the UID -->
-			<p id="{uid}-focus-desc" class="text-xs text-muted-foreground dark:text-foreground/80">
+			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Choose a preset or enter custom minutes.
 			</p>
 
@@ -88,17 +85,15 @@
 			</div>
 
 			<div class="relative">
-				<label for="{uid}-focus-custom" class="sr-only">Custom focus minutes</label>
 				<Input
-					id="{uid}-focus-custom"
-					bind:value={customFocusDuration}
 					min="1"
 					max="999"
 					class="pr-12"
 					type="number"
 					inputmode="numeric"
 					placeholder="Custom minutes"
-					aria-describedby="{uid}-focus-desc {uid}-focus-current"
+					bind:value={customFocusDuration}
+					aria-label="Custom focus duration in minutes"
 					onchange={handleCustomFocus}
 					onkeydown={onFocusKeydown}
 				/>
@@ -109,7 +104,7 @@
 				>
 			</div>
 
-			<p id="{uid}-focus-current" class="text-xs text-muted-foreground dark:text-foreground/80">
+			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Selected: {selectedFocusDuration} minutes
 			</p>
 		</fieldset>
@@ -119,11 +114,11 @@
 			<h3
 				class="flex items-center gap-2 text-sm font-medium text-muted-foreground dark:text-foreground/80"
 			>
-				<Coffee class="size-4" />
+				<Coffee class="size-4 text-primary" />
 				<span>Break Duration</span>
 			</h3>
 
-			<p id="{uid}-break-desc" class="text-xs text-muted-foreground dark:text-foreground/80">
+			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Short breaks help you reset. Choose a preset or enter custom minutes.
 			</p>
 
@@ -143,17 +138,15 @@
 			</div>
 
 			<div class="relative">
-				<label for="{uid}-break-custom" class="sr-only">Custom break minutes</label>
 				<Input
 					min="1"
 					max="60"
 					type="number"
 					class="pr-12"
 					inputmode="numeric"
-					id="{uid}-break-custom"
 					placeholder="Custom minutes"
 					bind:value={customBreakDuration}
-					aria-describedby="{uid}-break-desc {uid}-break-current"
+					aria-label="Custom break duration in minutes"
 					onchange={handleCustomBreak}
 					onkeydown={onBreakKeydown}
 				/>
@@ -162,7 +155,7 @@
 					>min</span
 				>
 			</div>
-			<p id="{uid}-break-current" class="text-xs text-muted-foreground dark:text-foreground/80">
+			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Selected: {selectedBreakDuration} minutes
 			</p>
 		</fieldset>
@@ -171,16 +164,12 @@
 	<div
 		class="mt-6 flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
 	>
-		<button
-			aria-expanded={autoLoop}
-			aria-controls="{uid}-autoloop-desc"
-			onclick={() => (autoLoop = !autoLoop)}
-		>
+		<button onclick={() => (autoLoop = !autoLoop)}>
 			<h4 class="flex items-center gap-2 font-medium text-foreground">
 				<RefreshCw class="size-4" />
 				<span> Auto-loop sessions </span>
 			</h4>
-			<p id="{uid}-autoloop-desc" class="text-sm text-muted-foreground dark:text-foreground/80">
+			<p class="text-sm text-muted-foreground dark:text-foreground/80">
 				Automatically start a new focus session when a break ends.
 			</p>
 		</button>
