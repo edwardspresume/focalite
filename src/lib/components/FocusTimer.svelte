@@ -14,8 +14,6 @@
 			else timer.resume();
 		} else if (e.key === 'Escape') {
 			timer.reset();
-		} else if (e.key.toLowerCase() === 'b') {
-			timer.startBreak();
 		}
 	}
 </script>
@@ -71,6 +69,5 @@
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
 		<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
 		<KeyboardShortcut key="Esc" label="Reset" />
-		<KeyboardShortcut key="B" label="Start Break" />
 	</div>
 </section>

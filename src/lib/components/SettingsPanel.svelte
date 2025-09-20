@@ -6,12 +6,16 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
 	import { preferences, setFocusMinutes, setBreakMinutes, toggleAutoLoop } from '$lib/stores/preferences.svelte';
+	import { timer } from '$lib/stores/timer.svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
 
 	let customFocusDuration = $state('');
 	let customBreakDuration = $state('');
+
+	// Track whether changes will apply to next session
+	const willApplyNextSession = $derived(timer.phase !== 'idle' && timer.startedAt !== null);
 
 	function selectFocusDuration(duration: number) {
 		setFocusMinutes(duration);
@@ -46,9 +50,16 @@
 </script>
 
 <section class="rounded-lg border bg-background p-6 shadow-md dark:border-input">
-	<header class="mb-6 flex items-center gap-2">
-		<Settings class="size-5" />
-		<h2 class="text-lg font-semibold">General Settings</h2>
+	<header class="mb-6 flex items-center justify-between gap-2">
+		<div class="flex items-center gap-2">
+			<Settings class="size-5" />
+			<h2 class="text-lg font-semibold">General Settings</h2>
+		</div>
+		{#if willApplyNextSession}
+			<p class="text-sm text-amber-600 dark:text-amber-400">
+				⚠️ Changes will apply next session
+			</p>
+		{/if}
 	</header>
 
 	<!-- Timer settings Grid -->
@@ -103,6 +114,9 @@
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Selected: {preferences.focusMinutes} minutes
+				{#if willApplyNextSession && timer.phase === 'focus'}
+					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
+				{/if}
 			</p>
 		</fieldset>
 
@@ -154,6 +168,9 @@
 			</div>
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Selected: {preferences.breakMinutes} minutes
+				{#if willApplyNextSession && timer.phase === 'break'}
+					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
+				{/if}
 			</p>
 		</fieldset>
 	</div>

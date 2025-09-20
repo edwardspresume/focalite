@@ -28,8 +28,9 @@ This file provides guidance to when working with code in this repository.
 
 #### User Interface
 
-- **Tab-based Navigation**: Timer, Break, Settings, and Stats panels
-- **Auto-tab Switching**: Automatically switches to break tab during break sessions
+- **Tab-based Navigation**: Timer, Break, Settings, and Stats panels (always clickable)
+- **Smart Auto-tab Switching**: Automatically switches to break tab when break starts, back to timer when break completes
+- **Persistent Settings Access**: Settings tab always accessible with visual indicators for when changes apply
 - Visual progress indicators with circular SVG animations using stroke-dashoffset
 - Settings panel with preset duration options and custom input
 - **Real-time Statistics Dashboard**: Live session tracking with completion rates and streaks
@@ -52,8 +53,10 @@ This file provides guidance to when working with code in this repository.
 
 #### Controls & Interaction
 
-- Keyboard shortcuts (Space: play/pause/resume, Esc: reset, B: start break)
-- Manual timer controls (start, pause, resume, reset, end break early)
+- Keyboard shortcuts (Space: play/pause/resume, Esc: reset)
+- Manual timer controls (start, pause, resume, reset, end break early, start break early)
+- **Start Break Early**: Users can manually start break during focus sessions via Break tab
+- **Always Clickable Tabs**: All navigation tabs remain accessible regardless of timer state
 
 #### Platform Support
 
@@ -218,6 +221,10 @@ class TimerStore {
   baseElapsedSec = $state(0);
   now = $state(Date.now());
 
+  // Progress tracking
+  lastCompletedPhase = $state<TimerPhase | null>(null);
+  lastCompletionAt = $state<number | null>(null);
+
   // Computed values using $derived for efficiency
   currentDuration = $derived.by(() => /* duration calculation */);
   elapsed = $derived(/* elapsed time calculation */);
@@ -226,7 +233,7 @@ class TimerStore {
   progress = $derived.by(() => /* 0-1 progress calculation */);
   dashOffset = $derived(/* SVG stroke-dashoffset for progress ring */);
 
-  // Methods: startFocus(), startBreak(), pause(), resume(), reset()
+  // Methods: startFocus(), startBreak(), startBreakEarly(), endBreakEarly(), pause(), resume(), reset()
 }
 ```
 
@@ -240,9 +247,9 @@ class TimerStore {
 ### Component Roles
 
 - **FocusTimer.svelte**: UI for focus sessions, consumes timer store
-- **BreakTimer.svelte**: UI for break sessions, consumes timer store
-- **+page.svelte**: Orchestrates auto-loop logic and tab switching
-- **SettingsPanel.svelte**: Modifies preferences that affect timer duration
+- **BreakTimer.svelte**: UI for break sessions with "Start Break" functionality during focus, consumes timer store
+- **+page.svelte**: Orchestrates auto-loop logic and smart tab switching based on phase changes
+- **SettingsPanel.svelte**: Always accessible settings with visual indicators for when changes apply next session
 - **StatsPanel.svelte**: Displays real-time and historical progress data
 
 ### State Flow
@@ -251,6 +258,8 @@ class TimerStore {
 2. Components automatically re-render via `$derived` subscriptions
 3. Timer completion → automatic phase transition → UI updates
 4. Progress tracking → persisted to Tauri store → stats update
+5. Tab navigation → always available, auto-switches only on phase changes
+6. Early break → `timer.startBreakEarly()` from Break tab → ends focus, starts break immediately
 
 ## Svelte 5+ Specifics
 

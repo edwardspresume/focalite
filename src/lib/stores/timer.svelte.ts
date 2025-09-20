@@ -150,6 +150,17 @@ class TimerStore {
 		this.reset();
 	}
 
+	startBreakEarly() {
+		if (this.phase !== 'focus') return;
+		// End the focus session early, recording partial completion
+		this.sessionsCompleted++;
+		this.totalFocusTime += Math.floor(this.elapsed / 60);
+		this.lastCompletedPhase = 'focus';
+		this.lastCompletionAt = Date.now();
+		// Start the break
+		this.startBreak();
+	}
+
 	resetProgress() {
 		this.sessionsCompleted = 0;
 		this.totalFocusTime = 0;

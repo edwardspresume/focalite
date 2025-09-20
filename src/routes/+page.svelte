@@ -31,14 +31,23 @@
 		}
 	});
 
-	// Tab management based on timer phase
+	// Tab management - only auto-switch when timer phase actually changes
 	let activeTab = $state('timer');
+	let lastPhase = $state<typeof timer.phase | null>(null);
 
 	$effect(() => {
-		if (timer.phase === 'break') {
-			activeTab = 'break';
-		} else if (activeTab === 'break' && (timer.phase === 'idle' || timer.phase === 'focus')) {
-			activeTab = 'timer';
+		// Only auto-switch tabs when phase changes (not just when viewing tabs)
+		if (timer.phase !== lastPhase) {
+			lastPhase = timer.phase;
+
+			// Auto-switch to break tab when break actually starts
+			if (timer.phase === 'break') {
+				activeTab = 'break';
+			}
+			// Auto-switch back to timer tab when break completes and we go idle
+			else if (timer.phase === 'idle' && timer.lastCompletedPhase === 'break') {
+				activeTab = 'timer';
+			}
 		}
 	});
 </script>
