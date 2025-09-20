@@ -102,7 +102,11 @@ class TimerStore {
 		} else if (completedPhase === 'break') {
 			this.breaksCompleted++;
 			this.totalBreakTime += completedMinutes;
-			this.reset();
+			if (preferences.autoLoop) {
+				this.startFocus();
+			} else {
+				this.reset();
+			}
 		}
 	}
 

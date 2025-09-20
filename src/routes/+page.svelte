@@ -16,20 +16,7 @@
 		void progress.loaded;
 	});
 
-	// Auto-loop functionality - automatically start focus after break completion
-	let lastHandledCompletion: number | null = null;
-
-	$effect(() => {
-		const completionAt = timer.lastCompletionAt;
-		if (!completionAt || completionAt === lastHandledCompletion) return;
-
-		lastHandledCompletion = completionAt;
-
-		if (timer.lastCompletedPhase === 'break' && preferences.autoLoop && timer.phase === 'idle') {
-			// Auto-start next focus session
-			timer.startFocus();
-		}
-	});
+	// Auto-loop is now handled in the timer store
 
 	// Tab management - only auto-switch when timer phase actually changes
 	let activeTab = $state('timer');
@@ -44,8 +31,8 @@
 			if (timer.phase === 'break') {
 				activeTab = 'break';
 			}
-			// Auto-switch back to timer tab when break completes and we go idle
-			else if (timer.phase === 'idle' && timer.lastCompletedPhase === 'break') {
+			// Auto-switch back to timer tab when transitioning to focus or idle
+			else if (timer.phase === 'focus' || timer.phase === 'idle') {
 				activeTab = 'timer';
 			}
 		}
