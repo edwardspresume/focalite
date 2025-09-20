@@ -3,7 +3,7 @@
 	import { BarChart } from 'layerchart';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
-	import { ChartNoAxesColumnIncreasing, CheckCircle, Coffee, Target } from 'lucide-svelte';
+	import { ChartNoAxesColumnIncreasing, CircleCheckBig, Coffee, Target } from 'lucide-svelte';
 
 	// Placeholder data for weekly chart
 	const chartData = [
@@ -50,7 +50,7 @@
             <div class="bg-background rounded-xl border p-4 shadow-sm">
                 <div class="flex items-center gap-4">
                     <div class="shrink-0 rounded-lg bg-primary/10 p-3 text-primary">
-                        <CheckCircle class="h-5 w-5" />
+                        <CircleCheckBig class="h-5 w-5" />
                     </div>
                     <div class="min-w-0">
                         <p class="text-sm text-muted-foreground">Sessions</p>
