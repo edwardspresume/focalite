@@ -69,7 +69,7 @@
                     <div class="min-w-0">
                         <p class="text-sm text-muted-foreground">Focus Time</p>
                         <p class="truncate text-3xl font-semibold leading-tight">{formatTime(todayStats.focusTime)}</p>
-                        <p class="text-xs text-muted-foreground mt-1">Total focus duration</p>
+                        <p class="text-xs text-muted-foreground mt-1">Total focus time</p>
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
 	<!-- Weekly Chart -->
 	<div>
 		<div class="mb-4 flex items-center justify-between">
-			<h3 class="text-lg font-semibold">Weekly Activity</h3>
+			<h3 class="text-lg font-semibold">Weekly Focus</h3>
 			<div class="flex items-center gap-2 text-sm text-muted-foreground">
 				<ChartNoAxesColumnIncreasing class="h-4 w-4" />
 				<span>Focus Minutes</span>

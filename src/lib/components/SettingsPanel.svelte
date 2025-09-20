@@ -63,7 +63,7 @@
 			</h3>
 
 			<p id="{uid}-focus-desc" class="text-xs text-muted-foreground">
-				Choose a preset or enter a custom number of minutes.
+				Choose a preset or enter custom minutes.
 			</p>
 
 			<div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
@@ -115,7 +115,7 @@
 			</h3>
 
 			<p id="{uid}-break-desc" class="text-xs text-muted-foreground">
-				Short breaks help you reset. Pick a preset or enter custom minutes.
+				Short breaks help you reset. Choose a preset or enter custom minutes.
 			</p>
 
 			<div class="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
@@ -170,13 +170,13 @@
 				aria-controls="{uid}-autoloop-desc"
 				onclick={() => (autoLoop = !autoLoop)}
 			>
-				<h4 class="font-medium text-foreground">Auto loop sessions</h4>
+				<h4 class="font-medium text-foreground">Auto-loop sessions</h4>
 				<p id="{uid}-autoloop-desc" class="max-w-prose text-sm text-muted-foreground">
-					Automatically start a new focus session after each break completes.
+					Automatically start a new focus session when a break ends.
 				</p>
 			</button>
 
-			<Switch aria-label="Auto loop sessions" bind:checked={autoLoop} />
+			<Switch aria-label="Auto-loop sessions" bind:checked={autoLoop} />
 		</div>
 	</div>
 </section>

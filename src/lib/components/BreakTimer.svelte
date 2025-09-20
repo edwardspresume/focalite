@@ -10,9 +10,9 @@
 		<div class="text-center">
 			<div class="mb-2 flex items-center justify-center gap-2 text-primary">
 				<Activity class="size-5" />
-				<h2 class="text-lg font-semibold text-primary">Time to move!</h2>
+				<h2 class="text-lg font-semibold text-primary">Time to move</h2>
 			</div>
-			<p class="text-sm text-muted-foreground">Get up, stretch your legs, and take a refreshing walk</p>
+			<p class="text-sm text-muted-foreground">Stand up, stretch, or take a short walk.</p>
 		</div>
 
 		<!-- Timer Display -->
@@ -44,7 +44,7 @@
 
 			<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
 				<time class="font-mono text-6xl font-bold text-foreground">2:57</time>
-				<p class="mt-2 text-sm text-muted-foreground">Break Time</p>
+				<p class="mt-2 text-sm text-muted-foreground">On break</p>
 			</figcaption>
 		</figure>
 
@@ -56,23 +56,24 @@
 			</Button>
 			<Button variant="destructive" size="lg" class="cursor-pointer shadow-sm hover:shadow-md">
 				<Square class="size-4" />
-				End Break Early
+				End Break
 			</Button>
 		</div>
 
 		<!-- Keyboard Shortcuts -->
 		<div class="flex gap-6 text-sm text-muted-foreground">
 			<span>
-				<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Space</kbd>
-				start/pause/resume
+				<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Space</kbd
+				>
+				Start/Pause/Resume
 			</span>
 			<span>
 				<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Esc</kbd>
-				end break
+				End Break
 			</span>
 			<span>
 				<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">B</kbd>
-				start break
+				Start Break
 			</span>
 		</div>
 	</section>
@@ -89,9 +90,9 @@
 			<div class="rounded-md border bg-primary/10 p-4 shadow-sm">
 				<h4 class="mb-3 font-medium text-foreground">Physical Movement</h4>
 				<ul class="space-y-2 text-sm text-muted-foreground">
-					<li>• Take a short walk</li>
-					<li>• Do some stretches</li>
-					<li>• Practice deep breathing</li>
+					<li>Take a short walk</li>
+					<li>Stretch neck, shoulders, and wrists</li>
+					<li>Do 10–15 squats or calf raises</li>
 				</ul>
 			</div>
 
@@ -99,9 +100,9 @@
 			<div class="rounded-md border bg-primary/10 p-4 shadow-sm">
 				<h4 class="mb-3 font-medium text-foreground">Mental Rest</h4>
 				<ul class="space-y-2 text-sm text-muted-foreground">
-					<li>• Look out the window</li>
-					<li>• Hydrate with water</li>
-					<li>• Practice mindfulness</li>
+					<li>Drink water</li>
+					<li>Box breathing (4-4-4-4)</li>
+					<li>Follow the 20-20-20 rule (eyes)</li>
 				</ul>
 			</div>
 		</div>

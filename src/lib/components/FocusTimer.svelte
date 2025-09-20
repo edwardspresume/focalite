@@ -32,7 +32,7 @@
 
 		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
 			<time class="font-mono text-6xl font-bold text-foreground">0:00</time>
-			<p class="mt-2 text-sm text-muted-foreground">Ready to Focus</p>
+			<p class="mt-2 text-sm text-muted-foreground">Ready to focus</p>
 		</figcaption>
 	</figure>
 
@@ -40,20 +40,20 @@
 	<div class="flex gap-4">
 		<Button size="lg" class="cursor-pointer text-lg font-semibold shadow-sm hover:shadow-md">
 			<Play class="size-4" />
-			Start Focus Session
+			Start Focus
 		</Button>
 	</div>
 
 	<div class="flex gap-6 text-sm text-muted-foreground">
 		<span>
 			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Space</kbd>
-			start/pause/resume
+			Start/Pause/Resume
 		</span>
 		<span>
-			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Esc</kbd> reset
+			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">Esc</kbd> Reset
 		</span>
 		<span>
-			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">B</kbd> start break
+			<kbd class="rounded-sm bg-border px-1.5 py-0.5 font-mono text-xs text-foreground">B</kbd> Start Break
 		</span>
 	</div>
 </section>
