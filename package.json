@@ -19,7 +19,8 @@
 		"@tauri-apps/plugin-notification": "~2.3.1",
 		"@tauri-apps/plugin-opener": "^2",
 		"d3-scale": "^4.0.2",
-		"lucide-svelte": "^0.544.0"
+		"lucide-svelte": "^0.544.0",
+		"mode-watcher": "^1.1.0"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

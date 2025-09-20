@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { Coffee, Moon, Settings, Sun, Target } from 'lucide-svelte';
+	import { toggleMode } from 'mode-watcher';
+
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
-	import { Coffee, Settings, Target } from 'lucide-svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
@@ -177,6 +179,32 @@
 			</button>
 
 			<Switch aria-label="Auto-loop sessions" bind:checked={autoLoop} />
+		</div>
+	</div>
+
+	<!-- Appearance -->
+	<div class="mt-6 rounded-md border bg-accent p-4">
+		<h3 class="mb-3 text-sm font-medium text-muted-foreground">Appearance</h3>
+		<div class="flex items-center justify-between gap-4">
+			<div>
+				<h4 class="font-medium text-foreground">Theme</h4>
+				<p class="max-w-prose text-sm text-muted-foreground">Toggle between light and dark mode.</p>
+			</div>
+			<Button
+				class="relative"
+				variant="outline"
+				size="icon"
+				onclick={toggleMode}
+				aria-label="Toggle theme"
+			>
+				<Sun
+					class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 !transition-all dark:scale-0 dark:-rotate-90"
+				/>
+				<Moon
+					class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 !transition-all dark:scale-100 dark:rotate-0"
+				/>
+				<span class="sr-only">Toggle theme</span>
+			</Button>
 		</div>
 	</div>
 </section>
