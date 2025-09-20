@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { scaleBand } from 'd3-scale';
 	import { BarChart } from 'layerchart';
+	import {
+		ChartNoAxesColumnIncreasing,
+		CircleCheckBig,
+		Coffee,
+		Target,
+		type Icon as IconType
+	} from 'lucide-svelte';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
-	import { ChartNoAxesColumnIncreasing, CircleCheckBig, Coffee, Target } from 'lucide-svelte';
 
 	// Placeholder data for weekly chart
 	const chartData = [
@@ -16,18 +22,30 @@
 		{ day: 'Sun', minutes: 45 }
 	];
 
-    const chartConfig = {
-        minutes: {
-            label: 'Focus Minutes',
-            color: 'color-mix(in oklch, var(--primary) 70%, white)'
-        }
-    } satisfies Chart.ChartConfig;
+	const chartConfig = {
+		minutes: {
+			label: 'Focus Minutes',
+			color: 'color-mix(in oklch, var(--primary) 70%, white)'
+		}
+	} satisfies Chart.ChartConfig;
 
-	// Placeholder stats
+	// Placeholder stats (requested metrics)
 	const todayStats = {
-		sessions: 8,
-		focusTime: 240, // in minutes
-		breaks: 7
+		// Focus Time (Today · WTD)
+		focusTodayMin: 220, // e.g., 3h 40m today
+		focusWtdMicro: 'WTD 3h 20m (↑18% vs last week)',
+
+		// Completion Rate
+		completionRate: 82, // %
+		completionMicro: 'Ignores <2m false starts',
+
+		// Consistency Streak (Current · Best)
+		streakCurrentDays: 3,
+		streakBestDays: 9,
+
+		// Break Adherence
+		breakAdherence: 91, // %
+		breakMicro: 'Avg break 5m'
 	};
 
 	// Convert minutes to hours and minutes
@@ -41,66 +59,85 @@
 	}
 </script>
 
-<div class="space-y-6 p-6">
-	<!-- Daily Stats Cards -->
-    <div>
-        <h3 class="text-lg font-semibold mb-4">Today's Focus</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Sessions Card -->
-            <div class="bg-background rounded-md border p-4 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="shrink-0 rounded-lg bg-primary/10 p-3 text-primary">
-                        <CircleCheckBig class="h-5 w-5" />
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-sm text-muted-foreground">Sessions</p>
-                        <p class="truncate text-3xl font-semibold leading-tight">{todayStats.sessions}</p>
-                        <p class="text-xs text-muted-foreground mt-1">Completed today</p>
-                    </div>
-                </div>
-            </div>
+{#snippet metricCard(
+	Icon: typeof IconType,
+	iconColorClasses: string,
+	title: string,
+	value: string,
+	subtitle: string
+)}
+	<article
+		class="flex items-center gap-4 rounded-md border bg-background p-3 shadow-sm dark:border-input"
+	>
+		<div class="shrink-0 rounded-lg p-3 {iconColorClasses}">
+			<Icon class="size-5" />
+		</div>
 
-            <!-- Focus Time Card -->
-            <div class="bg-background rounded-md border p-4 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="shrink-0 rounded-lg bg-blue-500/10 p-3 text-blue-600 dark:text-blue-400">
-                        <Target class="h-5 w-5" />
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-sm text-muted-foreground">Focus Time</p>
-                        <p class="truncate text-3xl font-semibold leading-tight">{formatTime(todayStats.focusTime)}</p>
-                        <p class="text-xs text-muted-foreground mt-1">Total focus time</p>
-                    </div>
-                </div>
-            </div>
+		<div>
+			<p class="text-sm text-muted-foreground dark:text-foreground/80">{title}</p>
+			<p class="truncate text-3xl leading-tight font-semibold">
+				{value}
+			</p>
+			<p class="mt-1 text-xs text-muted-foreground dark:text-foreground/80">
+				{subtitle}
+			</p>
+		</div>
+	</article>
+{/snippet}
 
-            <!-- Breaks Card -->
-            <div class="bg-background rounded-md border p-4 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="shrink-0 rounded-lg bg-green-500/10 p-3 text-green-600 dark:text-green-400">
-                        <Coffee class="h-5 w-5" />
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-sm text-muted-foreground">Breaks</p>
-                        <p class="truncate text-3xl font-semibold leading-tight">{todayStats.breaks}</p>
-                        <p class="text-xs text-muted-foreground mt-1">Breaks taken</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="space-y-6">
+	<!-- Daily Stats Section -->
+	<section>
+		<h3 class="mb-4 text-lg font-semibold">Today's Focus</h3>
+
+		<div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
+			{@render metricCard(
+				Target,
+				'bg-blue-500/10 text-blue-600 dark:bg-blue-400/15 dark:text-blue-400',
+				'Focus Time',
+				formatTime(todayStats.focusTodayMin),
+				todayStats.focusWtdMicro
+			)}
+
+			{@render metricCard(
+				CircleCheckBig,
+				'bg-primary/10 text-primary dark:bg-primary/20',
+				'Completion Rate',
+				`${todayStats.completionRate}%`,
+				todayStats.completionMicro
+			)}
+
+			{@render metricCard(
+				ChartNoAxesColumnIncreasing,
+				'bg-amber-500/10 text-amber-600 dark:bg-amber-400/15 dark:text-amber-400',
+				'Consistency Streak',
+				`${todayStats.streakCurrentDays}d · ${todayStats.streakBestDays}d`,
+				'Current · Best'
+			)}
+
+			{@render metricCard(
+				Coffee,
+				'bg-green-500/10 text-green-600 dark:bg-green-400/15 dark:text-green-400',
+				'Break Adherence',
+				`${todayStats.breakAdherence}%`,
+				todayStats.breakMicro
+			)}
+		</div>
+	</section>
 
 	<!-- Weekly Chart -->
 	<div>
-		<div class="mb-4 flex items-center justify-between">
+		<header class="mb-4 flex items-center justify-between">
 			<h3 class="text-lg font-semibold">Weekly Overview</h3>
-			<div class="flex items-center gap-2 text-sm text-muted-foreground">
-				<ChartNoAxesColumnIncreasing class="h-4 w-4" />
+
+			<h4 class="flex items-center gap-2 text-sm text-muted-foreground dark:text-foreground/80">
+				<ChartNoAxesColumnIncreasing class="size-4" />
 				<span>Focus Minutes</span>
-			</div>
-		</div>
-		<div class="rounded-md border bg-background p-6 shadow-sm">
-			<Chart.Container config={chartConfig} class="h-[250px] w-full">
+			</h4>
+		</header>
+
+		<div class="rounded-md border bg-background p-6 shadow-sm dark:border-input">
+			<Chart.Container config={chartConfig} class="h-[240px] ">
 				<BarChart
 					data={chartData}
 					xScale={scaleBand().padding(0.3)}

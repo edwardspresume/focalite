@@ -86,7 +86,7 @@
 <TooltipPrimitive.Root variant="none">
 	<div
 		class={cn(
-			"border-border/50 bg-background grid min-w-[9rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
+			"border-border/50 bg-background grid min-w-[9rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl dark:border-input",
 			className
 		)}
 		{...restProps}
@@ -101,7 +101,7 @@
 				{@const indicatorColor = color || item.payload?.color || item.color}
 				<div
 					class={cn(
-						"[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:size-2.5",
+						"[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:size-2.5 dark:[&>svg]:text-foreground/80",
 						indicator === "dot" && "items-center"
 					)}
 				>
@@ -141,7 +141,7 @@
 								{#if nestLabel}
 									{@render TooltipLabel()}
 								{/if}
-								<span class="text-muted-foreground">
+								<span class="text-muted-foreground dark:text-foreground/80">
 									{itemConfig?.label || item.name}
 								</span>
 							</div>
