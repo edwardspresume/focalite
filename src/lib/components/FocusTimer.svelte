@@ -58,7 +58,6 @@
 		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
 			<time
 				class="font-mono text-6xl font-bold text-foreground"
-				datetime={`PT${timer.phase === 'idle' ? timer.focusDurationSeconds : timer.displaySeconds}S`}
 				aria-live="polite"
 			>
 				{#if timer.phase === 'idle'}

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { timer } from '$lib/stores/timer.svelte';
 	import { Activity, Pause, Play, Square } from 'lucide-svelte';
-	import Button from './ui/button/button.svelte';
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
+	import Button from './ui/button/button.svelte';
 
 	function onKey(e: KeyboardEvent) {
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
@@ -68,7 +68,6 @@
 				<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
 					<time
 						class="font-mono text-6xl font-bold text-foreground"
-						datetime={`PT${timer.phase === 'idle' ? timer.breakDurationSeconds : timer.displaySeconds}S`}
 						aria-live="polite"
 					>
 						{#if timer.phase === 'idle'}
