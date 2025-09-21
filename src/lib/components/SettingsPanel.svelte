@@ -14,6 +14,7 @@
 
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { Separator } from '$lib/components/ui/separator';
 	import { Switch } from '$lib/components/ui/switch';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { timer } from '$lib/stores/timer.svelte';
@@ -190,10 +191,8 @@
 	</div>
 
 	<!-- Notification Settings -->
-	<div class="mt-6 space-y-4">
-		<div
-			class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
-		>
+	<fieldset class="mt-6 rounded-md border bg-accent p-0 dark:border-input">
+		<div class="flex items-center justify-between gap-4 p-4">
 			<header>
 				<h4 class="flex items-center gap-2 font-medium text-foreground">
 					<Volume2 class="size-4" />
@@ -213,21 +212,18 @@
 		</div>
 
 		{#if preferences.soundEnabled}
-			<div class="grid gap-4 md:grid-cols-2">
-				<div
-					class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
-				>
+			<Separator />
+			<div class="space-y-3 p-4">
+				<div class="flex items-center justify-between gap-4">
 					<header>
 						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
 							<Target class="size-4 text-primary" />
 							<span>Focus Start Sound</span>
 						</h5>
-
 						<p class="text-xs text-muted-foreground dark:text-foreground/80">
 							Play sound when focus session begins.
 						</p>
 					</header>
-
 					<Switch
 						aria-label="Focus start sound"
 						bind:checked={preferences.focusStartSound}
@@ -235,20 +231,17 @@
 					/>
 				</div>
 
-				<div
-					class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
-				>
+				<Separator />
+				<div class="flex items-center justify-between gap-4">
 					<header>
 						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
 							<Coffee class="size-4 text-primary" />
 							<span>Break Start Sound</span>
 						</h5>
-
 						<p class="text-xs text-muted-foreground dark:text-foreground/80">
 							Play sound when break session begins.
 						</p>
 					</header>
-
 					<Switch
 						aria-label="Break start sound"
 						bind:checked={preferences.breakStartSound}
@@ -257,7 +250,7 @@
 				</div>
 			</div>
 		{/if}
-	</div>
+	</fieldset>
 
 	<div
 		class="mt-6 flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
