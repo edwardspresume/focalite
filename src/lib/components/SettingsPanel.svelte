@@ -220,24 +220,6 @@
 					<div class="flex items-center justify-between gap-4">
 						<header>
 							<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
-								<Target class="size-4 text-primary" />
-								<span>Focus Start Sound</span>
-							</h5>
-							<p class="text-xs text-muted-foreground dark:text-foreground/80">
-								Play sound when focus session begins.
-							</p>
-						</header>
-						<Switch
-							aria-label="Focus start sound"
-							bind:checked={preferences.focusStartSound}
-							onCheckedChange={(checked: boolean) => preferences.setFocusStartSound(checked)}
-						/>
-					</div>
-
-					<Separator />
-					<div class="flex items-center justify-between gap-4">
-						<header>
-							<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
 								<Coffee class="size-4 text-primary" />
 								<span>Break Start Sound</span>
 							</h5>
@@ -249,6 +231,24 @@
 							aria-label="Break start sound"
 							bind:checked={preferences.breakStartSound}
 							onCheckedChange={(checked: boolean) => preferences.setBreakStartSound(checked)}
+						/>
+					</div>
+
+					<Separator />
+					<div class="flex items-center justify-between gap-4">
+						<header>
+							<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
+								<RefreshCw class="size-4 text-primary" />
+								<span>Break End Sound</span>
+							</h5>
+							<p class="text-xs text-muted-foreground dark:text-foreground/80">
+								Play sound when a break completes.
+							</p>
+						</header>
+						<Switch
+							aria-label="Break end sound"
+							bind:checked={preferences.breakEndSound}
+							onCheckedChange={(checked: boolean) => preferences.setBreakEndSound(checked)}
 						/>
 					</div>
 				</div>

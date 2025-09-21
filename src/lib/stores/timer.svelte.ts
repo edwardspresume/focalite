@@ -1,4 +1,5 @@
 import { notificationService } from '../services/notifications';
+import { playBreakEnd, playBreakStart } from '../services/sounds';
 import { preferences } from './preferences.svelte';
 import { IntervalManager } from './store-utils';
 
@@ -122,22 +123,26 @@ class TimerStore {
 		} else if (completedPhase === 'break') {
 			this.breaksCompleted++;
 			this.totalBreakTime += completedMinutes;
-			if (preferences.autoLoop && !this.isManualCycle) {
-				this.startFocus();
-			} else {
-				this.reset();
-			}
+            // Notify and play sound on break completion
+            notificationService.sendBreakEndNotification();
+            playBreakEnd();
+            if (preferences.autoLoop && !this.isManualCycle) {
+                // Start next focus; no notifications/sounds on focus start
+                this.startFocus();
+            } else {
+                this.reset();
+            }
 		}
 	}
 
 	// --- Public controls ---
-	startFocus() {
-		this.beginPhase('focus');
-	}
+    startFocus() {
+        this.beginPhase('focus');
+    }
 
-	startBreak() {
-		this.beginPhase('break');
-	}
+    startBreak() {
+        this.beginPhase('break');
+    }
 
 	pause() {
 		if (!this.startedAt) return;
@@ -185,19 +190,21 @@ class TimerStore {
 	}
 
 	// --- Phase orchestration ---
-	private beginPhase(phase: Extract<TimerPhase, 'focus' | 'break'>) {
-		this.stopInterval();
-		this.phase = phase;
-		this.lockedDuration = this.getDurationForPhase(phase);
-		this.baseElapsedSec = 0;
-		this.startedAt = Date.now();
-		this.now = this.startedAt;
-		this.startInterval();
+    private beginPhase(phase: Extract<TimerPhase, 'focus' | 'break'>) {
+        this.stopInterval();
+        this.phase = phase;
+        this.lockedDuration = this.getDurationForPhase(phase);
+        this.baseElapsedSec = 0;
+        this.startedAt = Date.now();
+        this.now = this.startedAt;
+        this.startInterval();
 
-		if (phase === 'break') {
-			notificationService.sendBreakStartNotification();
-		}
-	}
+        if (phase === 'break') {
+            // Always notify and play break start (respecting sound prefs)
+            notificationService.sendBreakStartNotification();
+            playBreakStart();
+        }
+    }
 }
 
 export const timer = new TimerStore();
