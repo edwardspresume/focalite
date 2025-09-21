@@ -18,6 +18,8 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { timer } from '$lib/stores/timer.svelte';
+	import { slide } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	const focusOptions = [20, 25, 30, 45, 50, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
@@ -212,41 +214,43 @@
 		</div>
 
 		{#if preferences.soundEnabled}
-			<Separator />
-			<div class="space-y-3 p-4">
-				<div class="flex items-center justify-between gap-4">
-					<header>
-						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
-							<Target class="size-4 text-primary" />
-							<span>Focus Start Sound</span>
-						</h5>
-						<p class="text-xs text-muted-foreground dark:text-foreground/80">
-							Play sound when focus session begins.
-						</p>
-					</header>
-					<Switch
-						aria-label="Focus start sound"
-						bind:checked={preferences.focusStartSound}
-						onCheckedChange={(checked: boolean) => preferences.setFocusStartSound(checked)}
-					/>
-				</div>
-
+			<div class="overflow-hidden" transition:slide={{ duration: 200, easing: cubicOut }}>
 				<Separator />
-				<div class="flex items-center justify-between gap-4">
-					<header>
-						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
-							<Coffee class="size-4 text-primary" />
-							<span>Break Start Sound</span>
-						</h5>
-						<p class="text-xs text-muted-foreground dark:text-foreground/80">
-							Play sound when break session begins.
-						</p>
-					</header>
-					<Switch
-						aria-label="Break start sound"
-						bind:checked={preferences.breakStartSound}
-						onCheckedChange={(checked: boolean) => preferences.setBreakStartSound(checked)}
-					/>
+				<div class="space-y-3 p-4">
+					<div class="flex items-center justify-between gap-4">
+						<header>
+							<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
+								<Target class="size-4 text-primary" />
+								<span>Focus Start Sound</span>
+							</h5>
+							<p class="text-xs text-muted-foreground dark:text-foreground/80">
+								Play sound when focus session begins.
+							</p>
+						</header>
+						<Switch
+							aria-label="Focus start sound"
+							bind:checked={preferences.focusStartSound}
+							onCheckedChange={(checked: boolean) => preferences.setFocusStartSound(checked)}
+						/>
+					</div>
+
+					<Separator />
+					<div class="flex items-center justify-between gap-4">
+						<header>
+							<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
+								<Coffee class="size-4 text-primary" />
+								<span>Break Start Sound</span>
+							</h5>
+							<p class="text-xs text-muted-foreground dark:text-foreground/80">
+								Play sound when break session begins.
+							</p>
+						</header>
+						<Switch
+							aria-label="Break start sound"
+							bind:checked={preferences.breakStartSound}
+							onCheckedChange={(checked: boolean) => preferences.setBreakStartSound(checked)}
+						/>
+					</div>
 				</div>
 			</div>
 		{/if}
