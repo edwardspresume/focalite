@@ -17,10 +17,14 @@ jobs:
           node-version: lts/*
           cache: pnpm
 
-      - name: Setup pnpm via Corepack
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Verify pnpm
+        run: pnpm --version
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
@@ -33,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tauriScript: pnpm tauri
+          tauriScript: pnpm
           args: build
 
       - name: Upload installer
