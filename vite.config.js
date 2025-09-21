@@ -26,6 +26,7 @@ export default defineConfig(async () => ({
 	test: {
 		environment: 'jsdom',
 		globals: true,
-		include: ['src/**/*.{test,spec}.{js,ts,svelte}']
+		include: ['src/**/*.{test,spec}.{js,ts,svelte}'],
+		setupFiles: ['./src/test/setup.ts']
 	}
 }));

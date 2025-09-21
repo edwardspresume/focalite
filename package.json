@@ -36,6 +36,7 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.0.0",
 		"@tauri-apps/cli": "^2",
+		"@testing-library/jest-dom": "^6.8.0",
 		"@testing-library/svelte": "^5.2.8",
 		"@types/d3-scale": "^4.0.9",
 		"@types/node": "^22",
