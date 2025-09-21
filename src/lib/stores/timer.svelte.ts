@@ -1,3 +1,4 @@
+import { notificationService } from '../services/notifications';
 import { preferences } from './preferences.svelte';
 import { IntervalManager } from './store-utils';
 
@@ -192,6 +193,10 @@ class TimerStore {
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
 		this.startInterval();
+
+		if (phase === 'break') {
+			notificationService.sendBreakStartNotification();
+		}
 	}
 }
 
