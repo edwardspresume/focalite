@@ -63,8 +63,6 @@ class TimerStore {
 	isComplete = $derived(this.startedAt !== null && this.remaining === 0);
 
 	// Display helpers
-	displaySeconds = $derived(this.phase === 'idle' ? this.currentDuration : this.remaining);
-
 	// Always show break duration (use locked duration during active break)
 	breakDurationSeconds = $derived.by(() =>
 		this.phase === 'break' && this.lockedDuration !== null
@@ -72,14 +70,14 @@ class TimerStore {
 			: this.getDurationForPhase('break')
 	);
 
-	timeLabel = $derived.by(() => formatTime(this.displaySeconds));
+	timeLabel = $derived.by(() =>
+		formatTime(this.phase === 'idle' ? this.currentDuration : this.remaining)
+	);
 
 	breakDurationLabel = $derived.by(() => formatTime(this.breakDurationSeconds));
 
-	// Focus duration (only used when idle, so always show current preference)
-	focusDurationSeconds = $derived(this.getDurationForPhase('focus'));
-
-	focusDurationLabel = $derived.by(() => formatTime(this.focusDurationSeconds));
+	// Focus duration label uses current preference (store handles locked duration elsewhere)
+	focusDurationLabel = $derived.by(() => formatTime(this.getDurationForPhase('focus')));
 
 	phaseLabel = $derived.by(() => {
 		if (this.phase === 'idle') return 'Ready to focus';
