@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { progress } from '$lib/stores/progress.svelte';
 	import { timer, type TimerPhase } from '$lib/stores/timer.svelte';
 	import { Activity, ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 
@@ -9,11 +8,6 @@
 	import StatsPanel from '$lib/components/StatsPanel.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 
-	// Initialize progress store (just by importing and using it)
-	$effect(() => {
-		// This ensures the progress store is initialized
-		void progress.loaded;
-	});
 
 	// Auto-loop is now handled in the timer store
 
@@ -22,23 +16,21 @@
 	let lastPhase = $state<TimerPhase>(timer.phase);
 
 	$effect(() => {
-		// Only auto-switch tabs when phase changes (not just when viewing tabs)
-		if (timer.phase !== lastPhase) {
-			lastPhase = timer.phase;
+		const phase = timer.phase;
 
-			// Auto-switch to break tab when break starts
-			if (timer.phase === 'break') {
-				activeTab = 'break';
-			}
-			// For manual cycles, stay idle when break completes
-			// For auto cycles, may auto-start focus per setting (handled in timer store)
-			else if (timer.phase === 'idle' && timer.isManualCycle) {
-				activeTab = 'timer';
-			}
-			// Auto-switch back to timer tab when transitioning to focus
-			else if (timer.phase === 'focus') {
-				activeTab = 'timer';
-			}
+		if (phase === lastPhase) return;
+
+		lastPhase = phase;
+
+		if (phase === 'break') {
+			activeTab = 'break';
+			return;
+		}
+
+		// Manual cycles return the UI to the timer when the break completes.
+		// Focus transitions should also snap the UI back to the timer tab.
+		if (phase === 'focus' || (phase === 'idle' && timer.isManualCycle)) {
+			activeTab = 'timer';
 		}
 	});
 </script>
