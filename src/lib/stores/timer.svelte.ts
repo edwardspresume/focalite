@@ -47,8 +47,15 @@ class TimerStore {
 	// Display helpers
 	displaySeconds = $derived(this.phase === 'idle' ? this.currentDuration : this.remaining);
 
-	// Always show break duration
-	breakDurationSeconds = $derived(Math.max(1, Math.round(preferences.breakMinutes * 60)));
+	// Always show break duration (respects locked duration during active break)
+	breakDurationSeconds = $derived.by(() => {
+		// If we're in break phase and have a locked duration, show that
+		if (this.phase === 'break' && this.lockedDuration !== null) {
+			return this.lockedDuration;
+		}
+		// Otherwise show current preference
+		return Math.max(1, Math.round(preferences.breakMinutes * 60));
+	});
 
 	timeLabel = $derived.by(() => {
 		const secs = this.displaySeconds;
