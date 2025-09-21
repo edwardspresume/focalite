@@ -60,8 +60,6 @@ class TimerStore {
 
 	running = $derived(this.startedAt !== null && this.remaining > 0);
 
-	isComplete = $derived(this.startedAt !== null && this.remaining === 0);
-
 	// Display helpers
 	// Always show break duration (use locked duration during active break)
 	breakDurationSeconds = $derived.by(() =>
@@ -146,21 +144,11 @@ class TimerStore {
 	}
 
 	startFocus() {
-		this.phase = 'focus';
-		this.lockedDuration = this.getDurationForPhase('focus');
-		this.baseElapsedSec = 0;
-		this.startedAt = Date.now();
-		this.now = this.startedAt;
-		this.startInterval();
+		this.beginPhase('focus');
 	}
 
 	startBreak() {
-		this.phase = 'break';
-		this.lockedDuration = this.getDurationForPhase('break');
-		this.baseElapsedSec = 0;
-		this.startedAt = Date.now();
-		this.now = this.startedAt;
-		this.startInterval();
+		this.beginPhase('break');
 	}
 
 	pause() {
@@ -208,6 +196,16 @@ class TimerStore {
 		// Mark as manual cycle and start break
 		this.isManualCycle = true;
 		this.startBreak();
+	}
+
+	private beginPhase(phase: Extract<TimerPhase, 'focus' | 'break'>) {
+		this.stopInterval();
+		this.phase = phase;
+		this.lockedDuration = this.getDurationForPhase(phase);
+		this.baseElapsedSec = 0;
+		this.startedAt = Date.now();
+		this.now = this.startedAt;
+		this.startInterval();
 	}
 }
 
