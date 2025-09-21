@@ -5,7 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
-	import { preferences, setFocusMinutes, setBreakMinutes, toggleAutoLoop } from '$lib/stores/preferences.svelte';
+	import { preferences } from '$lib/stores/preferences.svelte';
 	import { timer } from '$lib/stores/timer.svelte';
 
 	const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
@@ -17,35 +17,18 @@
 	// Track whether changes will apply to next session
 	const willApplyNextSession = $derived(timer.phase !== 'idle' && timer.startedAt !== null);
 
-	function selectFocusDuration(duration: number) {
-		setFocusMinutes(duration);
-		customFocusDuration = '';
-	}
-
-	function selectBreakDuration(duration: number) {
-		setBreakMinutes(duration);
-		customBreakDuration = '';
-	}
-
 	function handleCustomFocus() {
-		const value = parseFloat(customFocusDuration);
-		if (value && value > 0) {
-			setFocusMinutes(value);
+		if (customFocusDuration.trim()) {
+			preferences.setFocusMinutes(Number(customFocusDuration));
+			customFocusDuration = '';
 		}
 	}
 
 	function handleCustomBreak() {
-		const value = parseFloat(customBreakDuration);
-		if (value && value > 0) {
-			setBreakMinutes(value);
+		if (customBreakDuration.trim()) {
+			preferences.setBreakMinutes(Number(customBreakDuration));
+			customBreakDuration = '';
 		}
-	}
-
-	function onFocusKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') handleCustomFocus();
-	}
-	function onBreakKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') handleCustomBreak();
 	}
 </script>
 
@@ -73,10 +56,6 @@
 				<span>Focus Duration</span>
 			</h3>
 
-			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Choose a preset or enter custom minutes.
-			</p>
-
 			<div class="grid grid-cols-[repeat(auto-fit,minmax(3rem,1fr))] gap-2">
 				{#each focusOptions as duration (duration)}
 					<Button
@@ -84,7 +63,7 @@
 						class="rounded-full"
 						title={`${duration} minutes`}
 						aria-pressed={preferences.focusMinutes === duration}
-						onclick={() => selectFocusDuration(duration)}
+						onclick={() => preferences.setFocusMinutes(duration)}
 						variant={preferences.focusMinutes === duration ? 'default' : 'outline'}
 					>
 						{duration}m
@@ -103,7 +82,7 @@
                     bind:value={customFocusDuration}
                     aria-label="Custom focus duration in minutes"
                     onchange={handleCustomFocus}
-                    onkeydown={onFocusKeydown}
+                    onkeydown={(e) => e.key === 'Enter' && handleCustomFocus()}
                 />
 
 				<span
@@ -129,9 +108,7 @@
 				<span>Break Duration</span>
 			</h3>
 
-			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Short breaks help you reset. Choose a preset or enter custom minutes.
-			</p>
+
 
 			<div class="grid grid-cols-[repeat(auto-fit,minmax(3rem,1fr))] gap-2">
 				{#each breakOptions as duration (duration)}
@@ -140,7 +117,7 @@
 						class="rounded-full"
 						title={`${duration} minutes`}
 						aria-pressed={preferences.breakMinutes === duration}
-						onclick={() => selectBreakDuration(duration)}
+						onclick={() => preferences.setBreakMinutes(duration)}
 						variant={preferences.breakMinutes === duration ? 'default' : 'outline'}
 					>
 						{duration}m
@@ -159,13 +136,14 @@
                     bind:value={customBreakDuration}
                     aria-label="Custom break duration in minutes"
                     onchange={handleCustomBreak}
-                    onkeydown={onBreakKeydown}
+                    onkeydown={(e) => e.key === 'Enter' && handleCustomBreak()}
                 />
 				<span
 					class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground dark:text-foreground/80"
 					>min</span
 				>
 			</div>
+
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
 				Selected: {preferences.breakMinutes} minutes
 				{#if willApplyNextSession && timer.phase === 'break'}
@@ -178,7 +156,7 @@
 	<div
 		class="mt-6 flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
 	>
-		<button onclick={toggleAutoLoop}>
+		<button onclick={() => preferences.toggleAutoLoop()}>
 			<h4 class="flex items-center gap-2 font-medium text-foreground">
 				<RefreshCw class="size-4" />
 				<span> Auto-loop sessions </span>

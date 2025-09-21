@@ -13,46 +13,38 @@ const DEFAULT_PREFERENCES: Preferences = {
 	autoLoop: false
 };
 
-let loadPromise: Promise<void> | null = null;
 let storeInstance: Store | null = null;
 
 class PreferencesStore {
 	focusMinutes = $state(DEFAULT_PREFERENCES.focusMinutes);
 	breakMinutes = $state(DEFAULT_PREFERENCES.breakMinutes);
 	autoLoop = $state(DEFAULT_PREFERENCES.autoLoop);
-	loaded = $state(false);
 
 	constructor() {
-		this.loadPreferences();
+		this.load();
 	}
 
-	private async loadPreferences() {
-		if (loadPromise) return loadPromise;
-
-		loadPromise = (async () => {
-			try {
-				if (!storeInstance) {
-					storeInstance = await load('preferences.json');
-				}
-
-				const focusMinutes = await storeInstance.get('focusMinutes') as number | null;
-				const breakMinutes = await storeInstance.get('breakMinutes') as number | null;
-				const autoLoop = await storeInstance.get('autoLoop') as boolean | null;
-
-				this.focusMinutes = focusMinutes ?? DEFAULT_PREFERENCES.focusMinutes;
-				this.breakMinutes = breakMinutes ?? DEFAULT_PREFERENCES.breakMinutes;
-				this.autoLoop = autoLoop ?? DEFAULT_PREFERENCES.autoLoop;
-				this.loaded = true;
-			} catch (error) {
-				console.error('Failed to load preferences:', error);
-				this.loaded = true; // Mark as loaded even on error to prevent infinite loading
+	private async load() {
+		try {
+			if (!storeInstance) {
+				storeInstance = await load('preferences.json');
 			}
-		})();
 
-		return loadPromise;
+			const data = await Promise.all([
+				storeInstance.get('focusMinutes'),
+				storeInstance.get('breakMinutes'),
+				storeInstance.get('autoLoop')
+			]);
+
+			this.focusMinutes = (data[0] as number) ?? DEFAULT_PREFERENCES.focusMinutes;
+			this.breakMinutes = (data[1] as number) ?? DEFAULT_PREFERENCES.breakMinutes;
+			this.autoLoop = (data[2] as boolean) ?? DEFAULT_PREFERENCES.autoLoop;
+		} catch (error) {
+			console.error('Failed to load preferences:', error);
+		}
 	}
 
-	private async savePreference<K extends keyof Preferences>(key: K, value: Preferences[K]) {
+	private async save<K extends keyof Preferences>(key: K, value: Preferences[K]) {
 		try {
 			if (!storeInstance) {
 				storeInstance = await load('preferences.json');
@@ -64,41 +56,22 @@ class PreferencesStore {
 		}
 	}
 
-	setFocusMinutes(min: number) {
-		const n = Number(min);
-		if (!Number.isNaN(n)) {
-			const value = Math.max(1 / 60, n);
-			this.focusMinutes = value;
-			this.savePreference('focusMinutes', value);
-		}
+	setFocusMinutes(minutes: number) {
+		const value = Math.max(0.016, Math.min(1440, Number(minutes) || 0));
+		this.focusMinutes = value;
+		this.save('focusMinutes', value);
 	}
 
-	setBreakMinutes(min: number) {
-		const n = Number(min);
-		if (!Number.isNaN(n)) {
-			const value = Math.max(1 / 60, n);
-			this.breakMinutes = value;
-			this.savePreference('breakMinutes', value);
-		}
+	setBreakMinutes(minutes: number) {
+		const value = Math.max(0.016, Math.min(1440, Number(minutes) || 0));
+		this.breakMinutes = value;
+		this.save('breakMinutes', value);
 	}
 
 	toggleAutoLoop() {
 		this.autoLoop = !this.autoLoop;
-		this.savePreference('autoLoop', this.autoLoop);
+		this.save('autoLoop', this.autoLoop);
 	}
 }
 
 export const preferences = new PreferencesStore();
-
-// Legacy exports for backwards compatibility
-export function setFocusMinutes(min: number) {
-	preferences.setFocusMinutes(min);
-}
-
-export function setBreakMinutes(min: number) {
-	preferences.setBreakMinutes(min);
-}
-
-export function toggleAutoLoop() {
-	preferences.toggleAutoLoop();
-}
