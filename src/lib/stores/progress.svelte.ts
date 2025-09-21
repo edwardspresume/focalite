@@ -1,5 +1,6 @@
 import { timer } from './timer.svelte';
 import { LazyStore } from '@tauri-apps/plugin-store';
+import { SvelteDate } from 'svelte/reactivity';
 
 export interface DailyProgress {
 	date: string; // YYYY-MM-DD
@@ -154,10 +155,10 @@ class ProgressStore {
 	async getHistoricalProgress(days: number = 30): Promise<DailyProgress[]> {
 		try {
 			const results: DailyProgress[] = [];
-			const today = new Date();
+			const today = new SvelteDate();
 
 			for (let i = 0; i < days; i++) {
-				const date = new Date(today);
+				const date = new SvelteDate(today);
 				date.setDate(date.getDate() - i);
 				const dateStr = getLocalDateString(date);
 
