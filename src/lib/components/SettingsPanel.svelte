@@ -18,15 +18,17 @@
 	const willApplyNextSession = $derived(timer.phase !== 'idle' && timer.startedAt !== null);
 
 	function handleCustomFocus() {
-		if (customFocusDuration.trim()) {
-			preferences.setFocusMinutes(Number(customFocusDuration));
+		const value = String(customFocusDuration).trim();
+		if (value) {
+			preferences.setFocusMinutes(Number(value));
 			customFocusDuration = '';
 		}
 	}
 
 	function handleCustomBreak() {
-		if (customBreakDuration.trim()) {
-			preferences.setBreakMinutes(Number(customBreakDuration));
+		const value = String(customBreakDuration).trim();
+		if (value) {
+			preferences.setBreakMinutes(Number(value));
 			customBreakDuration = '';
 		}
 	}
