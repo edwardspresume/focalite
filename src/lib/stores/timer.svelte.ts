@@ -3,7 +3,7 @@ import { preferences } from './preferences.svelte';
 export type TimerPhase = 'idle' | 'focus' | 'break';
 
 // Small utility to format seconds as MM:SS for labels
-function formatMMSS(secs: number): string {
+function formatTime(secs: number): string {
 	const total = Math.max(0, Math.floor(secs));
 	const mins = Math.floor(total / 60);
 	const s = total % 60;
@@ -30,6 +30,14 @@ class TimerStore {
 
 	private interval: ReturnType<typeof setInterval> | undefined;
 
+	// Helper method for duration calculations
+	private getDurationForPhase(phase: TimerPhase, useLockedDuration = false): number {
+		if (useLockedDuration && this.lockedDuration !== null) return this.lockedDuration;
+
+		const minutes = phase === 'focus' ? preferences.focusMinutes : preferences.breakMinutes;
+		return Math.max(1, Math.round(minutes * 60));
+	}
+
 	// Derived values using $derived for efficiency
 	// Note: When idle, this returns 0 intentionally. Idle display is handled
 	// by focusDurationLabel/breakDurationLabel in the UI; currentDuration is
@@ -39,8 +47,9 @@ class TimerStore {
 		if (this.lockedDuration !== null) return this.lockedDuration;
 
 		// Otherwise use current preferences for the active phase
-		if (this.phase === 'focus') return Math.max(1, Math.round(preferences.focusMinutes * 60));
-		if (this.phase === 'break') return Math.max(1, Math.round(preferences.breakMinutes * 60));
+		if (this.phase === 'focus' || this.phase === 'break') {
+			return this.getDurationForPhase(this.phase);
+		}
 
 		return 0;
 	});
@@ -60,22 +69,17 @@ class TimerStore {
 
 	// Always show break duration (respects locked duration during active break)
 	breakDurationSeconds = $derived.by(() => {
-		// If we're in break phase and have a locked duration, show that
-		if (this.phase === 'break' && this.lockedDuration !== null) {
-			return this.lockedDuration;
-		}
-		// Otherwise show current preference
-		return Math.max(1, Math.round(preferences.breakMinutes * 60));
+		return this.getDurationForPhase('break', this.phase === 'break');
 	});
 
-	timeLabel = $derived.by(() => formatMMSS(this.displaySeconds));
+	timeLabel = $derived.by(() => formatTime(this.displaySeconds));
 
-	breakDurationLabel = $derived.by(() => formatMMSS(this.breakDurationSeconds));
+	breakDurationLabel = $derived.by(() => formatTime(this.breakDurationSeconds));
 
 	// Focus duration (only used when idle, so always show current preference)
-	focusDurationSeconds = $derived(Math.max(1, Math.round(preferences.focusMinutes * 60)));
+	focusDurationSeconds = $derived(this.getDurationForPhase('focus'));
 
-	focusDurationLabel = $derived.by(() => formatMMSS(this.focusDurationSeconds));
+	focusDurationLabel = $derived.by(() => formatTime(this.focusDurationSeconds));
 
 	phaseLabel = $derived.by(() => {
 		if (this.phase === 'idle') return 'Ready to focus';
@@ -145,7 +149,7 @@ class TimerStore {
 
 	startFocus() {
 		this.phase = 'focus';
-		this.lockedDuration = Math.max(1, Math.round(preferences.focusMinutes * 60));
+		this.lockedDuration = this.getDurationForPhase('focus');
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
@@ -154,7 +158,7 @@ class TimerStore {
 
 	startBreak() {
 		this.phase = 'break';
-		this.lockedDuration = Math.max(1, Math.round(preferences.breakMinutes * 60));
+		this.lockedDuration = this.getDurationForPhase('break');
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
@@ -194,6 +198,7 @@ class TimerStore {
 	startBreakEarly() {
 		if (this.phase !== 'focus') return;
 		// End the focus session early, recording partial completion
+		this.stopInterval(); // Stop the current timer first
 		this.sessionsCompleted++;
 		this.totalFocusTime += Math.floor(this.elapsed / 60);
 		this.lastCompletedPhase = 'focus';
@@ -207,6 +212,7 @@ class TimerStore {
 	startManualBreak() {
 		if (this.phase === 'focus') {
 			// Stop focus immediately and start break
+			this.stopInterval(); // Stop the current timer first
 			this.sessionsCompleted++;
 			this.totalFocusTime += Math.floor(this.elapsed / 60);
 			this.lastCompletedPhase = 'focus';
