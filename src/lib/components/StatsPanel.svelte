@@ -1,5 +1,9 @@
 <script lang="ts">
+	import { SvelteDate } from 'svelte/reactivity';
+
+	import type { DailyProgress } from '$lib/stores/progress.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { getLocalDateString } from '$lib/stores/store-utils';
 	import { timer } from '$lib/stores/timer.svelte';
 	import { scaleBand } from 'd3-scale';
 	import { BarChart } from 'layerchart';
@@ -10,7 +14,6 @@
 		Target,
 		type Icon as IconType
 	} from 'lucide-svelte';
-	import { SvelteDate } from 'svelte/reactivity';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
 
@@ -32,6 +35,12 @@
 		}
 	} satisfies Chart.ChartConfig;
 
+	const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+	const STREAK_WINDOW_DAYS = 30;
+	const CHART_DAYS = 7;
+
+	let historicalWindow = $state<DailyProgress[]>([]);
+
 	// Real-time stats derived from timer store
 	const todayStats = $derived.by(() => {
 		const completionRate =
@@ -46,41 +55,61 @@
 
 		const avgBreakTime =
 			timer.breaksCompleted > 0 ? Math.round(timer.totalBreakTime / timer.breaksCompleted) : 0;
+		const streaks = calculateStreaks(historicalWindow);
 
 		return {
 			focusTodayMin: timer.totalFocusTime,
 			focusWtdMicro: `${timer.sessionsCompleted} sessions completed`,
 			completionRate,
 			completionMicro: `${timer.sessionsCompleted} focus sessions`,
-			streakCurrentDays: 1, // TODO: Calculate from historical data
-			streakBestDays: 1, // TODO: Calculate from historical data
+			streakCurrentDays: streaks.current,
+			streakBestDays: streaks.best,
 			breakAdherence: timer.breaksCompleted > 0 ? 95 : 100, // Placeholder calculation
 			breakMicro: `Avg break ${avgBreakTime}m`
 		};
 	});
 
-	// Load historical data for chart
+	// Load historical data for charting and streak calculations
 	$effect(() => {
-		if (progress.loaded) {
-			progress.getHistoricalProgress(7).then((data) => {
-				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-				const today = new SvelteDate();
+		const completionMarker = timer.lastCompletionAt;
+		const dateKey = progress.currentDate;
+		void completionMarker;
+		void dateKey;
 
-				// Generate last 7 days
-				chartData = Array.from({ length: 7 }, (_, i) => {
-					const date = new SvelteDate(today);
-					date.setDate(date.getDate() - (6 - i));
-					const dayName = dayNames[date.getDay()];
-					const dateStr = date.toISOString().split('T')[0];
-
-					const dayData = data.find((d) => d.date === dateStr);
-					return {
-						day: dayName,
-						minutes: dayData?.focusMinutes || 0
-					};
-				});
-			});
+		if (!progress.loaded) {
+			return;
 		}
+
+		progress.getHistoricalProgress(STREAK_WINDOW_DAYS).then((data) => {
+			const today = new Date();
+			const todayStr = getLocalDateString(today);
+			const persistedByDate = new Map(data.map((entry) => [entry.date, entry]));
+
+			const filledWindow = Array.from({ length: STREAK_WINDOW_DAYS }, (_, index) => {
+				const date = new SvelteDate(today);
+				date.setDate(date.getDate() - (STREAK_WINDOW_DAYS - 1 - index));
+				const dateStr = getLocalDateString(date);
+				const persisted = persistedByDate.get(dateStr);
+				const isToday = dateStr === todayStr;
+
+				return {
+					date: dateStr,
+					sessionsCompleted:
+						persisted?.sessionsCompleted ?? (isToday ? timer.sessionsCompleted : 0),
+					breaksCompleted: persisted?.breaksCompleted ?? (isToday ? timer.breaksCompleted : 0),
+					focusMinutes: persisted?.focusMinutes ?? (isToday ? timer.totalFocusTime : 0),
+					breakMinutes: persisted?.breakMinutes ?? (isToday ? timer.totalBreakTime : 0)
+				};
+			});
+
+			historicalWindow = filledWindow;
+
+			const recentWindow = filledWindow.slice(-CHART_DAYS);
+			chartData = recentWindow.map((day) => ({
+				day: DAY_NAMES[new Date(`${day.date}T00:00:00`).getDay()],
+				minutes: day.focusMinutes
+			}));
+		});
 	});
 
 	// Convert minutes to hours and minutes
@@ -91,6 +120,35 @@
 			return `${hours}h ${mins}m`;
 		}
 		return `${mins}m`;
+	}
+
+	function calculateStreaks(days: DailyProgress[]) {
+		if (!days.length) {
+			return { current: 0, best: 0 };
+		}
+
+		const hasFocus = (day: DailyProgress) => day.focusMinutes > 0 || day.sessionsCompleted > 0;
+		let best = 0;
+		let running = 0;
+		for (const day of days) {
+			if (hasFocus(day)) {
+				running += 1;
+				best = Math.max(best, running);
+			} else {
+				running = 0;
+			}
+		}
+
+		let current = 0;
+		for (let index = days.length - 1; index >= 0; index -= 1) {
+			if (hasFocus(days[index])) {
+				current += 1;
+			} else {
+				break;
+			}
+		}
+
+		return { current, best };
 	}
 </script>
 
