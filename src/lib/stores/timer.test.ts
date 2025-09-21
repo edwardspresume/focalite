@@ -158,7 +158,6 @@ describe('Timer Store', () => {
 		it('should start manual break from focus phase', () => {
 			// Ensure clean state
 			timer.reset();
-			timer.resetProgress();
 
 			timer.startFocus();
 			vi.advanceTimersByTime(10000); // 10 seconds into focus

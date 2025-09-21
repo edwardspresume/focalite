@@ -1,19 +1,17 @@
 <script lang="ts">
+	import { progress } from '$lib/stores/progress.svelte';
+	import { timer } from '$lib/stores/timer.svelte';
 	import { scaleBand } from 'd3-scale';
 	import { BarChart } from 'layerchart';
 	import {
 		ChartNoAxesColumnIncreasing,
 		CircleCheckBig,
 		Coffee,
-		RotateCcw,
 		Target,
 		type Icon as IconType
 	} from 'lucide-svelte';
-	import { timer } from '$lib/stores/timer.svelte';
-	import { progress } from '$lib/stores/progress.svelte';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
-	import Button from './ui/button/button.svelte';
 
 	// Chart data - will be populated with real data when available
 	let chartData = $state([
@@ -35,11 +33,18 @@
 
 	// Real-time stats derived from timer store
 	const todayStats = $derived.by(() => {
-		const completionRate = timer.sessionsCompleted > 0 ?
-			Math.round((timer.sessionsCompleted / (timer.sessionsCompleted + Math.max(0, timer.totalFocusTime / 25 - timer.sessionsCompleted))) * 100) : 100;
+		const completionRate =
+			timer.sessionsCompleted > 0
+				? Math.round(
+						(timer.sessionsCompleted /
+							(timer.sessionsCompleted +
+								Math.max(0, timer.totalFocusTime / 25 - timer.sessionsCompleted))) *
+							100
+					)
+				: 100;
 
-		const avgBreakTime = timer.breaksCompleted > 0 ?
-			Math.round(timer.totalBreakTime / timer.breaksCompleted) : 0;
+		const avgBreakTime =
+			timer.breaksCompleted > 0 ? Math.round(timer.totalBreakTime / timer.breaksCompleted) : 0;
 
 		return {
 			focusTodayMin: timer.totalFocusTime,
@@ -56,7 +61,7 @@
 	// Load historical data for chart
 	$effect(() => {
 		if (progress.loaded) {
-			progress.getHistoricalProgress(7).then(data => {
+			progress.getHistoricalProgress(7).then((data) => {
 				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 				const today = new Date();
 
@@ -67,7 +72,7 @@
 					const dayName = dayNames[date.getDay()];
 					const dateStr = date.toISOString().split('T')[0];
 
-					const dayData = data.find(d => d.date === dateStr);
+					const dayData = data.find((d) => d.date === dateStr);
 					return {
 						day: dayName,
 						minutes: dayData?.focusMinutes || 0
@@ -117,18 +122,7 @@
 <div class="space-y-6">
 	<!-- Daily Stats Section -->
 	<section>
-		<div class="mb-4 flex items-center justify-between">
-			<h3 class="text-lg font-semibold">Today's Focus</h3>
-			<Button
-				size="sm"
-				variant="outline"
-				onclick={progress.resetProgress}
-				class="text-sm font-medium"
-			>
-				<RotateCcw class="size-4" />
-				Reset Progress
-			</Button>
-		</div>
+		<h3 class="mb-4 text-lg font-semibold">Today's Focus</h3>
 
 		<div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
 			{@render metricCard(

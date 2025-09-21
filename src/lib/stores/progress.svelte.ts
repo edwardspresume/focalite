@@ -130,14 +130,6 @@ class ProgressStore {
 		}
 	}
 
-	async resetProgress() {
-		try {
-			timer.resetProgress();
-			await this.saveProgressImmediate();
-		} catch (error) {
-			console.error('Failed to reset progress:', error);
-		}
-	}
 
 	// Get historical progress data
 	async getHistoricalProgress(days: number = 30): Promise<DailyProgress[]> {

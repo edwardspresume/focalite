@@ -223,12 +223,6 @@ class TimerStore {
 		this.startBreak();
 	}
 
-	resetProgress() {
-		this.sessionsCompleted = 0;
-		this.totalFocusTime = 0;
-		this.breaksCompleted = 0;
-		this.totalBreakTime = 0;
-	}
 }
 
 export const timer = new TimerStore();
