@@ -1,4 +1,5 @@
-import { createStoreAccessor } from './kv-store';
+import { load } from '@tauri-apps/plugin-store';
+import type { Store } from '@tauri-apps/plugin-store';
 
 export interface Preferences {
 	focusMinutes: number;
@@ -13,8 +14,7 @@ const DEFAULT_PREFERENCES: Preferences = {
 };
 
 let loadPromise: Promise<void> | null = null;
-
-const getStore = createStoreAccessor('preferences.json');
+let storeInstance: Store | null = null;
 
 class PreferencesStore {
 	focusMinutes = $state(DEFAULT_PREFERENCES.focusMinutes);
@@ -31,11 +31,13 @@ class PreferencesStore {
 
 		loadPromise = (async () => {
 			try {
-				const store = await getStore();
+				if (!storeInstance) {
+					storeInstance = await load('preferences.json');
+				}
 
-				const focusMinutes = await store.get<number>('focusMinutes');
-				const breakMinutes = await store.get<number>('breakMinutes');
-				const autoLoop = await store.get<boolean>('autoLoop');
+				const focusMinutes = await storeInstance.get('focusMinutes') as number | null;
+				const breakMinutes = await storeInstance.get('breakMinutes') as number | null;
+				const autoLoop = await storeInstance.get('autoLoop') as boolean | null;
 
 				this.focusMinutes = focusMinutes ?? DEFAULT_PREFERENCES.focusMinutes;
 				this.breakMinutes = breakMinutes ?? DEFAULT_PREFERENCES.breakMinutes;
@@ -52,9 +54,11 @@ class PreferencesStore {
 
 	private async savePreference<K extends keyof Preferences>(key: K, value: Preferences[K]) {
 		try {
-			const store = await getStore();
-			await store.set(key, value);
-			await store.save();
+			if (!storeInstance) {
+				storeInstance = await load('preferences.json');
+			}
+			await storeInstance.set(key, value);
+			await storeInstance.save();
 		} catch (error) {
 			console.error(`Failed to save ${key}:`, error);
 		}

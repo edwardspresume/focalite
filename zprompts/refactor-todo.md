@@ -10,6 +10,7 @@ Status key: [ ] todo · [~] in progress · [x] done
 - Ensure the core logic is correct (timing, transitions, auto-loop, manual overrides, persistence, rollover).
 - Utilize modern TypeScript and JavaScript best practices.
 - Use Svelte 5 Runes-first patterns ($state, $derived) and avoid legacy Svelte 4 idioms.
+- Write tests with Vitest where applicable to validate behavior and prevent regressions.
 
 ## 1) Timer Store (Centralized)
 
@@ -99,6 +100,16 @@ Status key: [ ] todo · [~] in progress · [x] done
 - [ ] Preferences persist correctly in both runtimes; progress saves throttle and immediate-on-completion work
 - [ ] Midnight rollover occurs and maintains 30‑day history
 - [ ] Audio cues and desktop notifications trigger at correct events (and do not duplicate)
+- [ ] Vitest unit/component test suite covers core logic paths and passes in CI
+
+## 15) Testing (Vitest)
+
+- [ ] Configure Vitest (jsdom or happy-dom environment)
+- [ ] Unit tests for `timer.svelte.ts` using `vi.useFakeTimers()` to cover start/pause/resume/reset, transitions, auto-loop, manual overrides, and rollover
+- [ ] Component tests with `@testing-library/svelte` for tabs, controls, keyboard shortcuts, and auto-tab switching
+- [ ] Mock/stub environment specifics: `localStorage` in browser, `@tauri-apps/api` (store/notification) in desktop unit tests
+- [ ] Keep durations short/preset for tests; avoid real waits
+- [ ] Optional: configure coverage via c8 (V8) to track core logic coverage
 
 ## 14) Documentation & Clean‑up
 

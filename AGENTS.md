@@ -8,10 +8,10 @@ This file provides guidance to when working with code in this repository.
 
 ## Project Overview
 
-**Focalite** is a Windows desktop focus timer (Pomodoro-style), built with Tauri v2 and Svelte 5.
+**Focalite** is a desktop focus timer (Pomodoro-style), built with Tauri v2 and Svelte 5.
 
 - **Stack**: Tauri v2, Svelte 5 with Runes, TypeScript, Tailwind CSS
-- **Target Platform**: Windows (WebView2)
+- **Target Platform**: Desktop (cross-platform via Tauri)
 - **App Identifier**: com.focalite.app
 - **Package Manager**: pnpm
 
@@ -19,15 +19,15 @@ This file provides guidance to when working with code in this repository.
 
 ## Product Overview
 
-- Windows desktop Pomodoro-style focus timer built with Tauri v2 and Svelte 5 (Runes).
-- Targets WebView2 on Windows; also supports web runtime for development and preview.
+- Desktop Pomodoro-style focus timer built with Tauri v2 and Svelte 5 (Runes).
+- Cross-platform desktop application using native OS rendering via Tauri.
 
 ## Initialization & Startup
 
 - Load persisted user preferences and daily progress from the Tauri Store on app launch.
 - If no preferences exist, initialize user defaults for durations: Focus = 30:00 and Break = 03:00.
 - Hydrate UI from stored values: timers display selected durations; settings reflect current preferences.
-- Note: Persistence is environment-specific — in the browser we use `localStorage`; in the desktop app we use the Tauri Store, which persists to a JSON file on the local filesystem. Data does not sync between runtimes.
+- Persistence: Uses the Tauri Store plugin, which persists data to JSON files on the local filesystem.
 
 ## Navigation & Tabs
 
@@ -80,8 +80,7 @@ This file provides guidance to when working with code in this repository.
 
 ## Data, Progress & Persistence
 
-- Storage: Desktop (Tauri) uses the Tauri Store plugin (JSON file on the local filesystem). Browser uses `localStorage`.
-- Separation: Browser `localStorage` and the desktop file store are independent and do not sync.
+- Storage: Uses the Tauri Store plugin (JSON files on the local filesystem).
 - Autosave: progress saved every 15 seconds during active sessions and immediately on completion.
 - Daily Rollover: at midnight, roll daily counters; maintain historical data with 30-day retention for charts.
 - Reset: action to reset daily progress and statistics.
@@ -114,7 +113,7 @@ pnpm tauri dev
 # Build for production
 pnpm tauri build
 
-# Frontend only development
+# Frontend only development (for UI testing)
 pnpm dev
 
 # Build frontend only
@@ -124,7 +123,7 @@ pnpm build
 pnpm preview
 ```
 
-Note: In `pnpm dev` (browser), data persists via `localStorage`. In `pnpm tauri dev` (desktop), data persists via the Tauri Store on the filesystem. Use `pnpm tauri dev` when testing desktop/file persistence.
+Note: Use `pnpm tauri dev` for full desktop app development with proper Tauri Store persistence. `pnpm dev` runs in browser mode for UI-only testing.
 
 ### Type Checking and Validation
 
@@ -188,7 +187,7 @@ After calling the list_sections tool, you MUST analyze the returned documentatio
 - `src/lib.rs` - Library exports with plugin initialization
 - `tauri.conf.json` - Tauri configuration
 - `Cargo.toml` - Rust dependencies
-- `capabilities/default.json` - Plugin permissions (includes `store:default` for persistence)
+- `capabilities/default.json` - Plugin permissions (includes `store:default` for Tauri Store persistence)
 
 ### Key Configuration Files
 
@@ -596,7 +595,7 @@ const isOffline = $derived(!online.current);
 
 - Frontend builds to static files for Tauri consumption
 - Development server runs on port 1420 (Tauri requirement)
-- Cross-platform considerations for Windows target from WSL development environment
+- Cross-platform desktop application targeting multiple OS via Tauri
 - GitHub Actions workflows:
   - `build.yml` - Automated build pipeline
   - `claude.yml` - Claude PR Assistant

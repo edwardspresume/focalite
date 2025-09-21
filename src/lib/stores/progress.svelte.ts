@@ -1,5 +1,6 @@
 import { timer } from './timer.svelte';
-import { createStoreAccessor } from './kv-store';
+import { load } from '@tauri-apps/plugin-store';
+import type { Store } from '@tauri-apps/plugin-store';
 
 export interface DailyProgress {
 	date: string; // YYYY-MM-DD
@@ -9,7 +10,7 @@ export interface DailyProgress {
 	breakMinutes: number;
 }
 
-const getStore = createStoreAccessor('progress.json');
+let storeInstance: Store | null = null;
 let saveThrottleId: ReturnType<typeof setTimeout> | null = null;
 
 function getLocalDateString(date: Date): string {
@@ -29,10 +30,12 @@ class ProgressStore {
 
 	private async loadTodayProgress() {
 		try {
-			const store = await getStore();
+			if (!storeInstance) {
+				storeInstance = await load('progress.json');
+			}
 			const today = getLocalDateString(new Date());
 
-			const progress = await store.get<DailyProgress>(today);
+			const progress = await storeInstance.get(today) as DailyProgress | null;
 			if (progress) {
 				timer.sessionsCompleted = progress.sessionsCompleted;
 				timer.breaksCompleted = progress.breaksCompleted;
@@ -108,7 +111,9 @@ class ProgressStore {
 
 	private async saveProgressImmediate() {
 		try {
-			const store = await getStore();
+			if (!storeInstance) {
+				storeInstance = await load('progress.json');
+			}
 			const progress: DailyProgress = {
 				date: this.date,
 				sessionsCompleted: timer.sessionsCompleted,
@@ -117,8 +122,8 @@ class ProgressStore {
 				breakMinutes: timer.totalBreakTime
 			};
 
-			await store.set(this.date, progress);
-			await store.save();
+			await storeInstance.set(this.date, progress);
+			await storeInstance.save();
 			this.lastPersistedCompletionAt = timer.lastCompletionAt;
 		} catch (error) {
 			console.error('Failed to save progress:', error);
@@ -137,7 +142,9 @@ class ProgressStore {
 	// Get historical progress data
 	async getHistoricalProgress(days: number = 30): Promise<DailyProgress[]> {
 		try {
-			const store = await getStore();
+			if (!storeInstance) {
+				storeInstance = await load('progress.json');
+			}
 			const results: DailyProgress[] = [];
 			const today = new Date();
 
@@ -146,7 +153,7 @@ class ProgressStore {
 				date.setDate(date.getDate() - i);
 				const dateStr = getLocalDateString(date);
 
-				const progress = await store.get<DailyProgress>(dateStr);
+				const progress = await storeInstance.get(dateStr) as DailyProgress | null;
 				if (progress) {
 					results.push(progress);
 				}
