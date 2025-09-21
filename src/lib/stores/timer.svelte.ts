@@ -11,15 +11,13 @@ function formatTime(secs: number): string {
 }
 
 class TimerStore {
+	// --- Core reactive state ---
 	phase = $state<TimerPhase>('idle');
 	startedAt = $state<number | null>(null);
 	baseElapsedSec = $state(0);
 	now = $state(Date.now());
 
-	// Lock duration when session starts to prevent mid-session changes
-	private lockedDuration = $state<number | null>(null);
-
-	// Progress tracking
+	// --- Session progress metrics ---
 	sessionsCompleted = $state(0);
 	totalFocusTime = $state(0);
 	breaksCompleted = $state(0);
@@ -28,27 +26,24 @@ class TimerStore {
 	lastCompletionAt = $state<number | null>(null);
 	isManualCycle = $state(false);
 
+	// --- Private runtime details ---
+	// Lock duration when a session starts so preference tweaks mid-run do not affect timing.
+	private lockedDuration = $state<number | null>(null);
 	private interval: ReturnType<typeof setInterval> | undefined;
 
-	// Helper method for duration calculations
+	// --- Duration helpers ---
 	private getDurationForPhase(phase: TimerPhase): number {
 		const minutes = phase === 'focus' ? preferences.focusMinutes : preferences.breakMinutes;
 		return Math.max(1, Math.round(minutes * 60));
 	}
 
-	// Derived values using $derived for efficiency
-	// Note: When idle, this returns 0 intentionally. Idle display is handled
-	// by focusDurationLabel/breakDurationLabel in the UI; currentDuration is
-	// the source for active/paused session math (remaining, progress, crediting).
+	// When idle, currentDuration intentionally reports 0. UI components read
+	// focus/break labels for idle displays; currentDuration feeds active math.
 	currentDuration = $derived.by(() => {
-		// Use locked duration if set (during active session)
 		if (this.lockedDuration !== null) return this.lockedDuration;
-
-		// Otherwise use current preferences for the active phase
 		if (this.phase === 'focus' || this.phase === 'break') {
 			return this.getDurationForPhase(this.phase);
 		}
-
 		return 0;
 	});
 
@@ -60,21 +55,19 @@ class TimerStore {
 
 	running = $derived(this.startedAt !== null && this.remaining > 0);
 
-	// Display helpers
-	// Always show break duration (use locked duration during active break)
-	breakDurationSeconds = $derived.by(() =>
-		this.phase === 'break' && this.lockedDuration !== null
-			? this.lockedDuration
-			: this.getDurationForPhase('break')
-	);
-
+	// --- Display helpers ---
 	timeLabel = $derived.by(() =>
 		formatTime(this.phase === 'idle' ? this.currentDuration : this.remaining)
 	);
 
-	breakDurationLabel = $derived.by(() => formatTime(this.breakDurationSeconds));
+	breakDurationLabel = $derived.by(() => {
+		const seconds =
+			this.phase === 'break' && this.lockedDuration !== null
+				? this.lockedDuration
+				: this.getDurationForPhase('break');
+		return formatTime(seconds);
+	});
 
-	// Focus duration label uses current preference (store handles locked duration elsewhere)
 	focusDurationLabel = $derived.by(() => formatTime(this.getDurationForPhase('focus')));
 
 	phaseLabel = $derived.by(() => {
@@ -83,7 +76,6 @@ class TimerStore {
 		return this.running ? 'On break' : 'Break paused';
 	});
 
-	// Progress ring calculation
 	progress = $derived.by(() => {
 		if (this.phase === 'idle') return 0;
 		return this.currentDuration > 0
@@ -91,14 +83,12 @@ class TimerStore {
 			: 0;
 	});
 
-	// geometry for SVG ring
+	// --- Visualization geometry ---
 	readonly r = 45;
 	readonly C = 2 * Math.PI * this.r;
-
 	dashOffset = $derived(this.C * (1 - this.progress));
 
-	constructor() {}
-
+	// --- Timing loop ---
 	private startInterval() {
 		this.stopInterval();
 		this.interval = setInterval(() => this.onTick(), 250);
@@ -113,14 +103,14 @@ class TimerStore {
 
 	private onTick() {
 		this.now = Date.now();
-		// Handle completion immediately when remaining reaches zero
+		// Completion is handled here to avoid missing the transition if the
+		// interval overshoots by a handful of milliseconds.
 		if (this.startedAt && this.remaining <= 0) {
 			this.onComplete();
 		}
 	}
 
 	private onComplete() {
-		// Ensure we don't keep ticking in this phase
 		this.stopInterval();
 		const completedPhase = this.phase;
 		const completedMinutes = Math.floor((this.lockedDuration ?? 0) / 60);
@@ -134,7 +124,6 @@ class TimerStore {
 		} else if (completedPhase === 'break') {
 			this.breaksCompleted++;
 			this.totalBreakTime += completedMinutes;
-			// If it's a manual cycle, don't auto-start focus even with auto-loop enabled
 			if (preferences.autoLoop && !this.isManualCycle) {
 				this.startFocus();
 			} else {
@@ -143,6 +132,7 @@ class TimerStore {
 		}
 	}
 
+	// --- Public controls ---
 	startFocus() {
 		this.beginPhase('focus');
 	}
@@ -183,21 +173,20 @@ class TimerStore {
 
 	startManualBreak() {
 		if (this.phase === 'focus') {
-			// Stop focus immediately and start break
-			this.stopInterval(); // Stop the current timer first
+			// Credit the partial focus session before switching.
+			this.stopInterval();
 			this.sessionsCompleted++;
 			this.totalFocusTime += Math.floor(this.elapsed / 60);
 			this.lastCompletedPhase = 'focus';
 			this.lastCompletionAt = Date.now();
 		} else if (this.phase === 'break') {
-			// Already in break, no-op
-			return;
+			return; // Already in break – nothing to do.
 		}
-		// Mark as manual cycle and start break
 		this.isManualCycle = true;
 		this.startBreak();
 	}
 
+	// --- Phase orchestration ---
 	private beginPhase(phase: Extract<TimerPhase, 'focus' | 'break'>) {
 		this.stopInterval();
 		this.phase = phase;
