@@ -166,7 +166,11 @@
 			</p>
 		</button>
 
-		<Switch aria-label="Auto-loop sessions" bind:checked={preferences.autoLoop} />
+		<Switch
+			aria-label="Auto-loop sessions"
+			bind:checked={preferences.autoLoop}
+			onCheckedChange={(checked: boolean) => preferences.setAutoLoop(checked)}
+		/>
 	</div>
 
 	<div

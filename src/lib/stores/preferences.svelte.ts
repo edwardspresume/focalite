@@ -42,7 +42,6 @@ class PreferencesStore {
 	private async save<K extends keyof Preferences>(key: K, value: Preferences[K]) {
 		try {
 			await this.store.set(key, value);
-			await this.store.save();
 		} catch (error) {
 			console.error(`Failed to save ${key}:`, error);
 		}
@@ -65,9 +64,13 @@ class PreferencesStore {
 		this.save('breakMinutes', value);
 	}
 
-	toggleAutoLoop() {
-		this.autoLoop = !this.autoLoop;
+	setAutoLoop(on: boolean) {
+		this.autoLoop = !!on;
 		this.save('autoLoop', this.autoLoop);
+	}
+
+	toggleAutoLoop() {
+		this.setAutoLoop(!this.autoLoop);
 	}
 }
 
