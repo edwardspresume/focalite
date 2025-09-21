@@ -108,7 +108,7 @@
 			</div>
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: {preferences.focusMinutes} minutes
+				Selected: <span class="text-primary font-semibold">{preferences.focusMinutes} minutes</span>
 				{#if willApplyNextSession && timer.phase === 'focus'}
 					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
 				{/if}
@@ -159,7 +159,7 @@
 			</div>
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: {preferences.breakMinutes} minutes
+				Selected: <span class="text-primary font-semibold">{preferences.breakMinutes} minutes</span>
 				{#if willApplyNextSession && (timer.phase === 'break' || timer.phase === 'focus')}
 					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
 				{/if}
