@@ -10,6 +10,7 @@
 		Target,
 		type Icon as IconType
 	} from 'lucide-svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	import * as Chart from '$lib/components/ui/chart/index.js';
 
@@ -63,11 +64,11 @@
 		if (progress.loaded) {
 			progress.getHistoricalProgress(7).then((data) => {
 				const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-				const today = new Date();
+				const today = new SvelteDate();
 
 				// Generate last 7 days
 				chartData = Array.from({ length: 7 }, (_, i) => {
-					const date = new Date(today);
+					const date = new SvelteDate(today);
 					date.setDate(date.getDate() - (6 - i));
 					const dayName = dayNames[date.getDay()];
 					const dateStr = date.toISOString().split('T')[0];
@@ -171,7 +172,7 @@
 		</header>
 
 		<div class="rounded-md border bg-background p-6 shadow-sm dark:border-input">
-			<Chart.Container config={chartConfig} class="h-[240px] ">
+			<Chart.Container config={chartConfig} class="h-[240px] w-full">
 				<BarChart
 					data={chartData}
 					xScale={scaleBand().padding(0.3)}
