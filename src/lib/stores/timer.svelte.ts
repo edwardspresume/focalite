@@ -8,6 +8,9 @@ class TimerStore {
 	baseElapsedSec = $state(0);
 	now = $state(Date.now());
 
+	// Lock duration when session starts to prevent mid-session changes
+	private lockedDuration = $state<number | null>(null);
+
 	// Progress tracking
 	sessionsCompleted = $state(0);
 	totalFocusTime = $state(0);
@@ -21,6 +24,10 @@ class TimerStore {
 
 	// Derived values using $derived for efficiency
 	currentDuration = $derived.by(() => {
+		// Use locked duration if set (during active session)
+		if (this.lockedDuration !== null) return this.lockedDuration;
+
+		// Otherwise use current preferences (for display when idle)
 		if (this.phase === 'focus') return Math.max(1, Math.round(preferences.focusMinutes * 60));
 		if (this.phase === 'break') return Math.max(1, Math.round(preferences.breakMinutes * 60));
 		return 0;
@@ -112,6 +119,7 @@ class TimerStore {
 
 	startFocus() {
 		this.phase = 'focus';
+		this.lockedDuration = Math.max(1, Math.round(preferences.focusMinutes * 60));
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
@@ -120,6 +128,7 @@ class TimerStore {
 
 	startBreak() {
 		this.phase = 'break';
+		this.lockedDuration = Math.max(1, Math.round(preferences.breakMinutes * 60));
 		this.baseElapsedSec = 0;
 		this.startedAt = Date.now();
 		this.now = this.startedAt;
@@ -144,6 +153,7 @@ class TimerStore {
 		this.phase = 'idle';
 		this.startedAt = null;
 		this.baseElapsedSec = 0;
+		this.lockedDuration = null;
 		this.stopInterval();
 	}
 
