@@ -7,7 +7,8 @@
 		Sun,
 		SunMoon,
 		Target,
-		TriangleAlert
+		TriangleAlert,
+		Volume2
 	} from 'lucide-svelte';
 	import { toggleMode } from 'mode-watcher';
 
@@ -186,6 +187,76 @@
 			bind:checked={preferences.autoLoop}
 			onCheckedChange={(checked: boolean) => preferences.setAutoLoop(checked)}
 		/>
+	</div>
+
+	<!-- Notification Settings -->
+	<div class="mt-6 space-y-4">
+		<div
+			class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
+		>
+			<header>
+				<h4 class="flex items-center gap-2 font-medium text-foreground">
+					<Volume2 class="size-4" />
+					<span>Notification Sounds</span>
+				</h4>
+
+				<p class="text-sm text-muted-foreground dark:text-foreground/80">
+					Enable or disable notification sounds for timer events.
+				</p>
+			</header>
+
+			<Switch
+				aria-label="Enable notification sounds"
+				bind:checked={preferences.soundEnabled}
+				onCheckedChange={(checked: boolean) => preferences.setSoundEnabled(checked)}
+			/>
+		</div>
+
+		{#if preferences.soundEnabled}
+			<div class="grid gap-4 md:grid-cols-2">
+				<div
+					class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
+				>
+					<header>
+						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
+							<Target class="size-4 text-primary" />
+							<span>Focus Start Sound</span>
+						</h5>
+
+						<p class="text-xs text-muted-foreground dark:text-foreground/80">
+							Play sound when focus session begins.
+						</p>
+					</header>
+
+					<Switch
+						aria-label="Focus start sound"
+						bind:checked={preferences.focusStartSound}
+						onCheckedChange={(checked: boolean) => preferences.setFocusStartSound(checked)}
+					/>
+				</div>
+
+				<div
+					class="flex items-center justify-between gap-4 rounded-md border bg-accent p-4 dark:border-input"
+				>
+					<header>
+						<h5 class="flex items-center gap-2 text-sm font-medium text-foreground">
+							<Coffee class="size-4 text-primary" />
+							<span>Break Start Sound</span>
+						</h5>
+
+						<p class="text-xs text-muted-foreground dark:text-foreground/80">
+							Play sound when break session begins.
+						</p>
+					</header>
+
+					<Switch
+						aria-label="Break start sound"
+						bind:checked={preferences.breakStartSound}
+						onCheckedChange={(checked: boolean) => preferences.setBreakStartSound(checked)}
+					/>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<div
