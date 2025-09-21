@@ -16,7 +16,6 @@ class TimerStore {
 	totalFocusTime = $state(0);
 	breaksCompleted = $state(0);
 	totalBreakTime = $state(0);
-	completedCycles = $state(0);
 	lastCompletedPhase = $state<TimerPhase | null>(null);
 	lastCompletionAt = $state<number | null>(null);
 	isManualCycle = $state(false);
@@ -126,7 +125,6 @@ class TimerStore {
 		this.stopInterval();
 		const completedPhase = this.phase;
 		const completedMinutes = Math.floor(this.currentDuration / 60);
-		this.completedCycles++;
 		this.lastCompletedPhase = completedPhase;
 		this.lastCompletionAt = Date.now();
 

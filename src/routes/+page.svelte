@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Activity, ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
-	import { timer } from '$lib/stores/timer.svelte';
-	import { preferences } from '$lib/stores/preferences.svelte';
 	import { progress } from '$lib/stores/progress.svelte';
+	import { timer, type TimerPhase } from '$lib/stores/timer.svelte';
+	import { Activity, ChartColumnIncreasing, Settings, Timer } from 'lucide-svelte';
 
 	import BreakTimer from '$lib/components/BreakTimer.svelte';
 	import FocusTimer from '$lib/components/FocusTimer.svelte';
@@ -20,7 +19,7 @@
 
 	// Tab management - only auto-switch when timer phase actually changes
 	let activeTab = $state('timer');
-	let lastPhase = $state<typeof timer.phase | null>(null);
+	let lastPhase = $state<TimerPhase>(timer.phase);
 
 	$effect(() => {
 		// Only auto-switch tabs when phase changes (not just when viewing tabs)

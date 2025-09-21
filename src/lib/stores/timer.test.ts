@@ -22,7 +22,6 @@ describe('Timer Store', () => {
 			expect(timer.sessionsCompleted).toBe(0);
 			expect(timer.totalFocusTime).toBe(0);
 			expect(timer.breaksCompleted).toBe(0);
-			expect(timer.completedCycles).toBe(0);
 		});
 	});
 
