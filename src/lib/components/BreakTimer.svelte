@@ -18,6 +18,10 @@
 			}
 		}
 	}
+
+	const breakPhaseLabel = $derived(
+		timer.phase === 'idle' ? 'Ready for a break' : timer.phaseLabel
+	);
 </script>
 
 <svelte:window onkeydown={onKey} />
@@ -76,11 +80,11 @@
 							{timer.timeLabel}
 						{/if}
 					</time>
-				<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
-					{timer.phaseLabel}
-				</p>
-			</figcaption>
-		</figure>
+			<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
+				{breakPhaseLabel}
+			</p>
+		</figcaption>
+	</figure>
 
 		<!-- Control Buttons -->
 		<div class="flex gap-4">
