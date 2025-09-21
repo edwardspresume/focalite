@@ -85,9 +85,7 @@ class PreferencesStore {
 		this.save('autoLoop', this.autoLoop);
 	}
 
-	toggleAutoLoop() {
-		this.setAutoLoop(!this.autoLoop);
-	}
+
 }
 
 export const preferences = new PreferencesStore();
