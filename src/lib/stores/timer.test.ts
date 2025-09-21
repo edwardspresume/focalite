@@ -146,4 +146,49 @@ describe('Timer Store', () => {
 			// Implementation depends on how preferences are mocked
 		});
 	});
+
+	describe('Manual Break Functionality', () => {
+		it('should start manual break from idle phase', () => {
+			timer.startManualBreak();
+			expect(timer.phase).toBe('break');
+			expect(timer.isManualCycle).toBe(true);
+			expect(timer.running).toBe(true);
+		});
+
+		it('should start manual break from focus phase', () => {
+			// Ensure clean state
+			timer.reset();
+			timer.resetProgress();
+
+			timer.startFocus();
+			vi.advanceTimersByTime(10000); // 10 seconds into focus
+
+			timer.startManualBreak();
+			expect(timer.phase).toBe('break');
+			expect(timer.isManualCycle).toBe(true);
+			expect(timer.sessionsCompleted).toBe(1); // Should record partial focus
+		});
+
+		it('should be no-op when already in break phase', () => {
+			timer.startFocus();
+			timer.startManualBreak(); // First manual break
+			const breakStartTime = timer.startedAt;
+
+			timer.startManualBreak(); // Second call should be no-op
+			expect(timer.phase).toBe('break');
+			expect(timer.startedAt).toBe(breakStartTime); // Should not restart
+		});
+
+		it('should prevent auto-loop after manual break completes', () => {
+			timer.startManualBreak();
+			expect(timer.isManualCycle).toBe(true);
+
+			// Complete the break
+			vi.advanceTimersByTime(3 * 60 * 1000 + 250); // 3 minutes + timer tick
+
+			// Should go to idle, not auto-start focus (even if auto-loop enabled)
+			expect(timer.phase).toBe('idle');
+			expect(timer.isManualCycle).toBe(false); // Reset on idle
+		});
+	});
 });
