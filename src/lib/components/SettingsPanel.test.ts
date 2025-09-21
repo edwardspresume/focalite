@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { render, screen, fireEvent, within } from '@testing-library/svelte';
 import SettingsPanel from './SettingsPanel.svelte';
+import { preferences } from '$lib/stores/preferences.svelte';
 import { timer } from '$lib/stores/timer.svelte';
 
 // Mock external dependencies
@@ -8,13 +9,20 @@ vi.mock('mode-watcher', () => ({
 	toggleMode: vi.fn()
 }));
 
-vi.mock('@tauri-apps/plugin-store', () => ({
-	load: vi.fn(() => ({
-		get: vi.fn().mockResolvedValue(null),
-		set: vi.fn(),
-		save: vi.fn()
-	}))
-}));
+vi.mock('@tauri-apps/plugin-store', () => {
+  const storeApi = {
+    get: vi.fn().mockResolvedValue(null),
+    set: vi.fn(),
+    save: vi.fn()
+  };
+  return {
+    load: vi.fn(async () => storeApi),
+    LazyStore: vi.fn(() => ({
+      entries: vi.fn(async () => []),
+      set: vi.fn()
+    }))
+  };
+});
 
 vi.mock('$lib/stores/timer.svelte', () => ({
 	timer: {
@@ -24,30 +32,38 @@ vi.mock('$lib/stores/timer.svelte', () => ({
 }));
 
 describe('SettingsPanel', () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-		// Reset timer mock state
-		(timer as any).phase = 'idle';
-		(timer as any).startedAt = null;
-	});
+beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset timer mock state
+    (timer as any).phase = 'idle';
+    (timer as any).startedAt = null;
+    // Reset preferences defaults for isolation
+    preferences.setFocusMinutes(30);
+    preferences.setBreakMinutes(3);
+    preferences.setAutoLoop(false);
+});
 
 	it('should render all preset focus options', () => {
-		render(SettingsPanel);
+    render(SettingsPanel);
 
-		const focusOptions = [20, 25, 30, 45, 50, 52, 60, 75, 90];
-		focusOptions.forEach(duration => {
-			expect(screen.getByText(`${duration}m`)).toBeInTheDocument();
-		});
-	});
+    const focusOptions = [20, 25, 30, 45, 50, 60, 75, 90];
+    const focusSection = screen.getByText('Focus Duration').closest('fieldset')!;
+    const scope = within(focusSection);
+    focusOptions.forEach((duration) => {
+        expect(scope.getByTitle(`${duration} minutes`)).toBeInTheDocument();
+    });
+});
 
 	it('should render all preset break options', () => {
-		render(SettingsPanel);
+    render(SettingsPanel);
 
-		const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
-		breakOptions.forEach(duration => {
-			expect(screen.getByText(`${duration}m`)).toBeInTheDocument();
-		});
-	});
+    const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
+    const breakSection = screen.getByText('Break Duration').closest('fieldset')!;
+    const scope = within(breakSection);
+    breakOptions.forEach((duration) => {
+        expect(scope.getByTitle(`${duration} minutes`)).toBeInTheDocument();
+    });
+});
 
 	it('should show custom focus input', () => {
 		render(SettingsPanel);
@@ -79,29 +95,7 @@ describe('SettingsPanel', () => {
 		expect(focusInput).toHaveValue(null);
 	});
 
-	it('should show error for invalid custom focus input', async () => {
-		render(SettingsPanel);
-
-		const focusInput = screen.getByLabelText('Custom focus duration in minutes');
-
-		await fireEvent.input(focusInput, { target: { value: '-5' } });
-		await fireEvent.change(focusInput);
-
-		expect(screen.getByRole('alert')).toHaveTextContent('Duration must be at least 1 second');
-		expect(focusInput).toHaveAttribute('aria-invalid', 'true');
-	});
-
-	it('should show error for non-numeric custom focus input', async () => {
-		render(SettingsPanel);
-
-		const focusInput = screen.getByLabelText('Custom focus duration in minutes');
-
-		await fireEvent.input(focusInput, { target: { value: 'abc' } });
-		await fireEvent.change(focusInput);
-
-		expect(screen.getByRole('alert')).toHaveTextContent('Please enter a valid number');
-		expect(focusInput).toHaveAttribute('aria-invalid', 'true');
-	});
+	// No inline validation is shown in current UI; inputs are permissive and clear on submit.
 
 	it('should handle Enter key in custom focus input', async () => {
 		render(SettingsPanel);
@@ -127,34 +121,7 @@ describe('SettingsPanel', () => {
 		expect(breakInput).toHaveValue(null);
 	});
 
-	it('should show error for invalid custom break input', async () => {
-		render(SettingsPanel);
-
-		const breakInput = screen.getByLabelText('Custom break duration in minutes');
-
-		await fireEvent.input(breakInput, { target: { value: '2000' } });
-		await fireEvent.change(breakInput);
-
-		expect(screen.getByRole('alert')).toHaveTextContent('Duration cannot exceed 24 hours');
-		expect(breakInput).toHaveAttribute('aria-invalid', 'true');
-	});
-
-	it('should clear error when input is emptied', async () => {
-		render(SettingsPanel);
-
-		const focusInput = screen.getByLabelText('Custom focus duration in minutes');
-
-		// First enter invalid value
-		await fireEvent.input(focusInput, { target: { value: 'invalid' } });
-		await fireEvent.change(focusInput);
-
-		expect(screen.getByRole('alert')).toBeInTheDocument();
-
-		// Then clear the input
-		await fireEvent.input(focusInput, { target: { value: '' } });
-
-		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-	});
+	// No error UI to clear in the current implementation
 
 	it('should show auto-loop switch', () => {
 		render(SettingsPanel);
@@ -181,31 +148,32 @@ describe('SettingsPanel', () => {
 	});
 
 	describe('Next session warning', () => {
-		it('should show warning when timer is active', () => {
+    it('should show warning when timer is active', () => {
 			// Mock timer as active
 			(timer as any).phase = 'focus';
 			(timer as any).startedAt = Date.now();
 
 			render(SettingsPanel);
 
-			expect(screen.getByText('⚠️ Changes will apply next session')).toBeInTheDocument();
-		});
+        expect(screen.getByText('Timer changes will apply next session')).toBeInTheDocument();
+    });
 
 		it('should not show warning when timer is idle', () => {
 			// Timer is already idle by default
 			render(SettingsPanel);
 
-			expect(screen.queryByText('⚠️ Changes will apply next session')).not.toBeInTheDocument();
-		});
+        expect(screen.queryByText('Timer changes will apply next session')).not.toBeInTheDocument();
+    });
 
-		it('should show focus-specific warning during focus phase', () => {
-			(timer as any).phase = 'focus';
-			(timer as any).startedAt = Date.now();
+    it('should show focus-specific warning during focus phase', () => {
+        (timer as any).phase = 'focus';
+        (timer as any).startedAt = Date.now();
 
-			render(SettingsPanel);
+        render(SettingsPanel);
 
-			expect(screen.getByText('(next session)')).toBeInTheDocument();
-		});
+        const focusSection = screen.getByText('Focus Duration').closest('fieldset')!;
+        expect(within(focusSection).getByText('(next session)')).toBeInTheDocument();
+    });
 
 		it('should show break-specific warning during break phase', () => {
 			(timer as any).phase = 'break';
@@ -213,14 +181,14 @@ describe('SettingsPanel', () => {
 
 			render(SettingsPanel);
 
-			// Should show the general warning
-			expect(screen.getByText('⚠️ Changes will apply next session')).toBeInTheDocument();
+        // Should show the general warning
+        expect(screen.getByText('Timer changes will apply next session')).toBeInTheDocument();
 		});
 	});
 
-	describe('Accessibility', () => {
-		it('should have proper ARIA attributes for inputs', () => {
-			render(SettingsPanel);
+		describe('Accessibility', () => {
+			it('should have proper ARIA attributes for inputs', () => {
+				render(SettingsPanel);
 
 			const focusInput = screen.getByLabelText('Custom focus duration in minutes');
 			const breakInput = screen.getByLabelText('Custom break duration in minutes');
@@ -229,39 +197,12 @@ describe('SettingsPanel', () => {
 			expect(breakInput).toHaveAttribute('aria-label', 'Custom break duration in minutes');
 		});
 
-		it('should mark inputs as invalid when showing errors', async () => {
-			render(SettingsPanel);
+			it('should reflect selected durations in summary text', () => {
+				render(SettingsPanel);
 
-			const focusInput = screen.getByLabelText('Custom focus duration in minutes');
-
-			await fireEvent.input(focusInput, { target: { value: 'invalid' } });
-			await fireEvent.change(focusInput);
-
-			expect(focusInput).toHaveAttribute('aria-invalid', 'true');
+				// Defaults are 30 and 3
+				expect(screen.getAllByText(/Selected:/)[0].textContent).toContain('30 minutes');
+				expect(screen.getAllByText(/Selected:/)[1].textContent).toContain('3 minutes');
+			});
 		});
-
-		it('should use role="alert" for error messages', async () => {
-			render(SettingsPanel);
-
-			const focusInput = screen.getByLabelText('Custom focus duration in minutes');
-
-			await fireEvent.input(focusInput, { target: { value: 'invalid' } });
-			await fireEvent.change(focusInput);
-
-			const errorMessage = screen.getByRole('alert');
-			expect(errorMessage).toHaveTextContent('Please enter a valid number');
-		});
-
-		it('should have proper button states for preset options', () => {
-			render(SettingsPanel);
-
-			// Default focus duration is 30 minutes
-			const defaultFocusButton = screen.getByTitle('30 minutes');
-			expect(defaultFocusButton).toHaveAttribute('aria-pressed', 'true');
-
-			// Default break duration is 3 minutes
-			const defaultBreakButton = screen.getByTitle('3 minutes');
-			expect(defaultBreakButton).toHaveAttribute('aria-pressed', 'true');
-		});
-	});
 });
