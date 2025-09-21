@@ -13,7 +13,12 @@ const DEFAULT_PREFERENCES: Preferences = {
 };
 
 class PreferencesStore {
-	private store = new LazyStore('preferences.json');
+	// Initialize with defaults so fresh installs have a sane baseline.
+	// This reduces undefined branches and writes defaults on first save.
+	// Note: options are ignored if a Store for this path already exists.
+	private store = new LazyStore('preferences.json', {
+		defaults: { ...DEFAULT_PREFERENCES }
+	});
 
 	focusMinutes = $state(DEFAULT_PREFERENCES.focusMinutes);
 	breakMinutes = $state(DEFAULT_PREFERENCES.breakMinutes);
@@ -25,15 +30,21 @@ class PreferencesStore {
 
 	private async load() {
 		try {
-			const [focus, brk, loop] = await Promise.all([
-				this.store.get('focusMinutes'),
-				this.store.get('breakMinutes'),
-				this.store.get('autoLoop')
-			]);
+			// Prefer a single IPC call (entries) over multiple get() calls to
+			// minimize Tauri invoke round-trips and latency. Then runtime-check
+			// and clamp values to defend against corrupted or user-edited files.
+			const entries = await this.store.entries<unknown>();
+			const all = Object.fromEntries(entries) as Record<string, unknown>;
 
-			this.focusMinutes = (focus as number) ?? DEFAULT_PREFERENCES.focusMinutes;
-			this.breakMinutes = (brk as number) ?? DEFAULT_PREFERENCES.breakMinutes;
-			this.autoLoop = (loop as boolean) ?? DEFAULT_PREFERENCES.autoLoop;
+			const fm =
+				typeof all.focusMinutes === 'number' ? this.clampMinutes(all.focusMinutes) : undefined;
+			const bm =
+				typeof all.breakMinutes === 'number' ? this.clampMinutes(all.breakMinutes) : undefined;
+			const al = typeof all.autoLoop === 'boolean' ? all.autoLoop : undefined;
+
+			this.focusMinutes = fm ?? DEFAULT_PREFERENCES.focusMinutes;
+			this.breakMinutes = bm ?? DEFAULT_PREFERENCES.breakMinutes;
+			this.autoLoop = al ?? DEFAULT_PREFERENCES.autoLoop;
 		} catch (error) {
 			console.error('Failed to load preferences:', error);
 		}
@@ -47,6 +58,8 @@ class PreferencesStore {
 		}
 	}
 
+	// Clamp minutes to a safe range (≈1s–1440m) to avoid extreme values
+	// from UI bugs or stale/corrupted persisted data.
 	private clampMinutes(input: number) {
 		const n = Number(input) || 0;
 		return Math.max(0.016, Math.min(1440, n));
