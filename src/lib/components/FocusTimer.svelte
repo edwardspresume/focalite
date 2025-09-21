@@ -35,26 +35,27 @@
 	class="grid place-items-center gap-8 rounded-lg border bg-background p-8 shadow-md dark:border-input"
 >
 	<!-- Timer Display -->
-	<figure class="relative size-72">
-		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
+	<figure class="relative size-64">
+		<svg class="-rotate-90" viewBox="0 0 100 100" aria-hidden="true">
 			<!-- track -->
 			<circle
 				cx="50"
 				cy="50"
 				r={timer.r}
-				stroke="currentColor"
-				stroke-width="2"
 				fill="none"
+				stroke-width="2"
+				stroke="currentColor"
 				class="text-primary/30"
 			/>
+
 			<!-- progress -->
 			<circle
 				cx="50"
 				cy="50"
-				r={timer.r}
-				stroke="currentColor"
-				stroke-width="3"
 				fill="none"
+				r={timer.r}
+				stroke-width="3"
+				stroke="currentColor"
 				stroke-linecap="round"
 				stroke-dasharray={timer.C}
 				stroke-dashoffset={timer.dashOffset}
@@ -84,7 +85,7 @@
 		{#if timer.phase === 'idle'}
 			<Button
 				size="lg"
-				class="text-lg font-semibold shadow-sm hover:shadow-md"
+				class="text-lg shadow-sm hover:shadow-md"
 				onclick={() => timer.startFocus()}
 			>
 				<Play class="size-4" /> Start Focus
@@ -93,7 +94,7 @@
 			<Button size="lg" variant="outline" onclick={() => timer.pause()}
 				><Pause class="size-4" /> Pause</Button
 			>
-			<Button size="lg" variant="secondary" onclick={() => timer.reset()}
+			<Button size="lg" variant="outline" onclick={() => timer.reset()}
 				><RotateCcw class="size-4" /> Reset</Button
 			>
 		{:else}

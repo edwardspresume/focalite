@@ -44,14 +44,14 @@
 
 		<!-- Timer Display -->
 		<figure class="relative size-64">
-			<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
+			<svg class="-rotate-90" viewBox="0 0 100 100" aria-hidden="true">
 				<circle
 					cx="50"
 					cy="50"
 					r={timer.r}
-					stroke="currentColor"
-					stroke-width="2"
 					fill="none"
+					stroke-width="2"
+					stroke="currentColor"
 					class="text-primary/30"
 				/>
 
@@ -59,13 +59,13 @@
 					cx="50"
 					cy="50"
 					r={timer.r}
-					stroke="currentColor"
-					stroke-width="3"
 					fill="none"
+					stroke-width="3"
+					stroke="currentColor"
+					stroke-linecap="round"
 					stroke-dasharray={timer.C}
 					stroke-dashoffset={timer.dashOffset}
 					class="text-primary transition-[stroke-dashoffset] duration-1000 ease-linear"
-					stroke-linecap="round"
 				/>
 			</svg>
 
