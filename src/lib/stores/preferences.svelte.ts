@@ -33,8 +33,8 @@ class PreferencesStore {
 			// Prefer a single IPC call (entries) over multiple get() calls to
 			// minimize Tauri invoke round-trips and latency. Then runtime-check
 			// and clamp values to defend against corrupted or user-edited files.
-			const entries = await this.store.entries<unknown>();
-			const all = Object.fromEntries(entries) as Record<string, unknown>;
+			const entries = await this.store.entries();
+			const all = Object.fromEntries(entries);
 
 			this.focusMinutes =
 				typeof all.focusMinutes === 'number'
