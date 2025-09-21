@@ -1,7 +1,13 @@
-import { timer } from './timer.svelte';
 import { LazyStore } from '@tauri-apps/plugin-store';
 import { SvelteDate } from 'svelte/reactivity';
-import { IntervalManager, validateNumber, Throttle, withErrorHandling, getLocalDateString } from './store-utils';
+import {
+	getLocalDateString,
+	IntervalManager,
+	Throttle,
+	validateNumber,
+	withErrorHandling
+} from './store-utils';
+import { timer } from './timer.svelte';
 
 export interface DailyProgress {
 	date: string; // YYYY-MM-DD
@@ -9,14 +15,7 @@ export interface DailyProgress {
 	breaksCompleted: number;
 	focusMinutes: number;
 	breakMinutes: number;
-}
-
-const DEFAULT_PROGRESS: Omit<DailyProgress, 'date'> = {
-	sessionsCompleted: 0,
-	breaksCompleted: 0,
-	focusMinutes: 0,
-	breakMinutes: 0
-};
+}                   
 
 class ProgressStore {
 	private store = new LazyStore('progress.json', { defaults: {} });
@@ -28,13 +27,15 @@ class ProgressStore {
 	private lastPersistedCompletionAt = $state<number | null>(null);
 
 	// Derived state from timer - read-only view of current progress
-	currentProgress = $derived.by((): DailyProgress => ({
-		date: this.currentDate,
-		sessionsCompleted: timer.sessionsCompleted,
-		breaksCompleted: timer.breaksCompleted,
-		focusMinutes: timer.totalFocusTime,
-		breakMinutes: timer.totalBreakTime
-	}));
+	currentProgress = $derived.by(
+		(): DailyProgress => ({
+			date: this.currentDate,
+			sessionsCompleted: timer.sessionsCompleted,
+			breaksCompleted: timer.breaksCompleted,
+			focusMinutes: timer.totalFocusTime,
+			breakMinutes: timer.totalBreakTime
+		})
+	);
 
 	constructor() {
 		this.initialize();
@@ -49,7 +50,7 @@ class ProgressStore {
 		const today = getLocalDateString(new Date());
 		const progress = await withErrorHandling(
 			() => this.store.get(today) as Promise<DailyProgress | null>,
-			'Failed to load today\'s progress',
+			"Failed to load today's progress",
 			null
 		);
 
@@ -126,7 +127,7 @@ class ProgressStore {
 					date.setDate(date.getDate() - i);
 					const dateStr = getLocalDateString(date);
 
-					const progress = await this.store.get(dateStr) as DailyProgress | null;
+					const progress = (await this.store.get(dateStr)) as DailyProgress | null;
 					if (progress) {
 						// Validate historical data
 						results.push({

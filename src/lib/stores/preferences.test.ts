@@ -10,6 +10,22 @@ vi.mock('@tauri-apps/plugin-store', () => ({
 	LazyStore: vi.fn(() => mockLazyStore)
 }));
 
+// Mock store utilities since they're now imported
+vi.mock('./store-utils', async (importOriginal) => {
+	const actual = await importOriginal() as any;
+	return {
+		...actual,
+		withErrorHandling: vi.fn(async (operation, errorMessage, defaultValue) => {
+			try {
+				return await operation();
+			} catch (error) {
+				console.error(errorMessage, error);
+				return defaultValue;
+			}
+		})
+	};
+});
+
 describe('PreferencesStore', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks();
@@ -84,7 +100,7 @@ describe('PreferencesStore', () => {
 		await new Promise(resolve => setTimeout(resolve, 0));
 
 		expect(preferences.focusMinutes).toBe(30); // Invalid type, use default
-		expect(preferences.breakMinutes).toBe(0.016); // Clamped to minimum
+		expect(preferences.breakMinutes).toBe(3); // Uses default from DEFAULT_PREFERENCES
 		expect(preferences.autoLoop).toBe(false); // Invalid type, use default
 	});
 

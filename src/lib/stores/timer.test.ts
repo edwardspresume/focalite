@@ -1,6 +1,29 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { timer } from './timer.svelte';
 
+// Mock store utilities since they're now imported
+vi.mock('./store-utils', () => ({
+	IntervalManager: class MockIntervalManager {
+		private interval: ReturnType<typeof setInterval> | null = null;
+
+		start(callback: () => void, intervalMs: number) {
+			this.stop();
+			this.interval = setInterval(callback, intervalMs);
+		}
+
+		stop() {
+			if (this.interval) {
+				clearInterval(this.interval);
+				this.interval = null;
+			}
+		}
+
+		get isRunning() {
+			return this.interval !== null;
+		}
+	}
+}));
+
 describe('Timer Store', () => {
 	beforeEach(() => {
 		vi.useFakeTimers();

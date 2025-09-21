@@ -38,7 +38,8 @@ export function validateNumber(value: unknown, defaultValue: number, min = 0, ma
  * Clamps minutes to a reasonable range (≈1s–1440m)
  */
 export function clampMinutes(input: number): number {
-	return validateNumber(input, 0, 0.016, 1440);
+	const n = Number(input) || 0;
+	return Math.max(0.016, Math.min(1440, n));
 }
 
 /**
