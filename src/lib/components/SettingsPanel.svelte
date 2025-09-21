@@ -2,6 +2,7 @@
 	import {
 		Coffee,
 		Moon,
+		Palette,
 		RefreshCw,
 		Settings,
 		Sun,
@@ -18,14 +19,22 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { timer } from '$lib/stores/timer.svelte';
-	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
 
 	const focusOptions = [20, 25, 30, 45, 50, 60, 75, 90];
 	const breakOptions = [3, 5, 8, 10, 12, 15, 17, 20];
 
 	let customFocusDuration = $state('');
 	let customBreakDuration = $state('');
+
+	// Primary color now persisted via preferences store
+	function getPrimaryColor() {
+		return preferences.primaryColor;
+	}
+	function setPrimaryColor(v: string) {
+		preferences.setPrimaryColor(v);
+	}
 
 	// Track whether changes will apply to next session
 	const willApplyNextSession = $derived(timer.phase !== 'idle' && timer.startedAt !== null);
@@ -279,4 +288,30 @@
 			<span class="sr-only">Toggle theme</span>
 		</Button>
 	</div>
+
+	<fieldset class="mt-4 space-y-3 rounded-md border bg-accent p-4 dark:border-input">
+		<h4 class="flex items-center gap-2 text-sm font-medium text-foreground">
+			<Palette class="size-4" />
+			<label for="primary-color" class="cursor-pointer">Primary Color</label>
+		</h4>
+
+		<p class="text-xs text-muted-foreground dark:text-foreground/80">
+			Choose your app’s accent color. Applies immediately and is saved.
+		</p>
+
+		<div class="flex items-center gap-3 pt-1">
+			<input
+				id="primary-color"
+				type="color"
+				bind:value={getPrimaryColor, setPrimaryColor}
+				class="h-9 w-12 cursor-pointer rounded-md border bg-transparent p-0"
+				aria-label="Pick primary color"
+			/>
+			<code class="text-xs text-muted-foreground">{preferences.primaryColor}</code>
+		</div>
+
+		<p class="text-xs text-muted-foreground dark:text-foreground/80">
+			Saved and applied instantly.
+		</p>
+	</fieldset>
 </section>

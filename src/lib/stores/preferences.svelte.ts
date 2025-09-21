@@ -8,6 +8,7 @@ export interface Preferences {
     soundEnabled: boolean;
     breakStartSound: boolean;
     breakEndSound: boolean;
+    primaryColor: string; // hex color like #7c3aed
 }
 
 const DEFAULT_PREFERENCES: Preferences = {
@@ -16,7 +17,9 @@ const DEFAULT_PREFERENCES: Preferences = {
     autoLoop: false,
     soundEnabled: true,
     breakStartSound: true,
-    breakEndSound: true
+    breakEndSound: true,
+    // default aligns roughly with current theme primary (violet)
+    primaryColor: '#7c3aed'
 };
 
 class PreferencesStore {
@@ -33,6 +36,7 @@ class PreferencesStore {
     soundEnabled = $state(DEFAULT_PREFERENCES.soundEnabled);
     breakStartSound = $state(DEFAULT_PREFERENCES.breakStartSound);
     breakEndSound = $state(DEFAULT_PREFERENCES.breakEndSound);
+    primaryColor = $state(DEFAULT_PREFERENCES.primaryColor);
 
 	constructor() {
 		this.load();
@@ -56,6 +60,10 @@ class PreferencesStore {
             this.breakEndSound = typeof all.breakEndSound === 'boolean'
                 ? all.breakEndSound
                 : (typeof all.breakCompleteSound === 'boolean' ? all.breakCompleteSound : DEFAULT_PREFERENCES.breakEndSound);
+
+            const hex = typeof all.primaryColor === 'string' ? all.primaryColor : DEFAULT_PREFERENCES.primaryColor;
+            this.primaryColor = this.validateHex(hex) ? hex : DEFAULT_PREFERENCES.primaryColor;
+            this.applyPrimaryColorToCSS();
 			},
 			'Failed to load preferences',
 			undefined
@@ -100,6 +108,39 @@ class PreferencesStore {
     setBreakEndSound(on: boolean) {
         this.breakEndSound = !!on;
         this.save('breakEndSound', this.breakEndSound);
+    }
+
+    // Primary color (hex) handling
+    setPrimaryColor(hex: string) {
+        const value = this.validateHex(hex) ? hex : this.primaryColor;
+        if (value === this.primaryColor) {
+            // still apply in case of same value to ensure CSS is synced
+            this.applyPrimaryColorToCSS();
+            return;
+        }
+        this.primaryColor = value;
+        this.applyPrimaryColorToCSS();
+        this.save('primaryColor', value);
+    }
+
+    private validateHex(hex: unknown): hex is string {
+        if (typeof hex !== 'string') return false;
+        // Accept #RRGGBB or #RGB
+        return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(hex.trim());
+    }
+
+    private applyPrimaryColorToCSS() {
+        // In Tauri/SvelteKit SPA this runs in the browser only
+        if (typeof document === 'undefined') return;
+        const root = document.documentElement;
+        try {
+            root.style.setProperty('--primary', this.primaryColor);
+            root.style.setProperty('--ring', this.primaryColor);
+            // Optional: keep sidebar primary in sync
+            root.style.setProperty('--sidebar-primary', this.primaryColor);
+        } catch {
+            // no-op; CSS application is non-critical
+        }
     }
 
 }
