@@ -4,6 +4,13 @@ Purpose: Track and execute the refactor of Focalite’s core logic and the docum
 
 Status key: [ ] todo · [~] in progress · [x] done
 
+## Goals
+
+- Make the code simpler and more maintainable.
+- Ensure the core logic is correct (timing, transitions, auto-loop, manual overrides, persistence, rollover).
+- Utilize modern TypeScript and JavaScript best practices.
+- Use Svelte 5 Runes-first patterns ($state, $derived) and avoid legacy Svelte 4 idioms.
+
 ## 1) Timer Store (Centralized)
 
 - [ ] Single source of truth in `src/lib/stores/timer.svelte.ts` (no per-component timers)
@@ -75,29 +82,13 @@ Status key: [ ] todo · [~] in progress · [x] done
 - [ ] Avoid duplicate reactive sources for the same concept (DRY)
 - [ ] Ensure minimal re-renders (check referential equality where needed)
 
-## 10) Accessibility & UX
-
-- [ ] Semantic elements for navigation, buttons, and content
-- [ ] Labels/ARIA where appropriate; avoid redundant roles
-- [ ] Sufficient contrast; keyboard operability across all controls
-- [ ] Visual indicators for settings application timing
-
-## 11) Cross‑Runtime Behavior
+## 10) Cross‑Runtime Behavior
 
 - [ ] Timer logic identical across browser and desktop
 - [ ] Guard Tauri-only APIs; provide no-op or browser equivalent when needed
 - [ ] Document any runtime-specific nuances (e.g., notifications, filesystem persistence)
 
-## 12) Files to Review/Touch
 
-- [ ] `src/lib/stores/timer.svelte.ts` (centralized timer store)
-- [ ] `src/lib/stores/preferences.svelte.ts` (persistent user preferences)
-- [ ] `src/lib/stores/progress.svelte.ts` (daily progress + history)
-- [ ] `src/lib/components/FocusTimer.svelte` (UI uses shared store only)
-- [ ] `src/lib/components/BreakTimer.svelte` (UI uses shared store only)
-- [ ] `src/routes/+page.svelte` (auto-loop, smart tab switching, orchestration)
-- [ ] `src-tauri/capabilities/default.json` (permissions for store/notifications)
-- [ ] `src-tauri/src/lib.rs` / plugin init (notifications, store)
 
 ## 13) Verification & Acceptance Criteria
 
@@ -112,14 +103,7 @@ Status key: [ ] todo · [~] in progress · [x] done
 ## 14) Documentation & Clean‑up
 
 - [ ] Keep `AGENTS.md` aligned with behavior (no drift)
-- [ ] Keep `zprompts/prompt.md` as the single-source brief overview for prompts
-- [ ] Remove obsolete comments or dead code uncovered during refactor
+      -- [ ] Remove obsolete comments or dead code uncovered during refactor
 - [ ] Note any limitations or open questions at the end of this file
 
 ---
-
-Notes / Open Questions
-
-- [ ] Confirm notification plugin permissions and any user-consent prompts for Windows
-- [ ] Define exact preset options for durations beyond defaults (if any)
-- [ ] Confirm precise autosave cadence (15s vs 10/30s) and power impact
