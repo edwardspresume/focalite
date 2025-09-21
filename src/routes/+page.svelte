@@ -60,11 +60,11 @@
 
 		<div class="mx-auto max-w-4xl">
 			<Tabs.Content value="timer">
-				<FocusTimer />
+				<FocusTimer isActive={activeTab === 'timer'} />
 			</Tabs.Content>
 
 			<Tabs.Content value="break">
-				<BreakTimer />
+				<BreakTimer isActive={activeTab === 'break'} />
 			</Tabs.Content>
 
 			<Tabs.Content value="stats">

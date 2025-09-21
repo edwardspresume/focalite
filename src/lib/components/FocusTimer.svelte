@@ -4,7 +4,10 @@
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
 	import Button from './ui/button/button.svelte';
 
+	let { isActive = true }: { isActive?: boolean } = $props();
+
 	function onKey(e: KeyboardEvent) {
+		if (!isActive) return;
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
 		const key = e.key;
@@ -14,11 +17,14 @@
 			return;
 		}
 
-		if (key === ' ' && timer.phase !== 'break') {
+		if (key === ' ') {
 			e.preventDefault();
-			if (timer.phase === 'idle') timer.startFocus();
-			else if (timer.running) timer.pause();
-			else timer.resume();
+			if (timer.phase === 'idle') {
+				timer.startFocus();
+			} else if (timer.phase === 'focus') {
+				if (timer.running) timer.pause();
+				else timer.resume();
+			}
 			return;
 		}
 

@@ -4,12 +4,15 @@
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
 	import Button from './ui/button/button.svelte';
 
+	let { isActive = true }: { isActive?: boolean } = $props();
+
 	function onKey(e: KeyboardEvent) {
+		if (!isActive) return;
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
 		const key = e.key;
 
-		if (key === ' ' || key === 'Spacebar') {
+		if (key === ' ') {
 			e.preventDefault();
 			if (timer.phase === 'break') {
 				if (timer.running) timer.pause();
