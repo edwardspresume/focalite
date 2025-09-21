@@ -1,35 +1,23 @@
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock Tauri store
+// Mock LazyStore
+const mockLazyStore = {
+	entries: vi.fn(),
+	set: vi.fn()
+};
+
 vi.mock('@tauri-apps/plugin-store', () => ({
-	load: vi.fn(() => ({
-		get: vi.fn(),
-		set: vi.fn(),
-		save: vi.fn()
-	}))
+	LazyStore: vi.fn(() => mockLazyStore)
 }));
 
 describe('PreferencesStore', () => {
-	let mockStore: {
-		get: Mock;
-		set: Mock;
-		save: Mock;
-	};
-
 	beforeEach(async () => {
 		vi.clearAllMocks();
-
-		// Reset module state
 		vi.resetModules();
 
-		mockStore = {
-			get: vi.fn(),
-			set: vi.fn(),
-			save: vi.fn()
-		};
-
-		const { load } = await import('@tauri-apps/plugin-store');
-		(load as Mock).mockResolvedValue(mockStore);
+		// Reset mock store
+		mockLazyStore.entries.mockResolvedValue([]);
+		mockLazyStore.set.mockResolvedValue(undefined);
 	});
 
 	it('should initialize with default values', async () => {
@@ -38,19 +26,14 @@ describe('PreferencesStore', () => {
 		expect(preferences.focusMinutes).toBe(30);
 		expect(preferences.breakMinutes).toBe(3);
 		expect(preferences.autoLoop).toBe(false);
-		// loaded state will be true after constructor runs async load
-		// expect(preferences.loaded).toBe(false);
 	});
 
-	it('should load preferences from store', async () => {
-		mockStore.get.mockImplementation((key: string) => {
-			switch (key) {
-				case 'focusMinutes': return Promise.resolve(45);
-				case 'breakMinutes': return Promise.resolve(10);
-				case 'autoLoop': return Promise.resolve(true);
-				default: return Promise.resolve(null);
-			}
-		});
+	it('should load preferences from store using entries()', async () => {
+		mockLazyStore.entries.mockResolvedValue([
+			['focusMinutes', 45],
+			['breakMinutes', 10],
+			['autoLoop', true]
+		]);
 
 		const { preferences } = await import('./preferences.svelte');
 
@@ -62,8 +45,8 @@ describe('PreferencesStore', () => {
 		expect(preferences.autoLoop).toBe(true);
 	});
 
-	it('should use defaults when store values are null', async () => {
-		mockStore.get.mockResolvedValue(null);
+	it('should use defaults when store is empty', async () => {
+		mockLazyStore.entries.mockResolvedValue([]);
 
 		const { preferences } = await import('./preferences.svelte');
 
@@ -76,8 +59,7 @@ describe('PreferencesStore', () => {
 	});
 
 	it('should handle store loading errors gracefully', async () => {
-		const { load } = await import('@tauri-apps/plugin-store');
-		(load as Mock).mockRejectedValue(new Error('Store loading failed'));
+		mockLazyStore.entries.mockRejectedValue(new Error('Store loading failed'));
 
 		const { preferences } = await import('./preferences.svelte');
 
@@ -85,73 +67,82 @@ describe('PreferencesStore', () => {
 		await new Promise(resolve => setTimeout(resolve, 0));
 
 		expect(preferences.focusMinutes).toBe(30); // Should use defaults
+		expect(preferences.breakMinutes).toBe(3);
+		expect(preferences.autoLoop).toBe(false);
 	});
 
-	it('should set focus minutes with validation', async () => {
+	it('should handle corrupted data with type checking and clamping', async () => {
+		mockLazyStore.entries.mockResolvedValue([
+			['focusMinutes', 'invalid'],
+			['breakMinutes', -10],
+			['autoLoop', 'not a boolean']
+		]);
+
+		const { preferences } = await import('./preferences.svelte');
+
+		// Wait for loading to complete
+		await new Promise(resolve => setTimeout(resolve, 0));
+
+		expect(preferences.focusMinutes).toBe(30); // Invalid type, use default
+		expect(preferences.breakMinutes).toBe(0.016); // Clamped to minimum
+		expect(preferences.autoLoop).toBe(false); // Invalid type, use default
+	});
+
+	it('should set focus minutes with clamping', async () => {
 		const { preferences } = await import('./preferences.svelte');
 
 		preferences.setFocusMinutes(25);
 		expect(preferences.focusMinutes).toBe(25);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('focusMinutes', 25);
 
-		// Wait for async save operation
-		await new Promise(resolve => setTimeout(resolve, 0));
-		expect(mockStore.set).toHaveBeenCalledWith('focusMinutes', 25);
-		expect(mockStore.save).toHaveBeenCalled();
-	});
-
-	it('should clamp invalid focus minutes to valid range', async () => {
-		const { preferences } = await import('./preferences.svelte');
-
-		// Test too small value
+		// Test clamping too small value
 		preferences.setFocusMinutes(-5);
-		expect(preferences.focusMinutes).toBe(0.016); // Clamped to minimum
+		expect(preferences.focusMinutes).toBe(0.016);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('focusMinutes', 0.016);
 
-		// Test too large value
+		// Test clamping too large value
 		preferences.setFocusMinutes(2000);
-		expect(preferences.focusMinutes).toBe(1440); // Clamped to maximum
+		expect(preferences.focusMinutes).toBe(1440);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('focusMinutes', 1440);
 	});
 
-	it('should set break minutes with validation', async () => {
+	it('should set break minutes with clamping', async () => {
 		const { preferences } = await import('./preferences.svelte');
 
 		preferences.setBreakMinutes(15);
 		expect(preferences.breakMinutes).toBe(15);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('breakMinutes', 15);
 
-		// Wait for async save operation
-		await new Promise(resolve => setTimeout(resolve, 0));
-		expect(mockStore.set).toHaveBeenCalledWith('breakMinutes', 15);
-		expect(mockStore.save).toHaveBeenCalled();
-	});
-
-	it('should clamp invalid break minutes to valid range', async () => {
-		const { preferences } = await import('./preferences.svelte');
-
-		// Test too small value
+		// Test clamping too small value
 		preferences.setBreakMinutes(-3);
-		expect(preferences.breakMinutes).toBe(0.016); // Clamped to minimum
+		expect(preferences.breakMinutes).toBe(0.016);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('breakMinutes', 0.016);
 
-		// Test too large value
+		// Test clamping too large value
 		preferences.setBreakMinutes(5000);
-		expect(preferences.breakMinutes).toBe(1440); // Clamped to maximum
+		expect(preferences.breakMinutes).toBe(1440);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('breakMinutes', 1440);
 	});
 
-	it('should toggle auto loop', async () => {
+	it('should set auto loop', async () => {
 		const { preferences } = await import('./preferences.svelte');
 
-		const originalValue = preferences.autoLoop;
-		preferences.toggleAutoLoop();
+		preferences.setAutoLoop(true);
+		expect(preferences.autoLoop).toBe(true);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('autoLoop', true);
 
-		expect(preferences.autoLoop).toBe(!originalValue);
+		preferences.setAutoLoop(false);
+		expect(preferences.autoLoop).toBe(false);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('autoLoop', false);
 
-		// Wait for async save operation
-		await new Promise(resolve => setTimeout(resolve, 0));
-
-		expect(mockStore.set).toHaveBeenCalledWith('autoLoop', !originalValue);
-		expect(mockStore.save).toHaveBeenCalled();
+		// Test truthy/falsy conversion
+		preferences.setAutoLoop('truthy' as unknown as boolean);
+		expect(preferences.autoLoop).toBe(true);
+		expect(mockLazyStore.set).toHaveBeenCalledWith('autoLoop', true);
 	});
 
 	it('should handle save errors gracefully', async () => {
-		mockStore.save.mockRejectedValue(new Error('Save failed'));
+		mockLazyStore.set.mockRejectedValue(new Error('Save failed'));
 
 		const { preferences } = await import('./preferences.svelte');
 
