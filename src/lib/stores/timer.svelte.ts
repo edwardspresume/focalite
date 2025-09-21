@@ -2,6 +2,14 @@ import { preferences } from './preferences.svelte';
 
 export type TimerPhase = 'idle' | 'focus' | 'break';
 
+// Small utility to format seconds as MM:SS for labels
+function formatMMSS(secs: number): string {
+	const total = Math.max(0, Math.floor(secs));
+	const mins = Math.floor(total / 60);
+	const s = total % 60;
+	return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
 class TimerStore {
 	phase = $state<TimerPhase>('idle');
 	startedAt = $state<number | null>(null);
@@ -23,13 +31,17 @@ class TimerStore {
 	private interval: ReturnType<typeof setInterval> | undefined;
 
 	// Derived values using $derived for efficiency
+	// Note: When idle, this returns 0 intentionally. Idle display is handled
+	// by focusDurationLabel/breakDurationLabel in the UI; currentDuration is
+	// the source for active/paused session math (remaining, progress, crediting).
 	currentDuration = $derived.by(() => {
 		// Use locked duration if set (during active session)
 		if (this.lockedDuration !== null) return this.lockedDuration;
 
-		// Otherwise use current preferences (for display when idle)
+		// Otherwise use current preferences for the active phase
 		if (this.phase === 'focus') return Math.max(1, Math.round(preferences.focusMinutes * 60));
 		if (this.phase === 'break') return Math.max(1, Math.round(preferences.breakMinutes * 60));
+
 		return 0;
 	});
 
@@ -56,29 +68,14 @@ class TimerStore {
 		return Math.max(1, Math.round(preferences.breakMinutes * 60));
 	});
 
-	timeLabel = $derived.by(() => {
-		const secs = this.displaySeconds;
-		const mins = Math.floor(secs / 60);
-		const s = secs % 60;
-		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-	});
+	timeLabel = $derived.by(() => formatMMSS(this.displaySeconds));
 
-	breakDurationLabel = $derived.by(() => {
-		const secs = this.breakDurationSeconds;
-		const mins = Math.floor(secs / 60);
-		const s = secs % 60;
-		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-	});
+	breakDurationLabel = $derived.by(() => formatMMSS(this.breakDurationSeconds));
 
 	// Focus duration (only used when idle, so always show current preference)
 	focusDurationSeconds = $derived(Math.max(1, Math.round(preferences.focusMinutes * 60)));
 
-	focusDurationLabel = $derived.by(() => {
-		const secs = this.focusDurationSeconds;
-		const mins = Math.floor(secs / 60);
-		const s = secs % 60;
-		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-	});
+	focusDurationLabel = $derived.by(() => formatMMSS(this.focusDurationSeconds));
 
 	phaseLabel = $derived.by(() => {
 		if (this.phase === 'idle') return 'Ready to focus';
@@ -89,7 +86,9 @@ class TimerStore {
 	// Progress ring calculation
 	progress = $derived.by(() => {
 		if (this.phase === 'idle') return 0;
-		return this.currentDuration > 0 ? (this.currentDuration - this.remaining) / this.currentDuration : 0;
+		return this.currentDuration > 0
+			? (this.currentDuration - this.remaining) / this.currentDuration
+			: 0;
 	});
 
 	// geometry for SVG ring
@@ -220,7 +219,6 @@ class TimerStore {
 		this.isManualCycle = true;
 		this.startBreak();
 	}
-
 }
 
 export const timer = new TimerStore();
