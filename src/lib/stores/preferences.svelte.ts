@@ -36,20 +36,21 @@ class PreferencesStore {
 			const entries = await this.store.entries<unknown>();
 			const all = Object.fromEntries(entries) as Record<string, unknown>;
 
-			this.focusMinutes = this.validateMinutes(all.focusMinutes) ?? DEFAULT_PREFERENCES.focusMinutes;
-			this.breakMinutes = this.validateMinutes(all.breakMinutes) ?? DEFAULT_PREFERENCES.breakMinutes;
-			this.autoLoop = this.validateBoolean(all.autoLoop) ?? DEFAULT_PREFERENCES.autoLoop;
+			this.focusMinutes =
+				typeof all.focusMinutes === 'number'
+					? this.clampMinutes(all.focusMinutes)
+					: DEFAULT_PREFERENCES.focusMinutes;
+
+			this.breakMinutes =
+				typeof all.breakMinutes === 'number'
+					? this.clampMinutes(all.breakMinutes)
+					: DEFAULT_PREFERENCES.breakMinutes;
+
+			this.autoLoop =
+				typeof all.autoLoop === 'boolean' ? all.autoLoop : DEFAULT_PREFERENCES.autoLoop;
 		} catch (error) {
 			console.error('Failed to load preferences:', error);
 		}
-	}
-
-	private validateMinutes(value: unknown): number | undefined {
-		return typeof value === 'number' ? this.clampMinutes(value) : undefined;
-	}
-
-	private validateBoolean(value: unknown): boolean | undefined {
-		return typeof value === 'boolean' ? value : undefined;
 	}
 
 	private async save<K extends keyof Preferences>(key: K, value: Preferences[K]) {
