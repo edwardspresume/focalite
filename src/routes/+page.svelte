@@ -8,7 +8,6 @@
 	import StatsPanel from '$lib/components/StatsPanel.svelte';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 
-
 	// Auto-loop is now handled in the timer store
 
 	// Tab management - only auto-switch when timer phase actually changes
@@ -36,27 +35,26 @@
 </script>
 
 <main class="p-6">
-
 	<Tabs.Root value={activeTab} class="gap-10">
 		<Tabs.List class="mx-auto">
-			<Tabs.Trigger value="timer" onclick={() => activeTab = 'timer'}>
+			<Tabs.Trigger value="timer" onclick={() => (activeTab = 'timer')}>
 				<Timer />
 				<span>Timer</span>
 			</Tabs.Trigger>
 
-			<Tabs.Trigger value="break" onclick={() => activeTab = 'break'}>
+			<Tabs.Trigger value="break" onclick={() => (activeTab = 'break')}>
 				<Activity />
 				<span>Break</span>
 			</Tabs.Trigger>
 
-			<Tabs.Trigger value="settings" onclick={() => activeTab = 'settings'}>
-				<Settings />
-				<span>Settings</span>
-			</Tabs.Trigger>
-
-			<Tabs.Trigger value="stats" onclick={() => activeTab = 'stats'}>
+			<Tabs.Trigger value="stats" onclick={() => (activeTab = 'stats')}>
 				<ChartColumnIncreasing />
 				<span>Stats</span>
+			</Tabs.Trigger>
+
+			<Tabs.Trigger value="settings" onclick={() => (activeTab = 'settings')}>
+				<Settings />
+				<span>Settings</span>
 			</Tabs.Trigger>
 		</Tabs.List>
 
@@ -69,12 +67,12 @@
 				<BreakTimer />
 			</Tabs.Content>
 
-			<Tabs.Content value="settings">
-				<SettingsPanel />
-			</Tabs.Content>
-
 			<Tabs.Content value="stats">
 				<StatsPanel />
+			</Tabs.Content>
+
+			<Tabs.Content value="settings">
+				<SettingsPanel />
 			</Tabs.Content>
 		</div>
 	</Tabs.Root>

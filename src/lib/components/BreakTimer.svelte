@@ -7,15 +7,18 @@
 	function onKey(e: KeyboardEvent) {
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
-		// Only handle keys if we're actually in break phase
-		if (timer.phase === 'break') {
-			if (e.key === ' ') {
-				e.preventDefault();
+		const key = e.key;
+
+		if (key === ' ' || key === 'Spacebar') {
+			e.preventDefault();
+			if (timer.phase === 'break') {
 				if (timer.running) timer.pause();
 				else timer.resume();
-			} else if (e.key === 'Escape') {
-				timer.endBreakEarly();
+			} else {
+				timer.startManualBreak();
 			}
+		} else if (key === 'Escape' && timer.phase === 'break') {
+			timer.endBreakEarly();
 		}
 	}
 
@@ -115,7 +118,7 @@
 
 		<!-- Keyboard Shortcuts -->
 		<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
-			<KeyboardShortcut key="Space" label="Pause/Resume" />
+			<KeyboardShortcut key="Space" label="Start/Pause Break" />
 			<KeyboardShortcut key="Esc" label="End Break" />
 		</div>
 	</section>

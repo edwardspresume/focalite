@@ -64,10 +64,7 @@
 		</svg>
 
 		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
-			<time
-				class="font-mono text-6xl font-bold text-foreground"
-				aria-live="polite"
-			>
+			<time class="font-mono text-6xl font-bold text-foreground" aria-live="polite">
 				{#if timer.phase === 'idle'}
 					{timer.focusDurationLabel}
 				{:else}
@@ -90,25 +87,35 @@
 			>
 				<Play class="size-4" /> Start Focus
 			</Button>
-		{:else if timer.running}
-			<Button size="lg" variant="outline" onclick={() => timer.pause()}
-				><Pause class="size-4" /> Pause</Button
+		{:else if timer.phase === 'focus'}
+			<Button
+				size="lg"
+				variant={timer.running ? 'outline' : undefined}
+				onclick={() => (timer.running ? timer.pause() : timer.resume())}
 			>
-			<Button size="lg" variant="outline" onclick={() => timer.reset()}
-				><RotateCcw class="size-4" /> Reset</Button
+				{#if timer.running}
+					<Pause class="size-4" /> Pause
+				{:else}
+					<Play class="size-4" /> Resume
+				{/if}
+			</Button>
+
+			<Button
+				size="lg"
+				variant='outline'
+				onclick={() => timer.reset()}
 			>
-		{:else}
-			<Button size="lg" onclick={() => timer.resume()}><Play class="size-4" /> Resume</Button>
-			<Button size="lg" variant="secondary" onclick={() => timer.reset()}
-				><RotateCcw class="size-4" /> Reset</Button
-			>
+				<RotateCcw class="size-4" /> Reset
+			</Button>
 		{/if}
 	</div>
 
 	<!-- Break Duration Display -->
-	<div class="text-center text-sm text-muted-foreground dark:text-foreground/80">
-		<p>Break duration: <span class="font-mono">{timer.breakDurationLabel}</span></p>
-	</div>
+		<p
+			class="text-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-foreground"
+		>
+			Break duration: <span class="font-mono">{timer.breakDurationLabel}</span>
+		</p>
 
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
 		<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
