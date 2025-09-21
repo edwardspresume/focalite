@@ -71,7 +71,11 @@
 						datetime={`PT${timer.displaySeconds}S`}
 						aria-live="polite"
 					>
-						{timer.timeLabel}
+						{#if timer.phase === 'idle'}
+							{timer.breakDurationLabel}
+						{:else}
+							{timer.timeLabel}
+						{/if}
 					</time>
 				<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
 					{timer.phaseLabel}

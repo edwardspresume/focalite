@@ -71,6 +71,16 @@ class TimerStore {
 		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 	});
 
+	// Focus duration (only used when idle, so always show current preference)
+	focusDurationSeconds = $derived(Math.max(1, Math.round(preferences.focusMinutes * 60)));
+
+	focusDurationLabel = $derived.by(() => {
+		const secs = this.focusDurationSeconds;
+		const mins = Math.floor(secs / 60);
+		const s = secs % 60;
+		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+	});
+
 	phaseLabel = $derived.by(() => {
 		if (this.phase === 'idle') return 'Ready to focus';
 		if (this.phase === 'focus') return this.running ? 'Focusing...' : 'Paused';

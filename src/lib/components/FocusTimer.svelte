@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { timer } from '$lib/stores/timer.svelte';
-	import { Play, Pause, RotateCcw } from 'lucide-svelte';
-	import Button from './ui/button/button.svelte';
+	import { Pause, Play, RotateCcw } from 'lucide-svelte';
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
+	import Button from './ui/button/button.svelte';
 
 	function onKey(e: KeyboardEvent) {
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
@@ -31,24 +31,42 @@
 	<figure class="relative size-72">
 		<svg class="size-full -rotate-90 transform" viewBox="0 0 100 100" aria-hidden="true">
 			<!-- track -->
-			<circle cx="50" cy="50" r={timer.r} stroke="currentColor" stroke-width="2" fill="none" class="text-primary/30" />
+			<circle
+				cx="50"
+				cy="50"
+				r={timer.r}
+				stroke="currentColor"
+				stroke-width="2"
+				fill="none"
+				class="text-primary/30"
+			/>
 			<!-- progress -->
 			<circle
-				cx="50" cy="50" r={timer.r}
-				stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
-				stroke-dasharray={timer.C} stroke-dashoffset={timer.dashOffset}
+				cx="50"
+				cy="50"
+				r={timer.r}
+				stroke="currentColor"
+				stroke-width="3"
+				fill="none"
+				stroke-linecap="round"
+				stroke-dasharray={timer.C}
+				stroke-dashoffset={timer.dashOffset}
 				class="text-primary transition-[stroke-dashoffset] duration-1000 ease-linear"
 			/>
 		</svg>
 
-			<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
-	            <time
-	                class="font-mono text-6xl font-bold text-foreground"
-	                datetime={`PT${timer.displaySeconds}S`}
-	                aria-live="polite"
-	            >
-	                {timer.timeLabel}
-	            </time>
+		<figcaption class="absolute inset-0 flex flex-col items-center justify-center">
+			<time
+				class="font-mono text-6xl font-bold text-foreground"
+				datetime={`PT${timer.displaySeconds}S`}
+				aria-live="polite"
+			>
+				{#if timer.phase === 'idle'}
+					{timer.focusDurationLabel}
+				{:else}
+					{timer.timeLabel}
+				{/if}
+			</time>
 			<p class="mt-2 text-sm text-muted-foreground dark:text-foreground/80">
 				{timer.phaseLabel}
 			</p>
@@ -58,15 +76,25 @@
 	<!-- Control Buttons -->
 	<div class="flex gap-4">
 		{#if timer.phase === 'idle'}
-			<Button size="lg" class="text-lg font-semibold shadow-sm hover:shadow-md" onclick={() => timer.startFocus()}>
+			<Button
+				size="lg"
+				class="text-lg font-semibold shadow-sm hover:shadow-md"
+				onclick={() => timer.startFocus()}
+			>
 				<Play class="size-4" /> Start Focus
 			</Button>
 		{:else if timer.running}
-			<Button size="lg" variant="outline" onclick={() => timer.pause()}><Pause class="size-4" /> Pause</Button>
-			<Button size="lg" variant="secondary" onclick={() => timer.reset()}><RotateCcw class="size-4" /> Reset</Button>
+			<Button size="lg" variant="outline" onclick={() => timer.pause()}
+				><Pause class="size-4" /> Pause</Button
+			>
+			<Button size="lg" variant="secondary" onclick={() => timer.reset()}
+				><RotateCcw class="size-4" /> Reset</Button
+			>
 		{:else}
 			<Button size="lg" onclick={() => timer.resume()}><Play class="size-4" /> Resume</Button>
-			<Button size="lg" variant="secondary" onclick={() => timer.reset()}><RotateCcw class="size-4" /> Reset</Button>
+			<Button size="lg" variant="secondary" onclick={() => timer.reset()}
+				><RotateCcw class="size-4" /> Reset</Button
+			>
 		{/if}
 	</div>
 
