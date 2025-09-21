@@ -1,4 +1,5 @@
 import { preferences } from './preferences.svelte';
+import { IntervalManager } from './store-utils';
 
 export type TimerPhase = 'idle' | 'focus' | 'break';
 
@@ -29,7 +30,7 @@ class TimerStore {
 	// --- Private runtime details ---
 	// Lock duration when a session starts so preference tweaks mid-run do not affect timing.
 	private lockedDuration = $state<number | null>(null);
-	private interval: ReturnType<typeof setInterval> | undefined;
+	private intervalManager = new IntervalManager();
 
 	// --- Duration helpers ---
 	private getDurationForPhase(phase: TimerPhase): number {
@@ -90,15 +91,11 @@ class TimerStore {
 
 	// --- Timing loop ---
 	private startInterval() {
-		this.stopInterval();
-		this.interval = setInterval(() => this.onTick(), 250);
+		this.intervalManager.start(() => this.onTick(), 250);
 	}
 
 	private stopInterval() {
-		if (this.interval) {
-			clearInterval(this.interval);
-			this.interval = undefined;
-		}
+		this.intervalManager.stop();
 	}
 
 	private onTick() {

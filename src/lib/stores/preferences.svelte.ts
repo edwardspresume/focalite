@@ -1,4 +1,5 @@
 import { LazyStore } from '@tauri-apps/plugin-store';
+import { validateNumber, clampMinutes, withErrorHandling } from './store-utils';
 
 export interface Preferences {
 	focusMinutes: number;
@@ -29,53 +30,39 @@ class PreferencesStore {
 	}
 
 	private async load() {
-		try {
-			// Prefer a single IPC call (entries) over multiple get() calls to
-			// minimize Tauri invoke round-trips and latency. Then runtime-check
-			// and clamp values to defend against corrupted or user-edited files.
-			const entries = await this.store.entries();
-			const all = Object.fromEntries(entries);
+		await withErrorHandling(
+			async () => {
+				// Prefer a single IPC call (entries) over multiple get() calls to
+				// minimize Tauri invoke round-trips and latency. Then runtime-check
+				// and clamp values to defend against corrupted or user-edited files.
+				const entries = await this.store.entries();
+				const all = Object.fromEntries(entries);
 
-			this.focusMinutes =
-				typeof all.focusMinutes === 'number'
-					? this.clampMinutes(all.focusMinutes)
-					: DEFAULT_PREFERENCES.focusMinutes;
-
-			this.breakMinutes =
-				typeof all.breakMinutes === 'number'
-					? this.clampMinutes(all.breakMinutes)
-					: DEFAULT_PREFERENCES.breakMinutes;
-
-			this.autoLoop =
-				typeof all.autoLoop === 'boolean' ? all.autoLoop : DEFAULT_PREFERENCES.autoLoop;
-		} catch (error) {
-			console.error('Failed to load preferences:', error);
-		}
+				this.focusMinutes = clampMinutes(validateNumber(all.focusMinutes, DEFAULT_PREFERENCES.focusMinutes));
+				this.breakMinutes = clampMinutes(validateNumber(all.breakMinutes, DEFAULT_PREFERENCES.breakMinutes));
+				this.autoLoop = typeof all.autoLoop === 'boolean' ? all.autoLoop : DEFAULT_PREFERENCES.autoLoop;
+			},
+			'Failed to load preferences',
+			undefined
+		);
 	}
 
 	private async save<K extends keyof Preferences>(key: K, value: Preferences[K]) {
-		try {
-			await this.store.set(key, value);
-		} catch (error) {
-			console.error(`Failed to save ${key}:`, error);
-		}
-	}
-
-	// Clamp minutes to a safe range (≈1s–1440m) to avoid extreme values
-	// from UI bugs or stale/corrupted persisted data.
-	private clampMinutes(input: number) {
-		const n = Number(input) || 0;
-		return Math.max(0.016, Math.min(1440, n));
+		await withErrorHandling(
+			() => this.store.set(key, value),
+			`Failed to save ${key}`,
+			undefined
+		);
 	}
 
 	setFocusMinutes(minutes: number) {
-		const value = this.clampMinutes(minutes);
+		const value = clampMinutes(minutes);
 		this.focusMinutes = value;
 		this.save('focusMinutes', value);
 	}
 
 	setBreakMinutes(minutes: number) {
-		const value = this.clampMinutes(minutes);
+		const value = clampMinutes(minutes);
 		this.breakMinutes = value;
 		this.save('breakMinutes', value);
 	}
