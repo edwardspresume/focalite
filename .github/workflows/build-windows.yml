@@ -11,23 +11,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js (with pnpm cache)
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: pnpm
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: latest
           run_install: false
 
-      - name: Verify pnpm
-        run: pnpm --version
+      # Enable dependency caching for pnpm after pnpm is available on PATH
+      - name: Enable pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
@@ -37,8 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tauriScript: pnpm
-          args: build
+          tauriScript: pnpm tauri
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
