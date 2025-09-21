@@ -1,5 +1,4 @@
-import { load } from '@tauri-apps/plugin-store';
-import type { Store } from '@tauri-apps/plugin-store';
+import { LazyStore } from '@tauri-apps/plugin-store';
 
 export interface Preferences {
 	focusMinutes: number;
@@ -13,9 +12,9 @@ const DEFAULT_PREFERENCES: Preferences = {
 	autoLoop: false
 };
 
-let storeInstance: Store | null = null;
-
 class PreferencesStore {
+	private store = new LazyStore('preferences.json');
+
 	focusMinutes = $state(DEFAULT_PREFERENCES.focusMinutes);
 	breakMinutes = $state(DEFAULT_PREFERENCES.breakMinutes);
 	autoLoop = $state(DEFAULT_PREFERENCES.autoLoop);
@@ -26,19 +25,15 @@ class PreferencesStore {
 
 	private async load() {
 		try {
-			if (!storeInstance) {
-				storeInstance = await load('preferences.json');
-			}
-
-			const data = await Promise.all([
-				storeInstance.get('focusMinutes'),
-				storeInstance.get('breakMinutes'),
-				storeInstance.get('autoLoop')
+			const [focus, brk, loop] = await Promise.all([
+				this.store.get('focusMinutes'),
+				this.store.get('breakMinutes'),
+				this.store.get('autoLoop')
 			]);
 
-			this.focusMinutes = (data[0] as number) ?? DEFAULT_PREFERENCES.focusMinutes;
-			this.breakMinutes = (data[1] as number) ?? DEFAULT_PREFERENCES.breakMinutes;
-			this.autoLoop = (data[2] as boolean) ?? DEFAULT_PREFERENCES.autoLoop;
+			this.focusMinutes = (focus as number) ?? DEFAULT_PREFERENCES.focusMinutes;
+			this.breakMinutes = (brk as number) ?? DEFAULT_PREFERENCES.breakMinutes;
+			this.autoLoop = (loop as boolean) ?? DEFAULT_PREFERENCES.autoLoop;
 		} catch (error) {
 			console.error('Failed to load preferences:', error);
 		}
@@ -46,24 +41,26 @@ class PreferencesStore {
 
 	private async save<K extends keyof Preferences>(key: K, value: Preferences[K]) {
 		try {
-			if (!storeInstance) {
-				storeInstance = await load('preferences.json');
-			}
-			await storeInstance.set(key, value);
-			await storeInstance.save();
+			await this.store.set(key, value);
+			await this.store.save();
 		} catch (error) {
 			console.error(`Failed to save ${key}:`, error);
 		}
 	}
 
+	private clampMinutes(input: number) {
+		const n = Number(input) || 0;
+		return Math.max(0.016, Math.min(1440, n));
+	}
+
 	setFocusMinutes(minutes: number) {
-		const value = Math.max(0.016, Math.min(1440, Number(minutes) || 0));
+		const value = this.clampMinutes(minutes);
 		this.focusMinutes = value;
 		this.save('focusMinutes', value);
 	}
 
 	setBreakMinutes(minutes: number) {
-		const value = Math.max(0.016, Math.min(1440, Number(minutes) || 0));
+		const value = this.clampMinutes(minutes);
 		this.breakMinutes = value;
 		this.save('breakMinutes', value);
 	}
