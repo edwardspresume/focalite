@@ -15,7 +15,12 @@ export interface DailyProgress {
 	breaksCompleted: number;
 	focusMinutes: number;
 	breakMinutes: number;
-}                   
+}
+
+interface DailyWindowOptions {
+	includeToday?: boolean;
+	fillMissing?: boolean;
+}
 
 class ProgressStore {
 	private store = new LazyStore('progress.json', { defaults: {} });
@@ -129,7 +134,6 @@ class ProgressStore {
 
 					const progress = (await this.store.get(dateStr)) as DailyProgress | null;
 					if (progress) {
-						// Validate historical data
 						results.push({
 							date: progress.date || dateStr,
 							sessionsCompleted: validateNumber(progress.sessionsCompleted, 0),
@@ -140,9 +144,70 @@ class ProgressStore {
 					}
 				}
 
-				return results.reverse(); // Oldest first
+			return results.reverse(); // Oldest first
 			},
 			'Failed to get historical progress',
+			[]
+		);
+	}
+
+	async getDailyWindow(
+		days: number = 30,
+		{ includeToday = true, fillMissing = true }: DailyWindowOptions = {}
+	): Promise<DailyProgress[]> {
+		return withErrorHandling(
+			async () => {
+				const history = await this.getHistoricalProgress(days);
+				const historyByDate = new Map(history.map((entry) => [entry.date, entry]));
+				const today = new SvelteDate();
+				const start = new SvelteDate(today);
+				start.setDate(start.getDate() - (days - 1));
+
+				const window: DailyProgress[] = [];
+
+				for (let offset = 0; offset < days; offset++) {
+					const date = new SvelteDate(start);
+					date.setDate(start.getDate() + offset);
+					const dateStr = getLocalDateString(date);
+					const persisted = historyByDate.get(dateStr);
+					const isToday = dateStr === this.currentDate;
+
+					let entry: DailyProgress | null = null;
+
+					if (includeToday && isToday) {
+						entry = {
+							date: dateStr,
+							sessionsCompleted: timer.sessionsCompleted,
+							breaksCompleted: timer.breaksCompleted,
+							focusMinutes: timer.totalFocusTime,
+							breakMinutes: timer.totalBreakTime
+						};
+					} else if (persisted) {
+						entry = persisted;
+					} else if (fillMissing) {
+						entry = {
+							date: dateStr,
+							sessionsCompleted: 0,
+							breaksCompleted: 0,
+							focusMinutes: 0,
+							breakMinutes: 0
+						};
+					}
+
+					if (entry) {
+						window.push({
+							date: entry.date,
+							sessionsCompleted: validateNumber(entry.sessionsCompleted, 0),
+							breaksCompleted: validateNumber(entry.breaksCompleted, 0),
+							focusMinutes: validateNumber(entry.focusMinutes, 0),
+							breakMinutes: validateNumber(entry.breakMinutes, 0)
+						});
+					}
+				}
+
+				return window;
+			},
+			'Failed to build daily progress window',
 			[]
 		);
 	}
