@@ -44,7 +44,7 @@
 				<circle
 					cx="50"
 					cy="50"
-					r="45"
+					r={timer.r}
 					stroke="currentColor"
 					stroke-width="2"
 					fill="none"
@@ -54,7 +54,7 @@
 				<circle
 					cx="50"
 					cy="50"
-					r="45"
+					r={timer.r}
 					stroke="currentColor"
 					stroke-width="3"
 					fill="none"

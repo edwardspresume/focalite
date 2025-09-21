@@ -31,9 +31,7 @@ class TimerStore {
 	private interval: ReturnType<typeof setInterval> | undefined;
 
 	// Helper method for duration calculations
-	private getDurationForPhase(phase: TimerPhase, useLockedDuration = false): number {
-		if (useLockedDuration && this.lockedDuration !== null) return this.lockedDuration;
-
+	private getDurationForPhase(phase: TimerPhase): number {
 		const minutes = phase === 'focus' ? preferences.focusMinutes : preferences.breakMinutes;
 		return Math.max(1, Math.round(minutes * 60));
 	}
@@ -67,10 +65,12 @@ class TimerStore {
 	// Display helpers
 	displaySeconds = $derived(this.phase === 'idle' ? this.currentDuration : this.remaining);
 
-	// Always show break duration (respects locked duration during active break)
-	breakDurationSeconds = $derived.by(() => {
-		return this.getDurationForPhase('break', this.phase === 'break');
-	});
+	// Always show break duration (use locked duration during active break)
+	breakDurationSeconds = $derived.by(() =>
+		this.phase === 'break' && this.lockedDuration !== null
+			? this.lockedDuration
+			: this.getDurationForPhase('break')
+	);
 
 	timeLabel = $derived.by(() => formatTime(this.displaySeconds));
 
@@ -127,7 +127,7 @@ class TimerStore {
 		// Ensure we don't keep ticking in this phase
 		this.stopInterval();
 		const completedPhase = this.phase;
-		const completedMinutes = Math.floor(this.currentDuration / 60);
+		const completedMinutes = Math.floor((this.lockedDuration ?? 0) / 60);
 		this.lastCompletedPhase = completedPhase;
 		this.lastCompletionAt = Date.now();
 
@@ -193,20 +193,6 @@ class TimerStore {
 		this.breaksCompleted++;
 		this.totalBreakTime += Math.floor(this.elapsed / 60);
 		this.reset();
-	}
-
-	startBreakEarly() {
-		if (this.phase !== 'focus') return;
-		// End the focus session early, recording partial completion
-		this.stopInterval(); // Stop the current timer first
-		this.sessionsCompleted++;
-		this.totalFocusTime += Math.floor(this.elapsed / 60);
-		this.lastCompletedPhase = 'focus';
-		this.lastCompletionAt = Date.now();
-		// Mark as manual cycle
-		this.isManualCycle = true;
-		// Start the break
-		this.startBreak();
 	}
 
 	startManualBreak() {

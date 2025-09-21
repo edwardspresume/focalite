@@ -157,14 +157,14 @@ describe('Timer Store', () => {
 		it('should start manual break from focus phase', () => {
 			// Ensure clean state
 			timer.reset();
-
+			const baseline = timer.sessionsCompleted;
 			timer.startFocus();
 			vi.advanceTimersByTime(10000); // 10 seconds into focus
 
 			timer.startManualBreak();
 			expect(timer.phase).toBe('break');
 			expect(timer.isManualCycle).toBe(true);
-			expect(timer.sessionsCompleted).toBe(1); // Should record partial focus
+			expect(timer.sessionsCompleted).toBe(baseline + 1); // Should record partial focus
 		});
 
 		it('should be no-op when already in break phase', () => {

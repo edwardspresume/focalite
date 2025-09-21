@@ -250,39 +250,6 @@ The application uses a **centralized timer store** pattern for optimal performan
 - **Efficient Reactivity**: Uses `$derived` for computed values instead of multiple `$effect` blocks
 - **Single Interval**: One 250ms interval handles all timing updates, not per-component timers
 
-#### Timer Store Structure
-
-```typescript
-class TimerStore {
-  // Core state
-  phase = $state<'idle' | 'focus' | 'break'>('idle');
-  startedAt = $state<number | null>(null);
-  baseElapsedSec = $state(0);
-  now = $state(Date.now());
-
-  // Progress tracking
-  lastCompletedPhase = $state<TimerPhase | null>(null);
-  lastCompletionAt = $state<number | null>(null);
-
-  // Computed values using $derived for efficiency
-  currentDuration = $derived.by(() => /* duration calculation */);
-  elapsed = $derived(/* elapsed time calculation */);
-  remaining = $derived(/* remaining time calculation */);
-  timeLabel = $derived.by(() => /* MM:SS formatting */);
-  progress = $derived.by(() => /* 0-1 progress calculation */);
-  dashOffset = $derived(/* SVG stroke-dashoffset for progress ring */);
-
-  // Methods: startFocus(), startBreak(), startBreakEarly(), endBreakEarly(), pause(), resume(), reset()
-}
-```
-
-#### Benefits of This Approach
-
-- **Performance**: Single interval, efficient `$derived` chains, minimal re-renders
-- **Consistency**: No state synchronization issues between components
-- **Maintainability**: Timer logic centralized, easier to debug and extend
-- **Memory Efficiency**: Shared reactive state instead of duplicate component state
-
 ### Component Roles
 
 - **FocusTimer.svelte**: UI for focus sessions, consumes timer store
