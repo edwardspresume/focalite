@@ -1,25 +1,25 @@
 import { LazyStore } from '@tauri-apps/plugin-store';
-import { validateNumber, clampMinutes, withErrorHandling } from './store-utils';
+import { clampMinutes, validateNumber, withErrorHandling } from './store-utils';
 
 export interface Preferences {
-    focusMinutes: number;
-    breakMinutes: number;
-    autoLoop: boolean;
-    soundEnabled: boolean;
-    breakStartSound: boolean;
-    breakEndSound: boolean;
-    primaryColor: string; // hex color like #7c3aed
+	focusMinutes: number;
+	breakMinutes: number;
+	autoLoop: boolean;
+	soundEnabled: boolean;
+	breakStartSound: boolean;
+	breakEndSound: boolean;
+	primaryColor: string; // hex color like #8e51ff
 }
 
 const DEFAULT_PREFERENCES: Preferences = {
-    focusMinutes: 30,
-    breakMinutes: 3,
-    autoLoop: false,
-    soundEnabled: true,
-    breakStartSound: true,
-    breakEndSound: true,
-    // default aligns roughly with current theme primary (violet)
-    primaryColor: '#7c3aed'
+	focusMinutes: 30,
+	breakMinutes: 3,
+	autoLoop: true,
+	soundEnabled: true,
+	breakStartSound: true,
+	breakEndSound: true,
+	// default aligns roughly with current theme primary (violet)
+	primaryColor: '#8e51ff'
 };
 
 class PreferencesStore {
@@ -37,6 +37,7 @@ class PreferencesStore {
     breakStartSound = $state(DEFAULT_PREFERENCES.breakStartSound);
     breakEndSound = $state(DEFAULT_PREFERENCES.breakEndSound);
     primaryColor = $state(DEFAULT_PREFERENCES.primaryColor);
+    readonly defaultPrimaryColor = DEFAULT_PREFERENCES.primaryColor;
 
 	constructor() {
 		this.load();
@@ -121,6 +122,11 @@ class PreferencesStore {
         this.primaryColor = value;
         this.applyPrimaryColorToCSS();
         this.save('primaryColor', value);
+    }
+
+    resetPrimaryColor() {
+        // Delegate to setter to keep behavior consistent
+        this.setPrimaryColor(this.defaultPrimaryColor);
     }
 
     private validateHex(hex: unknown): hex is string {

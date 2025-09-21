@@ -60,7 +60,7 @@
 
 <section class="rounded-lg border bg-background p-6 shadow-md dark:border-input">
 	<header class="mb-6 flex items-center justify-between gap-2">
-		<h2 class="font-semibol gap-2 flex items-center text-lg">
+		<h2 class="font-semibol flex items-center gap-2 text-lg">
 			<Settings class="size-5" />
 			General Settings
 		</h2>
@@ -121,7 +121,7 @@
 			</div>
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: <span class="text-primary font-semibold">{preferences.focusMinutes} minutes</span>
+				Selected: <span class="font-semibold text-primary">{preferences.focusMinutes} minutes</span>
 				{#if willApplyNextSession && timer.phase === 'focus'}
 					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
 				{/if}
@@ -172,7 +172,7 @@
 			</div>
 
 			<p class="text-xs text-muted-foreground dark:text-foreground/80">
-				Selected: <span class="text-primary font-semibold">{preferences.breakMinutes} minutes</span>
+				Selected: <span class="font-semibold text-primary">{preferences.breakMinutes} minutes</span>
 				{#if willApplyNextSession && (timer.phase === 'break' || timer.phase === 'focus')}
 					<span class="text-amber-600 dark:text-amber-400">(next session)</span>
 				{/if}
@@ -308,10 +308,18 @@
 				aria-label="Pick primary color"
 			/>
 			<code class="text-xs text-muted-foreground">{preferences.primaryColor}</code>
+			<Button
+				variant="outline"
+				size="sm"
+				class="ml-auto"
+				title="Reset primary color to default"
+				aria-label="Reset primary color to default"
+				disabled={preferences.primaryColor === preferences.defaultPrimaryColor}
+				onclick={() => preferences.resetPrimaryColor()}
+			>
+				<RefreshCw class="size-4" />
+				Reset
+			</Button>
 		</div>
-
-		<p class="text-xs text-muted-foreground dark:text-foreground/80">
-			Saved and applied instantly.
-		</p>
 	</fieldset>
 </section>
