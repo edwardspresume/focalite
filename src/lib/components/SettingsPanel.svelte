@@ -47,7 +47,7 @@
 
 <section class="rounded-lg border bg-background p-6 shadow-md dark:border-input">
 	<header class="mb-6 flex items-center justify-between gap-2">
-		<h2 class="font-semibol gap-2d flex items-center text-lg">
+		<h2 class="font-semibol gap-2 flex items-center text-lg">
 			<Settings class="size-5" />
 			General Settings
 		</h2>
