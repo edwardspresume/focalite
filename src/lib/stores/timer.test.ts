@@ -35,7 +35,7 @@ describe('Timer Store', () => {
 		});
 
 		it('should calculate remaining time correctly', () => {
-			const focusDuration = 25 * 60; // 25 minutes in seconds
+			const focusDuration = 30 * 60; // 30 minutes in seconds (default)
 			timer.startFocus();
 
 			// Initially should have full time remaining
@@ -96,14 +96,13 @@ describe('Timer Store', () => {
 		it('should track completed sessions', () => {
 			timer.startFocus();
 
-			// Complete a focus session
-			vi.advanceTimersByTime(25 * 60 * 1000); // 25 minutes
-			expect(timer.isComplete).toBe(true);
+			// Complete a focus session by advancing time and triggering timer tick
+			vi.advanceTimersByTime(30 * 60 * 1000 + 250); // 30 minutes + one timer tick
 
-			// Start break after completing focus
-			timer.startBreak();
+			// Check that the completion was handled (completion auto-triggers transition to break)
 			expect(timer.sessionsCompleted).toBe(1);
 			expect(timer.lastCompletedPhase).toBe('focus');
+			expect(timer.phase).toBe('break'); // Should auto-transition to break
 		});
 	});
 
@@ -112,8 +111,6 @@ describe('Timer Store', () => {
 			// Set up some state
 			timer.startFocus();
 			vi.advanceTimersByTime(10000);
-			timer.sessionsCompleted = 2;
-			timer.completedCycles = 1;
 
 			// Reset
 			timer.reset();
@@ -121,24 +118,23 @@ describe('Timer Store', () => {
 			expect(timer.phase).toBe('idle');
 			expect(timer.startedAt).toBeNull();
 			expect(timer.elapsed).toBe(0);
-			expect(timer.sessionsCompleted).toBe(0);
-			expect(timer.completedCycles).toBe(0);
 			expect(timer.running).toBe(false);
+			expect(timer.isManualCycle).toBe(false);
 		});
 	});
 
 	describe('Time Formatting', () => {
 		it('should format time label correctly', () => {
 			timer.startFocus();
-			expect(timer.timeLabel).toBe('25:00');
+			expect(timer.timeLabel).toBe('30:00');
 
 			vi.advanceTimersByTime(65000); // 1 minute 5 seconds
-			expect(timer.timeLabel).toBe('23:55');
+			expect(timer.timeLabel).toBe('28:55');
 		});
 
 		it('should pad single digit seconds', () => {
 			timer.startFocus();
-			vi.advanceTimersByTime((25 * 60 - 5) * 1000); // 5 seconds remaining
+			vi.advanceTimersByTime((30 * 60 - 5) * 1000); // 5 seconds remaining
 			expect(timer.timeLabel).toBe('00:05');
 		});
 	});

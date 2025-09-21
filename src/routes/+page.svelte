@@ -27,12 +27,17 @@
 		if (timer.phase !== lastPhase) {
 			lastPhase = timer.phase;
 
-			// Auto-switch to break tab when break actually starts
+			// Auto-switch to break tab when break starts
 			if (timer.phase === 'break') {
 				activeTab = 'break';
 			}
-			// Auto-switch back to timer tab when transitioning to focus or idle
-			else if (timer.phase === 'focus' || timer.phase === 'idle') {
+			// For manual cycles, stay idle when break completes
+			// For auto cycles, may auto-start focus per setting (handled in timer store)
+			else if (timer.phase === 'idle' && timer.isManualCycle) {
+				activeTab = 'timer';
+			}
+			// Auto-switch back to timer tab when transitioning to focus
+			else if (timer.phase === 'focus') {
 				activeTab = 'timer';
 			}
 		}

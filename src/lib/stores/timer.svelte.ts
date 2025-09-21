@@ -19,6 +19,7 @@ class TimerStore {
 	completedCycles = $state(0);
 	lastCompletedPhase = $state<TimerPhase | null>(null);
 	lastCompletionAt = $state<number | null>(null);
+	isManualCycle = $state(false);
 
 	private interval: ReturnType<typeof setInterval> | undefined;
 
@@ -46,8 +47,18 @@ class TimerStore {
 	// Display helpers
 	displaySeconds = $derived(this.phase === 'idle' ? this.currentDuration : this.remaining);
 
+	// Always show break duration
+	breakDurationSeconds = $derived(Math.max(1, Math.round(preferences.breakMinutes * 60)));
+
 	timeLabel = $derived.by(() => {
 		const secs = this.displaySeconds;
+		const mins = Math.floor(secs / 60);
+		const s = secs % 60;
+		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+	});
+
+	breakDurationLabel = $derived.by(() => {
+		const secs = this.breakDurationSeconds;
 		const mins = Math.floor(secs / 60);
 		const s = secs % 60;
 		return `${String(mins).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
@@ -109,7 +120,8 @@ class TimerStore {
 		} else if (completedPhase === 'break') {
 			this.breaksCompleted++;
 			this.totalBreakTime += completedMinutes;
-			if (preferences.autoLoop) {
+			// If it's a manual cycle, don't auto-start focus even with auto-loop enabled
+			if (preferences.autoLoop && !this.isManualCycle) {
 				this.startFocus();
 			} else {
 				this.reset();
@@ -154,6 +166,7 @@ class TimerStore {
 		this.startedAt = null;
 		this.baseElapsedSec = 0;
 		this.lockedDuration = null;
+		this.isManualCycle = false;
 		this.stopInterval();
 	}
 
@@ -171,7 +184,25 @@ class TimerStore {
 		this.totalFocusTime += Math.floor(this.elapsed / 60);
 		this.lastCompletedPhase = 'focus';
 		this.lastCompletionAt = Date.now();
+		// Mark as manual cycle
+		this.isManualCycle = true;
 		// Start the break
+		this.startBreak();
+	}
+
+	startManualBreak() {
+		if (this.phase === 'focus') {
+			// Stop focus immediately and start break
+			this.sessionsCompleted++;
+			this.totalFocusTime += Math.floor(this.elapsed / 60);
+			this.lastCompletedPhase = 'focus';
+			this.lastCompletionAt = Date.now();
+		} else if (this.phase === 'break') {
+			// Already in break, no-op
+			return;
+		}
+		// Mark as manual cycle and start break
+		this.isManualCycle = true;
 		this.startBreak();
 	}
 

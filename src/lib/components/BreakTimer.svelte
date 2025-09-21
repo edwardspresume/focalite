@@ -81,31 +81,28 @@
 
 		<!-- Control Buttons -->
 		<div class="flex gap-4">
-			{#if timer.phase === 'focus'}
-				<!-- Show start break button when focus is running -->
-				<Button size="lg" class="text-lg font-semibold shadow-sm hover:shadow-md" onclick={() => timer.startBreakEarly()}>
-					<Play class="size-4" /> Start Break
-				</Button>
-			{:else if timer.phase === 'break'}
+			{#if timer.phase === 'break'}
 				<!-- Show pause/resume and end break buttons when break is active -->
 				{#if timer.running}
-					<Button variant="outline" size="lg" onclick={timer.pause}>
+					<Button variant="outline" size="lg" onclick={() => timer.pause()}>
 						<Pause class="size-4" />
 						Pause
 					</Button>
 				{:else}
-					<Button variant="outline" size="lg" onclick={timer.resume}>
+					<Button variant="outline" size="lg" onclick={() => timer.resume()}>
 						<Play class="size-4" />
 						Resume
 					</Button>
 				{/if}
-				<Button variant="destructive" size="lg" onclick={timer.endBreakEarly}>
+				<Button variant="destructive" size="lg" onclick={() => timer.endBreakEarly()}>
 					<Square class="size-4" />
-					End Break
+					End Break Now
 				</Button>
 			{:else}
-				<!-- Show placeholder when idle -->
-				<p class="text-sm text-muted-foreground">Start a focus session first</p>
+				<!-- Show start break button for any non-break state -->
+				<Button size="lg" class="text-lg font-semibold shadow-sm hover:shadow-md" onclick={() => timer.startManualBreak()}>
+					<Play class="size-4" /> Start Break
+				</Button>
 			{/if}
 		</div>
 

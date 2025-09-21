@@ -7,13 +7,17 @@
 	function onKey(e: KeyboardEvent) {
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
-		if (e.key === ' ') {
+		// Only handle space key for focus and idle phases, let BreakTimer handle break phase
+		if (e.key === ' ' && timer.phase !== 'break') {
 			e.preventDefault();
 			if (timer.phase === 'idle') timer.startFocus();
 			else if (timer.running) timer.pause();
 			else timer.resume();
 		} else if (e.key === 'Escape') {
 			timer.reset();
+		} else if (e.key === 'b' || e.key === 'B') {
+			e.preventDefault();
+			timer.startManualBreak();
 		}
 	}
 </script>
@@ -66,8 +70,14 @@
 		{/if}
 	</div>
 
+	<!-- Break Duration Display -->
+	<div class="text-center text-sm text-muted-foreground dark:text-foreground/80">
+		<p>Break duration: <span class="font-mono">{timer.breakDurationLabel}</span></p>
+	</div>
+
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
 		<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
 		<KeyboardShortcut key="Esc" label="Reset" />
+		<KeyboardShortcut key="B" label="Start Break" />
 	</div>
 </section>
