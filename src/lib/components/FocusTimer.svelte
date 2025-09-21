@@ -7,15 +7,22 @@
 	function onKey(e: KeyboardEvent) {
 		if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
 
-		// Only handle space key for focus and idle phases, let BreakTimer handle break phase
-		if (e.key === ' ' && timer.phase !== 'break') {
+		const key = e.key;
+
+		if (key === 'Escape') {
+			timer.reset();
+			return;
+		}
+
+		if (key === ' ' && timer.phase !== 'break') {
 			e.preventDefault();
 			if (timer.phase === 'idle') timer.startFocus();
 			else if (timer.running) timer.pause();
 			else timer.resume();
-		} else if (e.key === 'Escape') {
-			timer.reset();
-		} else if (e.key === 'b' || e.key === 'B') {
+			return;
+		}
+
+		if (key.toLowerCase() === 'b') {
 			e.preventDefault();
 			timer.startManualBreak();
 		}
