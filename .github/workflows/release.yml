@@ -30,6 +30,41 @@ jobs:
         with:
           node-version: lts/*
 
+      - name: Validate version consistency (tag/pkg/tauri/cargo)
+        uses: actions/github-script@v7
+        env:
+          TAG: ${{ github.ref_name }}
+        with:
+          script: |
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const tauri = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            const cargoToml = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            const cargoVersion = (cargoToml.match(/^version\s*=\s*"([^"]+)"/m) || [null, null])[1];
+            const tag = process.env.TAG || '';
+            const tagVersion = tag.replace(/^v/, '');
+
+            const mismatches = [];
+            if (!pkg.version) mismatches.push('package.json missing version');
+            if (!tauri.version) mismatches.push('tauri.conf.json missing version');
+            if (!cargoVersion) mismatches.push('Cargo.toml missing version');
+
+            if (pkg.version && tauri.version && pkg.version !== tauri.version) {
+              mismatches.push(`package.json (${pkg.version}) != tauri.conf.json (${tauri.version})`);
+            }
+            if (pkg.version && cargoVersion && pkg.version !== cargoVersion) {
+              mismatches.push(`package.json (${pkg.version}) != Cargo.toml (${cargoVersion})`);
+            }
+            if (tagVersion && pkg.version && tagVersion !== pkg.version) {
+              mismatches.push(`git tag (${tag}) != package.json (${pkg.version})`);
+            }
+
+            if (mismatches.length) {
+              core.setFailed('Version mismatch: ' + mismatches.join('; '));
+            } else {
+              core.info(`Version OK: ${pkg.version}`);
+            }
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -67,4 +102,3 @@ jobs:
             - Includes MSI/NSIS on Windows and DMG on macOS.
           draft: false
           prerelease: false
-

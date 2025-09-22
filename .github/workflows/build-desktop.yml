@@ -1,4 +1,4 @@
-name: Build Desktop Installers
+name: Build Focalite Installers
 
 on:
   workflow_dispatch:
@@ -12,13 +12,13 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            artifact_name: focalite-macos-dmg
+            artifact_name: Focalite-macOS-dmg
             artifact_path: src-tauri/target/release/bundle/dmg/*.dmg
           - os: windows-latest
-            artifact_name: focalite-windows-nsis
+            artifact_name: Focalite-Windows-nsis
             artifact_path: src-tauri/target/release/bundle/nsis/*.exe
           - os: windows-latest
-            artifact_name: focalite-windows-msi
+            artifact_name: Focalite-Windows-msi
             artifact_path: src-tauri/target/release/bundle/msi/*.msi
 
     steps:
@@ -41,6 +41,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
+
+      - name: Validate version consistency (pkg/tauri/cargo)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const tauri = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            const cargoToml = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            const cargoVersion = (cargoToml.match(/^version\s*=\s*"([^"]+)"/m) || [null, null])[1];
+
+            const mismatches = [];
+            if (!pkg.version) mismatches.push('package.json missing version');
+            if (!tauri.version) mismatches.push('tauri.conf.json missing version');
+            if (!cargoVersion) mismatches.push('Cargo.toml missing version');
+
+            if (pkg.version && tauri.version && pkg.version !== tauri.version) {
+              mismatches.push(`package.json (${pkg.version}) != tauri.conf.json (${tauri.version})`);
+            }
+            if (pkg.version && cargoVersion && pkg.version !== cargoVersion) {
+              mismatches.push(`package.json (${pkg.version}) != Cargo.toml (${cargoVersion})`);
+            }
+
+            if (mismatches.length) {
+              core.setFailed('Version mismatch: ' + mismatches.join('; '));
+            } else {
+              core.info(`Version OK: ${pkg.version}`);
+            }
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable

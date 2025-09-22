@@ -3,19 +3,24 @@
 	"version": "0.1.0",
 	"description": "",
 	"type": "module",
-	"scripts": {
+  "scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"tauri": "tauri",
-		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
-		"test": "vitest",
-		"test:ui": "vitest --ui",
-		"test:run": "vitest run"
-	},
+		"bump": "node scripts/bump-version.mjs",
+		"release": "node scripts/bump-version.mjs --commit --tag",
+		"release:patch": "node scripts/bump-version.mjs patch --commit --tag",
+		"release:minor": "node scripts/bump-version.mjs minor --commit --tag",
+		"release:major": "node scripts/bump-version.mjs major --commit --tag",
+  		"format": "prettier --write .",
+  		"lint": "prettier --check . && eslint .",
+  		"test": "vitest",
+  		"test:ui": "vitest --ui",
+  		"test:run": "vitest run"
+  },
 	"license": "MIT",
 	"dependencies": {
 		"@tauri-apps/api": "^2",
