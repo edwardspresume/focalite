@@ -15,8 +15,11 @@ jobs:
             artifact_name: focalite-macos-dmg
             artifact_path: src-tauri/target/release/bundle/dmg/*.dmg
           - os: windows-latest
-            artifact_name: focalite-windows-installer
+            artifact_name: focalite-windows-nsis
             artifact_path: src-tauri/target/release/bundle/nsis/*.exe
+          - os: windows-latest
+            artifact_name: focalite-windows-msi
+            artifact_path: src-tauri/target/release/bundle/msi/*.msi
 
     steps:
       - name: Checkout repository

@@ -34,7 +34,7 @@
 	});
 </script>
 
-<main class="p-6">
+<main class="p-8">
 	<Tabs.Root value={activeTab} class="gap-10">
 		<Tabs.List class="mx-auto">
 			<Tabs.Trigger value="timer" onclick={() => (activeTab = 'timer')}>
