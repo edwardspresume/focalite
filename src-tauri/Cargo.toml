@@ -1,6 +1,6 @@
 [package]
 name = "focalite"
-version = "0.1.0"
+version = "0.1.1"
 description = "Focus timer"
 authors = ["Edwards Presume"]
 edition = "2021"
