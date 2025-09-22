@@ -1,6 +1,6 @@
 # Focalite Privacy Policy
 
-Last Updated: January 2025
+Last Updated: September 2025
 
 ## Your Privacy Matters
 
@@ -14,7 +14,7 @@ Focalite collects and stores the following information **locally on your device 
 
 - Focus session durations and completion counts
 - Break session durations and completion counts
-- Daily productivity statistics
+- Daily productivity statistics (e.g., per‑day focus/break totals)
 - Timer preferences and settings
 
 ### Application Settings
@@ -28,15 +28,18 @@ Focalite collects and stores the following information **locally on your device 
 
 ### Local Storage Only
 
-- All data is stored exclusively on your device using local storage
+- All data is stored exclusively on your device
+- Preferences and progress are persisted to local JSON files via the Tauri Store plugin
+- Some UI-only preferences (such as theme mode) may use the app’s browser localStorage
 - No data is transmitted to external servers
 - No cloud synchronization or backup services are used
-- Data files are stored in your system's application data directory
+- Data files are stored in your system's application data directory (paths vary by OS)
 
 ### Data Retention
 
 - Data remains on your device until you choose to delete it
-- Uninstalling the application will remove all stored data
+- Historical entries are kept locally; charts typically show recent windows (e.g., last 7–30 days) without deleting older entries
+- Uninstalling the application does not always remove app data on every OS. To fully remove data, delete the app’s data directory in your system application data location (exact path varies by OS) after uninstalling.
 
 ## Data Sharing
 
@@ -44,7 +47,7 @@ Focalite collects and stores the following information **locally on your device 
 
 - Focalite does not collect personal information
 - No data is sent to the developers or third parties
-- No analytics or telemetry services are used
+- No analytics, telemetry, or crash-reporting services are used
 - No advertising networks are integrated
 
 ## Your Control
@@ -52,14 +55,13 @@ Focalite collects and stores the following information **locally on your device 
 ### Data Management
 
 - Access your statistics anytime within the application
-- Delete all data by uninstalling the application
+- To delete data, manually remove the application data directory for Focalite from your system’s application data location after uninstalling (paths vary by OS)
 
 ### Permissions
 
 The application may request the following system permissions:
 
-- **Notifications**: To alert you when sessions complete (optional)
-- **System Tray**: To minimize the application to system tray (optional)
+- **Notifications**: To alert you when a break starts and when a break ends (optional)
 
 ## Updates to This Policy
 
