@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { preferences } from '$lib/stores/preferences.svelte';
 	import { timer } from '$lib/stores/timer.svelte';
+
 	import { Pause, Play, RotateCcw } from 'lucide-svelte';
 	import KeyboardShortcut from './KeyboardShortcut.svelte';
 	import Button from './ui/button/button.svelte';
 
 	let { isActive = true }: { isActive?: boolean } = $props();
+
+	const breakDurationMinutes = $derived(`${preferences.breakMinutes}m`);
 
 	function onKey(e: KeyboardEvent) {
 		if (!isActive) return;
@@ -116,7 +120,7 @@
 	<p
 		class="rounded-full bg-primary/10 px-3 py-1 text-center text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-foreground"
 	>
-		Break duration: <span class="font-mono">{timer.breakDurationLabel}m</span>
+		Break duration: <span class="font-mono">{breakDurationMinutes}</span>
 	</p>
 
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
