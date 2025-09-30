@@ -29,7 +29,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 
 // ==============================================================================
 // Constants
@@ -244,21 +244,29 @@ function hasGit() {
 
 /**
  * Runs a git command, optionally in dry-run mode.
- * @param {string[]} args - Git command arguments
+ * @param {string[]} args - Git command arguments (e.g., ['add', 'file.txt'])
  * @param {boolean} dryRun - If true, only show what would be done
  */
 function runGit(args, dryRun) {
-	const cmd = `git ${args.join(' ')}`;
+	const displayCmd = `git ${args.join(' ')}`;
 
 	if (dryRun) {
-		console.log(`  [dry-run] Would run: ${cmd}`);
+		console.log(`  [dry-run] Would run: ${displayCmd}`);
 		return;
 	}
 
 	try {
-		execSync(cmd, { stdio: 'inherit', cwd: ROOT });
+		// Use spawnSync with argument array to avoid shell escaping issues
+		const result = spawnSync('git', args, {
+			stdio: 'inherit',
+			cwd: ROOT
+		});
+
+		if (result.status !== 0) {
+			throw new Error(`Process exited with code ${result.status}`);
+		}
 	} catch (err) {
-		throw new Error(`Git command failed: ${cmd}\n${err.message}`);
+		throw new Error(`Git command failed: ${displayCmd}\n${err.message}`);
 	}
 }
 
