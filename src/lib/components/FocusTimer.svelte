@@ -106,22 +106,18 @@
 				{/if}
 			</Button>
 
-			<Button
-				size="lg"
-				variant='outline'
-				onclick={() => timer.reset()}
-			>
+			<Button size="lg" variant="outline" onclick={() => timer.reset()}>
 				<RotateCcw class="size-4" /> Reset
 			</Button>
 		{/if}
 	</div>
 
 	<!-- Break Duration Display -->
-		<p
-			class="text-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-foreground"
-		>
-			Break duration: <span class="font-mono">{timer.breakDurationLabel}</span>
-		</p>
+	<p
+		class="rounded-full bg-primary/10 px-3 py-1 text-center text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-foreground"
+	>
+		Break duration: <span class="font-mono">{timer.breakDurationLabel}m</span>
+	</p>
 
 	<div class="flex gap-6 text-sm text-muted-foreground dark:text-foreground/80">
 		<KeyboardShortcut key="Space" label="Start/Pause/Resume" />
