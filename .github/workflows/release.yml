@@ -17,57 +17,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate version consistency
+        shell: bash
+        run: |
+          PKG_VER=$(node -p "require('./package.json').version")
+          TAURI_VER=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          CARGO_VER=$(grep -m1 '^version = ' src-tauri/Cargo.toml | cut -d'"' -f2)
+          TAG_VER="${GITHUB_REF_NAME#v}"
+
+          if [[ "$PKG_VER" != "$TAURI_VER" ]] || [[ "$PKG_VER" != "$CARGO_VER" ]] || [[ "$TAG_VER" != "$PKG_VER" ]]; then
+            echo "❌ Version mismatch:"
+            echo "  package.json: $PKG_VER"
+            echo "  tauri.conf.json: $TAURI_VER"
+            echo "  Cargo.toml: $CARGO_VER"
+            echo "  Git tag: $TAG_VER"
+            exit 1
+          fi
+          echo "✅ All versions match: $PKG_VER"
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
-          run_install: false
 
-      - name: Setup Node.js + pnpm cache
+      - name: Setup Node.js with cache
         uses: actions/setup-node@v5
         with:
           node-version: lts/*
           cache: pnpm
 
-      - name: Validate version consistency (tag/pkg/tauri/cargo)
-        uses: actions/github-script@v7
-        env:
-          TAG: ${{ github.ref_name }}
-        with:
-          script: |
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            const tauri = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
-            const cargoToml = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
-            const cargoVersion = (cargoToml.match(/^version\s*=\s*"([^"]+)"/m) || [null, null])[1];
-            const tag = process.env.TAG || '';
-            const tagVersion = tag.replace(/^v/, '');
-
-            const mismatches = [];
-            if (!pkg.version) mismatches.push('package.json missing version');
-            if (!tauri.version) mismatches.push('tauri.conf.json missing version');
-            if (!cargoVersion) mismatches.push('Cargo.toml missing version');
-
-            if (pkg.version && tauri.version && pkg.version !== tauri.version) {
-              mismatches.push(`package.json (${pkg.version}) != tauri.conf.json (${tauri.version})`);
-            }
-            if (pkg.version && cargoVersion && pkg.version !== cargoVersion) {
-              mismatches.push(`package.json (${pkg.version}) != Cargo.toml (${cargoVersion})`);
-            }
-            if (tagVersion && pkg.version && tagVersion !== pkg.version) {
-              mismatches.push(`git tag (${tag}) != package.json (${pkg.version})`);
-            }
-
-            if (mismatches.length) {
-              core.setFailed('Version mismatch: ' + mismatches.join('; '));
-            } else {
-              core.info(`Version OK: ${pkg.version}`);
-            }
-
-      - name: Rust toolchain
+      - name: Install Rust with cache
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Rust cache
+      - name: Cache Rust dependencies
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
@@ -75,18 +57,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and publish NSIS release artifact
+      - name: Build and Release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: pnpm tauri
-          # Attach NSIS artifact to the tag's release
           tagName: ${{ github.ref_name }}
           releaseName: Focalite ${{ github.ref_name }}
           releaseBody: |
             Automated release for ${{ github.ref_name }}.
-            - Windows only.
-            - NSIS installer (.exe) only.
+            - Windows NSIS installer (.exe)
           releaseDraft: false
           prerelease: false
