@@ -1,34 +1,22 @@
-name: Build Focalite Installers
+name: Build Windows NSIS Installer
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            artifact_name: Focalite-macOS-dmg
-            artifact_path: src-tauri/target/release/bundle/dmg/*.dmg
-          - os: windows-latest
-            artifact_name: Focalite-Windows-nsis
-            artifact_path: src-tauri/target/release/bundle/nsis/*.exe
-          - os: windows-latest
-            artifact_name: Focalite-Windows-msi
-            artifact_path: src-tauri/target/release/bundle/msi/*.msi
+    name: Build (Windows NSIS)
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js + pnpm cache
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: pnpm
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -36,11 +24,7 @@ jobs:
           version: latest
           run_install: false
 
-      # Enable dependency caching for pnpm after pnpm is available on PATH
-      - name: Enable pnpm cache
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
+      # pnpm cache enabled in setup-node step above
 
       - name: Validate version consistency (pkg/tauri/cargo)
         uses: actions/github-script@v7
@@ -81,15 +65,15 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build app with Tauri
+      - name: Build app with Tauri (NSIS only)
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: pnpm tauri
 
-      - name: Upload installer artifact
+      - name: Upload NSIS installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_path }}
+          name: Focalite-Windows-NSIS
+          path: src-tauri/target/release/bundle/nsis/*.exe

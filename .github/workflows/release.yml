@@ -1,4 +1,4 @@
-name: Release
+name: Release (Windows NSIS)
 
 on:
   push:
@@ -10,25 +10,18 @@ permissions:
 
 jobs:
   build:
-    name: Release build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-          - os: macos-latest
-          # Uncomment to build Linux assets as well
-          # - os: ubuntu-latest
+    name: Release build (Windows NSIS)
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js + pnpm cache
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: pnpm
 
       - name: Validate version consistency (tag/pkg/tauri/cargo)
         uses: actions/github-script@v7
@@ -71,11 +64,6 @@ jobs:
           version: latest
           run_install: false
 
-      - name: Enable pnpm cache
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-
       - name: Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -87,18 +75,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and publish release artifacts
+      - name: Build and publish NSIS release artifact
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: pnpm tauri
-          # Attach artifacts to the tag's release
+          # Attach NSIS artifact to the tag's release
           tagName: ${{ github.ref_name }}
           releaseName: Focalite ${{ github.ref_name }}
           releaseBody: |
             Automated release for ${{ github.ref_name }}.
-            - Built via GitHub Actions matrix (Windows/macOS).
-            - Includes MSI/NSIS on Windows and DMG on macOS.
+            - Windows only.
+            - NSIS installer (.exe) only.
           draft: false
           prerelease: false
