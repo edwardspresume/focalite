@@ -88,5 +88,5 @@ jobs:
             Automated release for ${{ github.ref_name }}.
             - Windows only.
             - NSIS installer (.exe) only.
-          draft: false
+          releaseDraft: false
           prerelease: false
